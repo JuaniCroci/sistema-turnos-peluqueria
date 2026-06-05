@@ -25,9 +25,9 @@
 }
 
 .tone-accent {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(96, 165, 250, 0.12);
   color: var(--color-accent);
-  border-color: rgba(245, 158, 11, 0.3);
+  border-color: rgba(96, 165, 250, 0.25);
 }
 
 .tone-success {

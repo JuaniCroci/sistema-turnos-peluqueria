@@ -102,7 +102,7 @@
 }
 
 .link.active {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(96, 165, 250, 0.12);
   color: var(--color-accent);
 }
 

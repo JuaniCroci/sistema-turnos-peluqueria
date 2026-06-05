@@ -16,7 +16,7 @@
 .eyebrow {
   display: inline-block;
   padding: var(--space-1) var(--space-3);
-  background: rgba(245, 158, 11, 0.12);
+  background: rgba(96, 165, 250, 0.1);
   color: var(--color-accent);
   border-radius: var(--radius-pill);
   font-size: var(--font-size-xs);

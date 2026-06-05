@@ -29,7 +29,7 @@
   transform: translateX(-50%);
   width: 800px;
   height: 600px;
-  background: radial-gradient(ellipse at center, rgba(245, 158, 11, 0.18), transparent 60%);
+  background: radial-gradient(ellipse at center, rgba(96, 165, 250, 0.14), transparent 60%);
   filter: blur(40px);
   z-index: 0;
   pointer-events: none;
@@ -236,7 +236,7 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: rgba(245, 158, 11, 0.12);
+  background: rgba(96, 165, 250, 0.1);
   color: var(--color-accent);
   border-radius: var(--radius-lg);
 }
