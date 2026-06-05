@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.pnpm-store/
+
+# api
+apps/api/data/
+apps/api/.env
+
+# web
+apps/web/dist/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editor
+.vscode/
+.idea/
+.DS_Store
