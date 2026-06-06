@@ -93,6 +93,10 @@
   background: var(--color-surface-2);
 }
 
+.navLinkButton {
+  font-family: inherit;
+}
+
 .cta {
   display: inline-flex;
   align-items: center;

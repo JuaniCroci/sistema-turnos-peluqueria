@@ -14,14 +14,18 @@
     "postinstall": "node scripts/fetch-better-sqlite3-prebuild.mjs"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.10.0",
     "lucide-react": "^1.17.0",
     "next": "^15.0.0",
+    "next-auth": "5.0.0-beta.31",
     "open-props": "~1.7.23",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.0.10",
     "@types/react": "^19.0.0",
@@ -30,6 +34,8 @@
   },
   "packageManager": "pnpm@10.33.0",
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

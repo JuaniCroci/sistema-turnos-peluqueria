@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createPortal } from 'react-dom';
-import { X, LogIn, UserPlus, Calendar, LayoutDashboard, CalendarPlus, LogOut } from 'lucide-react';
+import { X, LogIn, UserPlus, Calendar, LayoutDashboard, CalendarPlus } from 'lucide-react';
+import { LogoutButton } from './LogoutButton';
 import type { NavUser } from './Navbar';
 import styles from './MobileMenu.module.css';
 
@@ -90,12 +91,7 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
                   <LayoutDashboard /> Panel admin
                 </Link>
               ) : null}
-              <button
-                type="button"
-                className={[styles.link, styles.linkButton].join(' ')}
-              >
-                <LogOut /> Cerrar sesión
-              </button>
+              <LogoutButton variant="mobile" />
             </>
           ) : (
             <>

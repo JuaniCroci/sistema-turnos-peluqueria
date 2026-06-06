@@ -8,14 +8,14 @@ App fullstack para reservar turnos en una peluquería. Los clientes se registran
 
 Este proyecto es **un campo de entrenamiento** para el trabajo final de la facultad: un e-commerce en grupo. La mayoría de los patrones se reusan tal cual:
 
-| Peluquería | E-commerce |
-|---|---|
-| Servicio | Producto |
-| Categoría | Categoría |
-| Reservar turno | Crear orden / checkout |
-| "Mis turnos" | "Mis órdenes" |
-| Panel admin | Panel admin |
-| Disponibilidad por fecha/hora | Stock / inventario |
+| Peluquería                    | E-commerce             |
+| ----------------------------- | ---------------------- |
+| Servicio                      | Producto               |
+| Categoría                     | Categoría              |
+| Reservar turno                | Crear orden / checkout |
+| "Mis turnos"                  | "Mis órdenes"          |
+| Panel admin                   | Panel admin            |
+| Disponibilidad por fecha/hora | Stock / inventario     |
 
 Lo que **sí** vas a tener que sumar en el e-commerce y que **no** se hace acá: integración de pagos (Stripe / MercadoPago), gestión de stock y envíos.
 
@@ -24,6 +24,7 @@ Lo que **sí** vas a tener que sumar en el e-commerce y que **no** se hace acá:
 ## 2. Stack
 
 ### Backend — `apps/api`
+
 - **Runtime**: Node 24 (alineado con la tarea de la facultad, `.nvmrc`)
 - **Lenguaje**: TypeScript `strict: true`, `target: es2020`, `module: ES2022`
 - **Framework**: Express 5 (mismo que ya conocés)
@@ -33,6 +34,7 @@ Lo que **sí** vas a tener que sumar en el e-commerce y que **no** se hace acá:
 - **CORS**: `cors` para que el front React pueda pegar
 
 ### Frontend — `apps/web`
+
 - **Build**: Vite + React 18 + TypeScript
 - **Routing**: `react-router-dom` v6
 - **Server state**: `@tanstack/react-query` (v5)
@@ -40,6 +42,7 @@ Lo que **sí** vas a tener que sumar en el e-commerce y que **no** se hace acá:
 - **Estilos**: CSS plano / CSS Modules. **No** sumar Tailwind ni UI libs por ahora.
 
 ### Repo / tooling
+
 - **Package manager**: `pnpm` 10 (workspaces)
 - **Lint/format/test**: **no se configuran**. Verificación con `tsc --noEmit` + curl manual.
 - **Monorepo**: `pnpm-workspace.yaml` con `apps/*`
@@ -190,9 +193,7 @@ Base: `/api`. Todas las respuestas JSON. Todas las请求 con body llevan `Conten
   "error": {
     "code": "VALIDATION_ERROR",
     "message": "Datos inválidos",
-    "details": [
-      { "path": "email", "message": "Email inválido" }
-    ]
+    "details": [{ "path": "email", "message": "Email inválido" }]
   }
 }
 ```
@@ -202,41 +203,46 @@ Códigos HTTP usados: `200`, `201`, `204`, `400`, `401`, `403`, `404`, `409`, `5
 ### 5.2 Endpoints
 
 #### Auth
-| Método | Ruta | Auth | Body | Respuesta |
-|---|---|---|---|---|
-| POST | `/api/auth/register` | público | `{ email, username, password }` | `201 { token, user }` |
-| POST | `/api/auth/login` | público | `{ email, password }` | `200 { token, user }` |
-| GET  | `/api/auth/me` | cliente | — | `200 { user }` |
+
+| Método | Ruta                 | Auth    | Body                            | Respuesta             |
+| ------ | -------------------- | ------- | ------------------------------- | --------------------- |
+| POST   | `/api/auth/register` | público | `{ email, username, password }` | `201 { token, user }` |
+| POST   | `/api/auth/login`    | público | `{ email, password }`           | `200 { token, user }` |
+| GET    | `/api/auth/me`       | cliente | —                               | `200 { user }`        |
 
 #### Categories
-| Método | Ruta | Auth | Notas |
-|---|---|---|---|
-| GET    | `/api/categories` | público | Lista todas |
-| GET    | `/api/categories/:slug` | público | Una por slug |
-| POST   | `/api/categories` | admin | `{ name, slug, description? }` |
-| DELETE | `/api/categories/:id` | admin | Solo si no tiene servicios asociados |
+
+| Método | Ruta                    | Auth    | Notas                                |
+| ------ | ----------------------- | ------- | ------------------------------------ |
+| GET    | `/api/categories`       | público | Lista todas                          |
+| GET    | `/api/categories/:slug` | público | Una por slug                         |
+| POST   | `/api/categories`       | admin   | `{ name, slug, description? }`       |
+| DELETE | `/api/categories/:id`   | admin   | Solo si no tiene servicios asociados |
 
 #### Services
-| Método | Ruta | Auth | Notas |
-|---|---|---|---|
-| GET    | `/api/services` | público | Query: `category=<slug>`, `q=<texto>`, `page=1`, `limit=10`. Default solo `active=1` (admin puede pasar `?includeInactive=1`). Devuelve `{ data: [...], pagination: {...} }` |
-| GET    | `/api/services/:id` | público | |
-| POST   | `/api/services` | admin | `{ category_id, name, description?, duration_minutes, price_cents }` |
-| PUT    | `/api/services/:id` | admin | Edita cualquier campo |
-| DELETE | `/api/services/:id` | admin | Soft delete (`active = 0`) |
+
+| Método | Ruta                | Auth    | Notas                                                                                                                                                                        |
+| ------ | ------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/services`     | público | Query: `category=<slug>`, `q=<texto>`, `page=1`, `limit=10`. Default solo `active=1` (admin puede pasar `?includeInactive=1`). Devuelve `{ data: [...], pagination: {...} }` |
+| GET    | `/api/services/:id` | público |                                                                                                                                                                              |
+| POST   | `/api/services`     | admin   | `{ category_id, name, description?, duration_minutes, price_cents }`                                                                                                         |
+| PUT    | `/api/services/:id` | admin   | Edita cualquier campo                                                                                                                                                        |
+| DELETE | `/api/services/:id` | admin   | Soft delete (`active = 0`)                                                                                                                                                   |
 
 #### Appointments
-| Método | Ruta | Auth | Notas |
-|---|---|---|---|
-| GET    | `/api/appointments` | cliente | Cliente ve los suyos. Admin ve todos. Query: `status`, `from`, `to`, `user_id` (solo admin) |
-| GET    | `/api/appointments/:id` | cliente | Cliente solo si es suyo; admin cualquiera |
-| POST   | `/api/appointments` | cliente | `{ service_id, appointment_at, notes? }`. Valida que `appointment_at` sea futuro y no haya solapamiento |
-| PATCH  | `/api/appointments/:id/status` | cliente/admin | Cliente solo puede pasar a `cancelled`. Admin puede pasar a cualquier estado |
+
+| Método | Ruta                           | Auth          | Notas                                                                                                   |
+| ------ | ------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/appointments`            | cliente       | Cliente ve los suyos. Admin ve todos. Query: `status`, `from`, `to`, `user_id` (solo admin)             |
+| GET    | `/api/appointments/:id`        | cliente       | Cliente solo si es suyo; admin cualquiera                                                               |
+| POST   | `/api/appointments`            | cliente       | `{ service_id, appointment_at, notes? }`. Valida que `appointment_at` sea futuro y no haya solapamiento |
+| PATCH  | `/api/appointments/:id/status` | cliente/admin | Cliente solo puede pasar a `cancelled`. Admin puede pasar a cualquier estado                            |
 
 #### Users (admin)
-| Método | Ruta | Auth | Notas |
-|---|---|---|---|
-| GET | `/api/users` | admin | Lista todos (útil para el panel admin) |
+
+| Método | Ruta         | Auth  | Notas                                  |
+| ------ | ------------ | ----- | -------------------------------------- |
+| GET    | `/api/users` | admin | Lista todos (útil para el panel admin) |
 
 ### 5.3 Headers y auth
 
@@ -251,18 +257,18 @@ Códigos HTTP usados: `200`, `201`, `204`, `400`, `401`, `403`, `404`, `409`, `5
 
 ### 6.1 Rutas
 
-| Ruta | Página | Acceso |
-|---|---|---|
-| `/` | Home (servicios destacados + CTA) | público |
-| `/servicios` | Listado con filtros y búsqueda | público |
-| `/servicios/:id` | Detalle + botón "Reservar" | público |
-| `/login` | Login | público (redirige a `/` si ya logueado) |
-| `/register` | Registro | público (redirige a `/` si ya logueado) |
-| `/mis-turnos` | Lista de turnos del usuario logueado | cliente |
-| `/mis-turnos/nuevo` | Form de reserva (servicio + fecha+hora + notas) | cliente |
-| `/admin/servicios` | Tabla CRUD de servicios | admin |
-| `/admin/categorias` | Tabla CRUD de categorías | admin |
-| `/admin/turnos` | Tabla de todos los turnos, filtros y cambio de estado | admin |
+| Ruta                | Página                                                | Acceso                                  |
+| ------------------- | ----------------------------------------------------- | --------------------------------------- |
+| `/`                 | Home (servicios destacados + CTA)                     | público                                 |
+| `/servicios`        | Listado con filtros y búsqueda                        | público                                 |
+| `/servicios/:id`    | Detalle + botón "Reservar"                            | público                                 |
+| `/login`            | Login                                                 | público (redirige a `/` si ya logueado) |
+| `/register`         | Registro                                              | público (redirige a `/` si ya logueado) |
+| `/mis-turnos`       | Lista de turnos del usuario logueado                  | cliente                                 |
+| `/mis-turnos/nuevo` | Form de reserva (servicio + fecha+hora + notas)       | cliente                                 |
+| `/admin/servicios`  | Tabla CRUD de servicios                               | admin                                   |
+| `/admin/categorias` | Tabla CRUD de categorías                              | admin                                   |
+| `/admin/turnos`     | Tabla de todos los turnos, filtros y cambio de estado | admin                                   |
 
 ### 6.2 Componentes globales
 
@@ -287,10 +293,12 @@ Códigos HTTP usados: `200`, `201`, `204`, `400`, `401`, `403`, `404`, `409`, `5
 Se ejecuta automáticamente al levantar el backend si la tabla `users` está vacía.
 
 **Usuarios:**
+
 - Admin: `admin@barberia.test` / `admin123`
-- Cliente: `mariano@test.com` / `1234`
+- Cliente: `juani@test.com` / `1234`
 
 **Categorías:**
+
 - `Cabello`
 - `Barba`
 - `Coloración`
@@ -298,17 +306,17 @@ Se ejecuta automáticamente al levantar el backend si la tabla `users` está vac
 
 **Servicios:**
 
-| Categoría | Nombre | Duración | Precio |
-|---|---|---|---|
-| Cabello | Corte caballero | 30 min | $3.000 |
-| Cabello | Corte dama | 45 min | $5.000 |
-| Cabello | Corte niño | 20 min | $2.000 |
-| Barba | Perfilado de barba | 20 min | $2.000 |
-| Barba | Barba completa | 30 min | $3.500 |
-| Coloración | Tinte de raíces | 60 min | $8.000 |
-| Coloración | Color completo | 90 min | $12.000 |
-| Tratamientos | Hidratación | 40 min | $6.000 |
-| Tratamientos | Keratina | 120 min | $18.000 |
+| Categoría    | Nombre             | Duración | Precio  |
+| ------------ | ------------------ | -------- | ------- |
+| Cabello      | Corte caballero    | 30 min   | $3.000  |
+| Cabello      | Corte dama         | 45 min   | $5.000  |
+| Cabello      | Corte niño         | 20 min   | $2.000  |
+| Barba        | Perfilado de barba | 20 min   | $2.000  |
+| Barba        | Barba completa     | 30 min   | $3.500  |
+| Coloración   | Tinte de raíces    | 60 min   | $8.000  |
+| Coloración   | Color completo     | 90 min   | $12.000 |
+| Tratamientos | Hidratación        | 40 min   | $6.000  |
+| Tratamientos | Keratina           | 120 min  | $18.000 |
 
 ---
 
@@ -343,6 +351,7 @@ Se ejecuta automáticamente al levantar el backend si la tabla `users` está vac
 ## 10. Milestones de implementación
 
 ### Milestone 1 — Andamiaje (~1 sesión)
+
 - `pnpm-workspace.yaml`, root `package.json` con scripts de orquestación
 - `apps/api` con Express + endpoint `GET /api/health` → `{ ok: true, db: 'up' }`
 - `apps/web` con Vite + React renderizando "Hola"
@@ -350,23 +359,27 @@ Se ejecuta automáticamente al levantar el backend si la tabla `users` está vac
 - `.nvmrc`, `.gitignore`, tsconfigs
 
 ### Milestone 2 — DB + Auth (~2 sesiones)
+
 - `db/connection.ts`, `db/migrations.ts`, `db/seed.ts`
 - Módulo `auth/` completo: register, login, `/me`, middlewares `auth.ts` y `requireAdmin`
 - Validación con Zod en cada endpoint
 - Pruebas con `curl` o `.http` files
 
 ### Milestone 3 — Servicios y categorías (~1–2 sesiones)
+
 - Endpoints de categories y services
 - Paginación + búsqueda + filtro por categoría
 - Página React `/servicios` con TanStack Query
 - Páginas de detalle y admin CRUD
 
 ### Milestone 4 — Turnos (~2 sesiones)
+
 - Endpoints de appointments con la regla anti-solapamiento
 - UI cliente: reservar turno + "Mis turnos" + cancelar
 - UI admin: ver todos, confirmar, marcar como completado
 
 ### Milestone 5 — Polish (~1 sesión)
+
 - Guards de ruta en React según rol
 - Manejo de errores prolijo en el front
 - Loading / empty states
@@ -379,22 +392,27 @@ Se ejecuta automáticamente al levantar el backend si la tabla `users` está vac
 ## 11. Setup
 
 ### Prerrequisitos
+
 - Node `24.14.1` (usar `nvm use` o tener la versión instalada)
 - pnpm `10.x` (`npm i -g pnpm`)
 
 ### Instalación
+
 ```bash
 pnpm install
 ```
 
 ### Desarrollo
+
 ```bash
 # Levanta api (puerto 3000) y web (puerto 5173) en paralelo
 pnpm dev
 ```
 
 ### Variables de entorno (api)
+
 Crear `apps/api/.env` (opcional, hay defaults):
+
 ```
 PORT=3000
 JWT_SECRET=cambiame-en-prod
@@ -406,14 +424,14 @@ CORS_ORIGIN=http://localhost:5173
 
 ## 12. Scripts (root)
 
-| Script | Hace |
-|---|---|
-| `pnpm dev` | Levanta `api` y `web` en paralelo |
-| `pnpm build` | `tsc` en `api` + `vite build` en `web` |
-| `pnpm typecheck` | `tsc --noEmit` en ambos paquetes |
-| `pnpm -F api dev` | Solo el backend |
-| `pnpm -F web dev` | Solo el frontend |
-| `pnpm -F api build` | Compila el backend a `dist/` |
+| Script              | Hace                                   |
+| ------------------- | -------------------------------------- |
+| `pnpm dev`          | Levanta `api` y `web` en paralelo      |
+| `pnpm build`        | `tsc` en `api` + `vite build` en `web` |
+| `pnpm typecheck`    | `tsc --noEmit` en ambos paquetes       |
+| `pnpm -F api dev`   | Solo el backend                        |
+| `pnpm -F web dev`   | Solo el frontend                       |
+| `pnpm -F api build` | Compila el backend a `dist/`           |
 
 > **No hay scripts de test, lint ni format.** No se configuran a menos que se pidan explícitamente.
 
@@ -422,6 +440,7 @@ CORS_ORIGIN=http://localhost:5173
 ## 13. Verificación manual
 
 ### Backend
+
 ```bash
 # Health
 curl -i http://localhost:3000/api/health
@@ -436,6 +455,7 @@ curl -i http://localhost:3000/api/services
 ```
 
 ### Frontend
+
 1. Abrir `http://localhost:5173`
 2. Verificar que carga el home
 3. Loguearse como admin, ir a `/admin/servicios`, crear uno nuevo
@@ -443,6 +463,7 @@ curl -i http://localhost:3000/api/services
 5. Loguearse como admin, ir a `/admin/turnos`, confirmar el turno
 
 ### Criterios de "andamiaje terminado"
+
 - [ ] `pnpm dev` levanta los dos sin errores
 - [ ] `pnpm typecheck` pasa sin errores
 - [ ] El health check responde

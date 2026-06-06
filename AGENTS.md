@@ -17,7 +17,20 @@ M0 cerrado: el proyecto migro de monorepo pnpm (Vite+React+Express) a **Next.js 
 - `.nvmrc` = `24.14.1`.
 - **Verificacion**: `pnpm typecheck` y `pnpm build` pasan verde. Smoke test: `pnpm start` arranca en `:3000` y `/`, `/login` devuelven 200; rutas inexistentes devuelven 404 via `app/not-found.tsx`.
 
-Milestone actual: **Fase 1 (M2 del README original) — DB + Auth con NextAuth v5** (migrations, seed, register/login/me con CredentialsProvider, middleware, paginas de auth).
+Milestone actual: **Fase 2 (M3 del README original) — Servicios y categorías** (endpoints públicos de services y categories, filtros, paginación, detalle de servicio, admin CRUD con soft delete). Fase 1 cerrada (ver entry de `prompts.md` del 2026-06-06).
+
+**Estado de Fase 1 (cerrada 2026-06-06):**
+
+- `lib/db/` con migrations, connection (singleton via `globalThis`), seed (admin + cliente + 4 categorias + 9 servicios).
+- `lib/auth/` con `config.edge.ts` (edge-safe, sin DB), `config.ts` (full con CredentialsProvider), `index.ts` (re-exports `handlers`/`auth`/`signIn`/`signOut`), `users.ts` (queries de user), `types.ts` eliminado en favor de `types/next-auth.d.ts` (module augmentation con `AppUser` custom).
+- `app/api/auth/[...nextauth]/route.ts` + `register/route.ts` + `me/route.ts`.
+- `middleware.ts` con `authEdgeConfig` (NO el full, para no jalar DB al edge runtime). Matcher: `/mis-turnos/:path*`, `/admin/:path*`.
+- `app/login/page.tsx` + `LoginForm.tsx` + `actions.ts` (server action con `signIn`).
+- `app/register/page.tsx` + `RegisterForm.tsx` + `actions.ts` (server action con auto-login post-register).
+- `app/auth.module.css` con estilos compartidos.
+- `components/Navbar/LogoutButton.tsx` con `signOut` de `next-auth/react`, dos variantes (`desktop`/`mobile`).
+- `app/layout.tsx` pasa `session.user.role` al Navbar.
+- `.env` con `AUTH_SECRET`, `AUTH_URL`, `NEXTAUTH_URL`, `DB_PATH`.
 
 ## Convenciones no obvias
 

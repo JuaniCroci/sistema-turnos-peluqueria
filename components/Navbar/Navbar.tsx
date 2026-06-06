@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, Scissors } from 'lucide-react';
+import { LogoutButton } from './LogoutButton';
 import { MobileMenu } from './MobileMenu';
 import styles from './Navbar.module.css';
 
@@ -82,7 +83,7 @@ export const Navbar = ({ user }: NavbarProps) => {
                   Panel admin
                 </Link>
               ) : null}
-              <span className={styles.navLink}>Salir</span>
+              <LogoutButton variant="desktop" />
             </>
           ) : (
             <>

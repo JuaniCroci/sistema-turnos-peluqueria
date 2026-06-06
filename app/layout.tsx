@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Fraunces } from 'next/font/google';
 import { Navbar, type NavUser } from '@/components/Navbar/Navbar';
+import { auth } from '@/lib/auth';
 import styles from './layout.module.css';
 import './globals.css';
 
@@ -25,14 +26,15 @@ export const viewport: Viewport = {
   themeColor: '#020617',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // M2 (NextAuth) leera la sesion del cookie y pasara el user real.
-  // Por ahora, sin auth, siempre se renderiza logged out.
-  const user: NavUser | null = null;
+  const session = await auth();
+  const user: NavUser | null = session?.user
+    ? { role: session.user.role }
+    : null;
 
   return (
     <html lang="es" className={`${inter.variable} ${fraunces.variable}`}>
