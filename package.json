@@ -2,17 +2,31 @@
   "name": "sistema-turnos-peluqueria",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "engines": {
     "node": "24.14.1",
     "pnpm": ">=10"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel run dev",
-    "build": "pnpm -r run build",
-    "typecheck": "pnpm -r run typecheck",
-    "start:api": "pnpm -F api dev",
-    "start:web": "pnpm -F web dev"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node scripts/fetch-better-sqlite3-prebuild.mjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "lucide-react": "^1.17.0",
+    "next": "^15.0.0",
+    "open-props": "~1.7.23",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.10",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.2"
   },
   "packageManager": "pnpm@10.33.0",
   "pnpm": {

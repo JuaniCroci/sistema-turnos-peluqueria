@@ -1,13 +1,14 @@
 node_modules/
+.next/
+out/
 dist/
-.pnpm-store/
+*.tsbuildinfo
 
-# api
-apps/api/data/
-apps/api/.env
-
-# web
-apps/web/dist/
+# datos
+data/
+.env
+.env.local
+.env.*.local
 
 # logs
 *.log
@@ -18,3 +19,6 @@ pnpm-debug.log*
 .vscode/
 .idea/
 .DS_Store
+
+# next
+next-env.d.ts
