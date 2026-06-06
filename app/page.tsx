@@ -1,88 +1,50 @@
 import Link from 'next/link';
-import { CalendarPlus, Scissors, Search, CalendarDays, CircleCheck, ArrowRight } from 'lucide-react';
-import { Card } from '@/components/Card/Card';
+import { Calendar, Clock, UserCheck } from 'lucide-react';
 import styles from './page.module.css';
-
-const STEPS = [
-  {
-    icon: Search,
-    title: 'Elegí el servicio',
-    description: 'Corte, barba, coloración o tratamiento. Vés duración y precio antes de reservar.',
-  },
-  {
-    icon: CalendarDays,
-    title: 'Elegí día y hora',
-    description: 'Reservás online en el horario que te quede cómodo, sin llamadas.',
-  },
-  {
-    icon: CircleCheck,
-    title: 'Te confirmamos',
-    description: 'Te queda el turno agendado. Lo cancelás o reprogramás cuando quieras.',
-  },
-];
 
 export default function HomePage() {
   return (
-    <>
+    <main className={styles.root}>
       <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <span className={styles.eyebrow}>Sistema de turnos online</span>
+        <div className={styles.heroInner}>
           <h1 className={styles.title}>
-            Tu peluquería,
-            <br />
-            <span className={styles.titleAccent}>a tu horario.</span>
+            Reservá tu turno en segundos.
           </h1>
           <p className={styles.subtitle}>
-            Reservá tu turno en segundos. Sin llamadas, sin esperas. Corte, barba,
-            coloración y más, en un solo lugar.
+            Elegí el servicio, la fecha y listo. Confirmación al instante.
           </p>
-          <div className={styles.heroActions}>
-            <Link href="/mis-turnos/nuevo" className={styles.buttonPrimary}>
-              <CalendarPlus size={18} aria-hidden="true" />
-              <span>Reservá tu turno</span>
+          <div className={styles.actions}>
+            <Link href="/register" className={styles.primaryAction}>
+              Crear cuenta
             </Link>
-            <Link href="/servicios" className={styles.buttonSecondary}>
-              <Scissors size={18} aria-hidden="true" />
-              <span>Ver servicios</span>
+            <Link href="/servicios" className={styles.ghostAction}>
+              Ver servicios
             </Link>
           </div>
         </div>
-        <div className={styles.heroGlow} aria-hidden="true" />
       </section>
 
-      <section className={styles.section}>
-        <header className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Cómo funciona</h2>
-        </header>
-        <div className={styles.steps}>
-          {STEPS.map((step, i) => {
-            const Icon = step.icon;
-            return (
-              <Card key={i} padding="lg" className={styles.step}>
-                <span className={styles.stepNumber}>0{i + 1}</span>
-                <span className={styles.stepIcon} aria-hidden="true">
-                  <Icon size={24} />
-                </span>
-                <h3 className={styles.stepTitle}>{step.title}</h3>
-                <p className={styles.stepDescription}>{step.description}</p>
-              </Card>
-            );
-          })}
+      <section className={styles.howItWorks} aria-labelledby="how-title">
+        <div className={styles.howInner}>
+          <h2 id="how-title" className={styles.sectionTitle}>
+            Cómo funciona
+          </h2>
+          <ol className={styles.steps}>
+            <li className={styles.step}>
+              <Calendar size={20} strokeWidth={1.5} aria-hidden="true" />
+              <span>Elegí el servicio</span>
+            </li>
+            <li className={styles.step}>
+              <Clock size={20} strokeWidth={1.5} aria-hidden="true" />
+              <span>Seleccioná el horario</span>
+            </li>
+            <li className={styles.step}>
+              <UserCheck size={20} strokeWidth={1.5} aria-hidden="true" />
+              <span>Confirmá y listo</span>
+            </li>
+          </ol>
         </div>
       </section>
-
-      <section className={styles.ctaSection}>
-        <Card padding="lg" className={styles.ctaCard}>
-          <h2 className={styles.ctaTitle}>Listo para tu próximo turno</h2>
-          <p className={styles.ctaText}>
-            Mirá los servicios disponibles y elegí el que más te guste.
-          </p>
-          <Link href="/servicios" className={styles.buttonPrimary}>
-            <span>Explorar servicios</span>
-            <ArrowRight size={18} aria-hidden="true" />
-          </Link>
-        </Card>
-      </section>
-    </>
+    </main>
   );
 }

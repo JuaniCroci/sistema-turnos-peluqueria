@@ -1,33 +1,35 @@
-/* Tokens semánticos del sistema de diseño.
-   Paleta: dark blue slate, acento azul refinado (sin naranjas ni ámbar).
-   Bordes rgba whisper-quiet. Sin drop shadows — jerarquía por stacking
-   de superficies apenas perceptibles. */
+/* Tokens semánticos — light minimalista (estilo Fresha/Stripe).
+   Acento: negro. Sin sombras, bordes hairline 1px.
+   Jerarquía por tipografía y espaciado, no por color. */
 
 :root {
-  /* ----- Surfaces (jerarquía por lightness, casi imperceptible) ----- */
-  --color-bg: #020617;          /* slate-950 — base, casi negro azulado */
-  --color-surface: #0b1220;     /* cards, navbar */
-  --color-surface-2: #111b30;   /* inputs (inset), hover, dropdowns */
+  color-scheme: light;
+
+  /* ----- Surfaces (light, jerarquía por oscuridad sutil) ----- */
+  --color-bg: #ffffff;
+  --color-surface: #fafafa;        /* neutral-50, secciones con fondo sutil */
+  --color-surface-2: #f5f5f5;      /* neutral-100, inputs y hover */
 
   /* ----- Foreground ----- */
-  --color-fg: #e2e8f0;          /* slate-200 — un toque menos brillante que slate-100 */
-  --color-fg-muted: #64748b;    /* slate-500 — más contenido que slate-400 */
+  --color-fg: #0a0a0a;             /* neutral-950, casi negro */
+  --color-fg-muted: #737373;       /* neutral-500 */
 
-  /* ----- Borders (rgba whisper-quiet) ----- */
-  --color-border: rgba(148, 163, 184, 0.08);
-  --color-border-strong: rgba(148, 163, 184, 0.16);
+  /* ----- Borders (hairline 1px) ----- */
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(0, 0, 0, 0.16);
 
-  /* ----- Acento: azul clásico refinado (reemplaza al amber) ----- */
-  --color-accent: #60a5fa;      /* blue-400 */
-  --color-accent-hover: #93c5fd; /* blue-300 */
-  --color-accent-fg: #020617;   /* texto sobre accent: navy profundo */
+  /* ----- Acento: negro (sin color de marca) ----- */
+  --color-accent: #0a0a0a;
+  --color-accent-hover: #262626;   /* neutral-800 */
+  --color-accent-fg: #ffffff;
+  --color-accent-soft: #525252;    /* neutral-600, links inline y focus */
 
-  /* ----- Semánticos ----- */
-  --color-danger: #f87171;      /* red-400 */
-  --color-danger-hover: #fca5a5; /* red-300 */
-  --color-success: #4ade80;     /* green-400 */
-  --color-warning: #facc15;     /* yellow-400 — el único warm del sistema, usado con moderación */
-  --color-info: #38bdf8;        /* sky-400 — alineado a la temperatura fría */
+  /* ----- Semánticos (desaturados) ----- */
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-success: #16a34a;
+  --color-warning: #ca8a04;
+  --color-info: #0284c7;
 
   /* ----- Spacing (alias de open-props --size-*) ----- */
   --space-1: var(--size-1, 0.25rem);
@@ -50,11 +52,11 @@
   --radius-xl: 16px;
   --radius-pill: 9999px;
 
-  /* ----- Shadows (uso limitado: solo overlays flotantes) ----- */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
-  --shadow-focus: 0 0 0 3px rgba(96, 165, 250, 0.35);
+  /* ----- Shadows (deshabilitados, bordes-only) ----- */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-focus: 0 0 0 3px rgba(10, 10, 10, 0.12);
 
   /* ----- Tipografía ----- */
   --font-sans: var(--font-inter, 'Inter'), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -69,9 +71,9 @@
   --font-size-3xl: 2rem;
   --font-size-4xl: 2.5rem;
 
-  --leading-tight: 1.2;
+  --leading-tight: 1.15;
   --leading-normal: 1.5;
-  --leading-relaxed: 1.75;
+  --leading-relaxed: 1.65;
 
   --weight-regular: 400;
   --weight-medium: 500;

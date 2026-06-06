@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Scissors } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { LogoutButton } from './LogoutButton';
 import { MobileMenu } from './MobileMenu';
 import styles from './Navbar.module.css';
@@ -36,9 +36,6 @@ export const Navbar = ({ user }: NavbarProps) => {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
-          <span className={styles.brandIcon} aria-hidden="true">
-            <Scissors size={18} />
-          </span>
           <span className={styles.brandText}>Peluquería</span>
         </Link>
 
