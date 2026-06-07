@@ -1,10 +1,11 @@
-/* Card — light, sin fondo ni borde, hoverable solo cambia bg. */
+/* Card — light, con fondo blanco, borde y sombra para contener. */
 
 .card {
-  background: transparent;
-  border: none;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
   border-radius: var(--radius-lg);
-  transition: background var(--transition-fast);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .padding-none {

@@ -42,3 +42,16 @@
 .input::placeholder {
   color: var(--color-fg-muted);
 }
+
+.inputWrapper:has(.input:disabled) {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  color: var(--color-fg-muted);
+}

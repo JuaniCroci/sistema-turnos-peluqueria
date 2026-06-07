@@ -1,7 +1,10 @@
 .wrapper {
   display: flex;
   justify-content: center;
-  padding: var(--space-8) 0;
+  align-items: center;
+  padding: var(--space-12) var(--space-4);
+  background: var(--color-surface);
+  min-height: calc(100dvh - var(--navbar-height));
 }
 
 .card {

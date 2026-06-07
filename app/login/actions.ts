@@ -1,6 +1,7 @@
 'use server';
 
 import { AuthError } from 'next-auth';
+import { redirect } from 'next/navigation';
 import { signIn } from '@/lib/auth';
 
 export interface LoginState {
@@ -19,17 +20,19 @@ export const loginAction = async (
   }
 
   try {
-    await signIn('credentials', {
+    const result = await signIn('credentials', {
       email,
       password,
-      redirectTo: '/',
+      redirect: false,
     });
-    return { error: null };
+
+    if (result?.error) {
+      return { error: 'Email o contraseña incorrectos' };
+    }
+
+    redirect('/');
   } catch (error) {
     if (error instanceof AuthError) {
-      if (error.type === 'CredentialsSignin') {
-        return { error: 'Email o contraseña incorrectos' };
-      }
       return { error: 'No se pudo iniciar sesion' };
     }
     throw error;

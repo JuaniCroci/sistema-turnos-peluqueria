@@ -12,17 +12,19 @@
 
   /* ----- Foreground ----- */
   --color-fg: #0a0a0a;             /* neutral-950, casi negro */
-  --color-fg-muted: #737373;       /* neutral-500 */
+  --color-fg-muted: #575757;       /* WCAG AA compliant (> 5.5:1 on --color-bg) */
 
   /* ----- Borders (hairline 1px) ----- */
   --color-border: rgba(0, 0, 0, 0.08);
   --color-border-strong: rgba(0, 0, 0, 0.16);
 
   /* ----- Acento: negro (sin color de marca) ----- */
-  --color-accent: #0a0a0a;
-  --color-accent-hover: #262626;   /* neutral-800 */
+  --color-accent: #1f1a17;        /* carbon cálido, personalidad premium */
+  --color-accent-hover: #332b27;
   --color-accent-fg: #ffffff;
   --color-accent-soft: #525252;    /* neutral-600, links inline y focus */
+  --color-accent-brand: #c5a880;  /* bronce sutil para detalles estéticos */
+  --color-accent-brand-hover: #b4966e;
 
   /* ----- Semánticos (desaturados) ----- */
   --color-danger: #dc2626;
@@ -53,9 +55,9 @@
   --radius-pill: 9999px;
 
   /* ----- Shadows (deshabilitados, bordes-only) ----- */
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
   --shadow-focus: 0 0 0 3px rgba(10, 10, 10, 0.12);
 
   /* ----- Tipografía ----- */
