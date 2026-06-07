@@ -1,5 +1,4 @@
 import type Database from 'better-sqlite3';
-import { hashPassword } from '@/lib/utils/password';
 
 interface SeedCategory {
   name: string;
@@ -52,8 +51,8 @@ export const seedIfEmpty = (db: Database.Database): void => {
      VALUES (?, ?, ?, ?, ?, 1)`,
   );
 
-  const adminHash = hashPassword('admin123');
-  const clientHash = hashPassword('1234');
+  const adminHash = '$2b$10$HrkvNaLOXV0PuSw1Mz0Y8.QZcExRrrEZNWPVN8eV.vu8vUTRrfS4m';
+  const clientHash = '$2b$10$IaiLUNkIj3n0jL2c5l8GdewXpzk0daJ8M53iE1oQqRVtaECQEZRdG';
 
   db.exec('BEGIN');
   try {

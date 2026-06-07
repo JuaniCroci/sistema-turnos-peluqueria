@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { getDb } from './connection';
 import type { Service } from '@/lib/types';
 
@@ -18,7 +19,7 @@ export interface ServiceListResult {
   };
 }
 
-export const findServices = (options: ServiceListOptions): ServiceListResult => {
+export const findServices = cache((options: ServiceListOptions): ServiceListResult => {
   const db = getDb();
   const conditions: string[] = [];
   const params: unknown[] = [];
@@ -59,12 +60,12 @@ export const findServices = (options: ServiceListOptions): ServiceListResult => 
   `).all(...params, options.limit, offset) as Service[];
 
   return { data, pagination: { page: options.page, limit: options.limit, total } };
-};
+});
 
-export const findServiceById = (id: number): Service | undefined => {
+export const findServiceById = cache((id: number): Service | undefined => {
   const db = getDb();
   return db.prepare('SELECT * FROM services WHERE id = ?').get(id) as Service | undefined;
-};
+});
 
 export interface CreateServiceInput {
   category_id: number;
@@ -150,7 +151,7 @@ export const softDeleteService = (id: number): void => {
   db.prepare('UPDATE services SET active = 0 WHERE id = ?').run(id);
 };
 
-export const findAllActiveCategoriesWithCount = (): Array<{ id: number; name: string; slug: string; description: string | null; service_count: number }> => {
+export const findAllActiveCategoriesWithCount = cache((): Array<{ id: number; name: string; slug: string; description: string | null; service_count: number }> => {
   const db = getDb();
   return db.prepare(`
     SELECT c.id, c.name, c.slug, c.description,
@@ -158,4 +159,4 @@ export const findAllActiveCategoriesWithCount = (): Array<{ id: number; name: st
     FROM categories c
     ORDER BY c.name
   `).all() as Array<{ id: number; name: string; slug: string; description: string | null; service_count: number }>;
-};
+});

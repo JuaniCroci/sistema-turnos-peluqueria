@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ServiceCard } from '@/components/ServiceCard/ServiceCard';
 import { findAllActiveCategoriesWithCount, findServices } from '@/lib/db/services';
+import { CategoryFilter } from './_components/CategoryFilter';
 import type { Service } from '@/lib/types';
 import styles from './ServicesList.module.css';
 
@@ -59,26 +60,9 @@ export default async function ServicesListPage({ searchParams }: ServicesListPag
             />
           </div>
 
-          <div className={styles.filterWrapper}>
-            <SlidersHorizontal size={16} className={styles.filterIcon} aria-hidden="true" />
-            <select
-              name="category"
-              defaultValue={category ?? ''}
-              className={styles.filterSelect}
-              aria-label="Filtrar por categoria"
-            >
-              <option value="">Todas las categorias</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.slug}>
-                  {cat.name} ({cat.service_count})
-                </option>
-              ))}
-            </select>
-          </div>
+          <CategoryFilter categories={categories} current={category} />
 
-          <button type="submit" className={styles.submitBtn}>
-            Filtrar
-          </button>
+          <button type="submit" className={styles.submitBtn}>Filtrar</button>
 
           {(q || category) && (
             <Link href="/servicios" className={styles.clearBtn}>

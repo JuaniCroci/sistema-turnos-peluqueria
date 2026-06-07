@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import { Calendar, Clock, UserCheck } from 'lucide-react';
+import { auth } from '@/lib/auth';
 import styles from './page.module.css';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth();
+  const isLoggedIn = Boolean(session?.user);
+
   return (
     <main className={styles.root}>
       <section className={styles.hero}>
@@ -14,9 +18,15 @@ export default function HomePage() {
             Elegí el servicio, la fecha y listo. Confirmación al instante.
           </p>
           <div className={styles.actions}>
-            <Link href="/register" className={styles.primaryAction}>
-              Crear cuenta
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/mis-turnos/nuevo" className={styles.primaryAction}>
+                Reservar turno
+              </Link>
+            ) : (
+              <Link href="/register" className={styles.primaryAction}>
+                Crear cuenta
+              </Link>
+            )}
             <Link href="/servicios" className={styles.ghostAction}>
               Ver servicios
             </Link>

@@ -1,26 +1,27 @@
+import { cache } from 'react';
 import { getDb } from './connection';
 import type { Category } from '@/lib/types';
 
-export const findAllCategories = (): Category[] => {
+export const findAllCategories = cache((): Category[] => {
   const db = getDb();
   return db.prepare('SELECT id, name, slug, description FROM categories ORDER BY name').all() as Category[];
-};
+});
 
-export const findCategoryBySlug = (slug: string): Category | undefined => {
+export const findCategoryBySlug = cache((slug: string): Category | undefined => {
   const db = getDb();
   return db.prepare('SELECT id, name, slug, description FROM categories WHERE slug = ?').get(slug) as Category | undefined;
-};
+});
 
-export const findCategoryById = (id: number): Category | undefined => {
+export const findCategoryById = cache((id: number): Category | undefined => {
   const db = getDb();
   return db.prepare('SELECT id, name, slug, description FROM categories WHERE id = ?').get(id) as Category | undefined;
-};
+});
 
-export const categoryHasServices = (id: number): boolean => {
+export const categoryHasServices = cache((id: number): boolean => {
   const db = getDb();
   const row = db.prepare('SELECT COUNT(*) as count FROM services WHERE category_id = ?').get(id) as { count: number };
   return row.count > 0;
-};
+});
 
 export interface CreateCategoryInput {
   name: string;

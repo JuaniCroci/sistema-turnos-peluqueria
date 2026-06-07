@@ -40,3 +40,7 @@ export const getDb = (): Database.Database => {
   globalForDb.__turnosDb = db;
   return db;
 };
+
+// Warm-up: inicializa la DB al importar el módulo para que la primera
+// request no pague cold start (migraciones + seed).
+getDb();
