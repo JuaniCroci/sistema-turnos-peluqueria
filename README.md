@@ -23,29 +23,21 @@ Lo que **sí** vas a tener que sumar en el e-commerce y que **no** se hace acá:
 
 ## 2. Stack
 
-### Backend — `apps/api`
+### Fullstack — Next.js 15 (App Router)
 
-- **Runtime**: Node 24 (alineado con la tarea de la facultad, `.nvmrc`)
-- **Lenguaje**: TypeScript `strict: true`, `target: es2020`, `module: ES2022`
-- **Framework**: Express 5 (mismo que ya conocés)
-- **DB**: `better-sqlite3` (sincrónico, cero config, ideal para practicar SQL real)
-- **Auth**: `bcrypt` para hash de passwords + `jsonwebtoken` (JWT) stateless
+- **Runtime**: Node 24.14.1 (`.nvmrc`)
+- **Lenguaje**: TypeScript 5.7, `strict: true`, cero `any`
+- **Framework**: Next.js 15.5+ (App Router con route.ts + Server Components)
+- **DB**: `better-sqlite3` v12 (sincrónico, cero config)
+- **Auth**: NextAuth v5 beta (Auth.js) con CredentialsProvider + JWT
 - **Validación**: `zod` en todos los endpoints con body/query/params
-- **CORS**: `cors` para que el front React pueda pegar
+- **Iconos**: `lucide-react`
+- **CSS tokens**: `open-props` + CSS Modules planos (sin Tailwind ni UI libs)
+- **Fonts**: `next/font/google` (Inter + Fraunces)
 
-### Frontend — `apps/web`
+### Package manager
 
-- **Build**: Vite + React 18 + TypeScript
-- **Routing**: `react-router-dom` v6
-- **Server state**: `@tanstack/react-query` (v5)
-- **HTTP**: `axios` (o `fetch` con un wrapper, lo que prefieras)
-- **Estilos**: CSS plano / CSS Modules. **No** sumar Tailwind ni UI libs por ahora.
-
-### Repo / tooling
-
-- **Package manager**: `pnpm` 10 (workspaces)
-- **Lint/format/test**: **no se configuran**. Verificación con `tsc --noEmit` + curl manual.
-- **Monorepo**: `pnpm-workspace.yaml` con `apps/*`
+- **pnpm** 10.x (sin workspaces, app única en la raíz)
 
 ---
 
@@ -53,73 +45,95 @@ Lo que **sí** vas a tener que sumar en el e-commerce y que **no** se hace acá:
 
 ```
 sistema-turnos-peluqueria/
-├── pnpm-workspace.yaml
-├── package.json                  # root, solo scripts de orquestación
-├── .nvmrc                        # 24.14.1
+├── package.json
+├── next.config.ts
+├── tsconfig.json
+├── .env                         # AUTH_SECRET, DB_PATH, etc.
+├── .nvmrc                       # 24.14.1
 ├── .gitignore
-├── README.md                     # este archivo
+├── README.md
+├── AGENTS.md                    # Instrucciones para agentes de IA
 │
-├── apps/
-│   ├── api/                      # backend
-│   │   ├── package.json
-│   │   ├── tsconfig.json
-│   │   ├── data/
-│   │   │   └── turnos.db         # sqlite (gitignored, se genera)
-│   │   └── src/
-│   │       ├── index.ts          # entry: app.listen
-│   │       ├── app.ts            # express app + middlewares
-│   │       ├── config/
-│   │       │   └── env.ts        # lectura de process.env con defaults
-│   │       ├── db/
-│   │       │   ├── connection.ts # better-sqlite3 instance
-│   │       │   ├── migrations.ts # array de SQL ejecutados en orden
-│   │       │   └── seed.ts       # datos iniciales
-│   │       ├── middlewares/
-│   │       │   ├── auth.ts             # verifica JWT, popula req.user
-│   │       │   ├── requireAdmin.ts
-│   │       │   ├── validate.ts         # helper para correr zod schemas
-│   │       │   ├── notFound.ts
-│   │       │   └── errorHandler.ts     # centralizado, último middleware
-│   │       ├── modules/
-│   │       │   ├── auth/
-│   │       │   │   ├── auth.routes.ts
-│   │       │   │   ├── auth.controller.ts
-│   │       │   │   └── auth.schema.ts
-│   │       │   ├── users/
-│   │       │   ├── categories/
-│   │       │   ├── services/
-│   │       │   └── appointments/
-│   │       └── utils/
-│   │           ├── jwt.ts
-│   │           ├── password.ts
-│   │           └── errors.ts     # clases AppError, NotFoundError, etc.
+├── app/                         # Next.js App Router
+│   ├── layout.tsx               # Root layout (Navbar + footer + fonts)
+│   ├── globals.css              # Reset + tokens + normalize
+│   ├── page.tsx                 # Home
+│   ├── not-found.tsx            # 404
+│   ├── auth.module.css
 │   │
-│   └── web/                      # frontend
-│       ├── package.json
-│       ├── vite.config.ts
-│       ├── tsconfig.json
-│       ├── index.html
-│       └── src/
-│           ├── main.tsx
-│           ├── App.tsx
-│           ├── api/              # cliente HTTP + tipos compartidos
-│           │   ├── client.ts     # axios instance con interceptor de JWT
-│           │   └── types.ts
-│           ├── auth/             # AuthContext, useAuth, RequireAuth
-│           ├── components/       # Navbar, ServiceCard, AppointmentRow, etc.
-│           ├── hooks/            # useServices, useAppointments, etc.
-│           └── pages/
-│               ├── HomePage.tsx
-│               ├── ServicesListPage.tsx
-│               ├── ServiceDetailPage.tsx
-│               ├── LoginPage.tsx
-│               ├── RegisterPage.tsx
-│               ├── MyAppointmentsPage.tsx
-│               ├── NewAppointmentPage.tsx
-│               └── admin/
-│                   ├── AdminServicesPage.tsx
-│                   ├── AdminCategoriesPage.tsx
-│                   └── AdminAppointmentsPage.tsx
+│   ├── login/                   # Login (server action + form)
+│   ├── register/                # Registro (server action + form)
+│   │
+│   ├── servicios/               # Listado público con filtros
+│   │   └── [id]/                # Detalle de servicio
+│   │
+│   ├── mis-turnos/              # Lista de turnos del cliente
+│   │   └── nuevo/               # Formulario de reserva
+│   │
+│   ├── admin/
+│   │   ├── page.tsx             # Redirige a /admin/servicios
+│   │   ├── servicios/           # CRUD de servicios
+│   │   ├── categorias/          # CRUD de categorías
+│   │   └── turnos/              # Gestión de turnos (admin)
+│   │
+│   └── api/
+│       ├── auth/
+│       │   ├── [...nextauth]/   # NextAuth handlers
+│       │   ├── register/        # POST /api/auth/register
+│       │   └── me/              # GET /api/auth/me
+│       ├── categories/          # GET, POST
+│       │   └── [slug]/          # GET by slug, DELETE
+│       ├── services/            # GET (lista), POST
+│       │   └── [id]/            # GET, PUT, DELETE
+│       ├── appointments/        # GET (lista), POST
+│       │   └── [id]/
+│       │       └── status/      # PATCH
+│       └── users/               # GET (admin)
+│
+├── components/
+│   ├── Badge/                   # Badge con tonos (success, danger, etc.)
+│   ├── Button/                  # Botón con variantes, loading, iconos
+│   ├── Card/                    # Contenedor con paddings
+│   ├── FormField/               # Label + input + error
+│   ├── Input/                   # Input estilizado
+│   ├── Navbar/                  # Navbar + MobileMenu + LogoutButton
+│   ├── ServiceCard/             # Card de servicio (listado público)
+│   ├── Skeleton/                # Skeleton loader
+│   ├── Spinner/                 # Spinner SVG
+│   └── StubPage/                # Placeholder para páginas futuras
+│
+├── lib/
+│   ├── auth/
+│   │   ├── config.ts            # Auth config full (con CredentialsProvider)
+│   │   ├── config.edge.ts       # Auth config edge-safe (middleware)
+│   │   ├── index.ts             # Re-exports auth, handlers, signIn, signOut
+│   │   └── users.ts             # Queries de usuarios
+│   ├── db/
+│   │   ├── connection.ts        # Singleton better-sqlite3 (globalThis)
+│   │   ├── migrations.ts        # Schema SQL
+│   │   ├── seed.ts              # Datos iniciales
+│   │   ├── services.ts          # Queries de servicios (cache)
+│   │   ├── categories.ts        # Queries de categorías (cache)
+│   │   └── appointments.ts      # Queries de turnos
+│   ├── utils/
+│   │   ├── api.ts               # errorResponse, zodDetails helpers
+│   │   ├── format.ts            # formatPrice, formatDuration, etc.
+│   │   └── password.ts          # bcrypt hash/verify
+│   └── types.ts                 # Tipos compartidos (User, Service, etc.)
+│
+├── middleware.ts                # Route protection (NextAuth edge)
+├── styles/
+│   ├── tokens.css               # CSS custom properties semánticos
+│   └── reset.css                # Reset básico
+│
+├── types/
+│   └── next-auth.d.ts           # Module augmentation de next-auth
+│
+├── data/
+│   └── turnos.db                # SQLite (gitignored, se regenera)
+│
+└── scripts/
+    └── fetch-better-sqlite3-prebuild.mjs  # Helper Windows para prebuilds
 ```
 
 ---
@@ -149,8 +163,8 @@ CREATE TABLE services (
   name             TEXT    NOT NULL,
   description      TEXT,
   duration_minutes INTEGER NOT NULL CHECK(duration_minutes > 0),
-  price_cents      INTEGER NOT NULL CHECK(price_cents >= 0),  -- SIEMPRE en centavos
-  active           INTEGER NOT NULL DEFAULT 1,                  -- 1 = visible, 0 = soft delete
+  price_cents      INTEGER NOT NULL CHECK(price_cents >= 0),
+  active           INTEGER NOT NULL DEFAULT 1,
   created_at       TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -158,7 +172,7 @@ CREATE TABLE appointments (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id        INTEGER NOT NULL REFERENCES users(id),
   service_id     INTEGER NOT NULL REFERENCES services(id),
-  appointment_at TEXT    NOT NULL,                               -- ISO 8601
+  appointment_at TEXT    NOT NULL,
   status         TEXT    NOT NULL CHECK(status IN
                     ('pending', 'confirmed', 'cancelled', 'completed')) DEFAULT 'pending',
   notes          TEXT,
@@ -184,7 +198,7 @@ CREATE INDEX idx_appointments_status ON appointments(status);
 
 ## 5. API REST
 
-Base: `/api`. Todas las respuestas JSON. Todas las请求 con body llevan `Content-Type: application/json`.
+Todas las rutas son `NextResponse` JSON dentro de `app/api/`. Autenticación vía NextAuth (cookie httpOnly, JWT). Ver `middleware.ts` para protección de rutas.
 
 ### 5.1 Formato uniforme de errores
 
@@ -204,52 +218,45 @@ Códigos HTTP usados: `200`, `201`, `204`, `400`, `401`, `403`, `404`, `409`, `5
 
 #### Auth
 
-| Método | Ruta                 | Auth    | Body                            | Respuesta             |
-| ------ | -------------------- | ------- | ------------------------------- | --------------------- |
-| POST   | `/api/auth/register` | público | `{ email, username, password }` | `201 { token, user }` |
-| POST   | `/api/auth/login`    | público | `{ email, password }`           | `200 { token, user }` |
-| GET    | `/api/auth/me`       | cliente | —                               | `200 { user }`        |
+| Método | Ruta                     | Auth    | Body / Query                      | Respuesta             |
+| ------ | ------------------------ | ------- | --------------------------------- | --------------------- |
+| POST   | `/api/auth/register`     | público | `{ email, username, password }`   | `201 { data }`        |
+| POST   | `/api/auth/login`        | público | `{ email, password }`             | (NextAuth credentials) |
+| GET    | `/api/auth/me`           | cliente | —                                 | `200 { data }`        |
 
 #### Categories
 
-| Método | Ruta                    | Auth    | Notas                                |
-| ------ | ----------------------- | ------- | ------------------------------------ |
-| GET    | `/api/categories`       | público | Lista todas                          |
-| GET    | `/api/categories/:slug` | público | Una por slug                         |
-| POST   | `/api/categories`       | admin   | `{ name, slug, description? }`       |
-| DELETE | `/api/categories/:id`   | admin   | Solo si no tiene servicios asociados |
+| Método | Ruta                      | Auth    | Body / Query                        | Notas                                |
+| ------ | ------------------------- | ------- | ----------------------------------- | ------------------------------------ |
+| GET    | `/api/categories`         | público | —                                   | Devuelve `{ data: [...] }`           |
+| GET    | `/api/categories/:slug`   | público | —                                   | Una por slug                         |
+| POST   | `/api/categories`         | admin   | `{ name, slug, description? }`      | —                                    |
+| DELETE | `/api/categories/:id`     | admin   | —                                   | Solo si no tiene servicios asociados |
 
 #### Services
 
-| Método | Ruta                | Auth    | Notas                                                                                                                                                                        |
-| ------ | ------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/services`     | público | Query: `category=<slug>`, `q=<texto>`, `page=1`, `limit=10`. Default solo `active=1` (admin puede pasar `?includeInactive=1`). Devuelve `{ data: [...], pagination: {...} }` |
-| GET    | `/api/services/:id` | público |                                                                                                                                                                              |
-| POST   | `/api/services`     | admin   | `{ category_id, name, description?, duration_minutes, price_cents }`                                                                                                         |
-| PUT    | `/api/services/:id` | admin   | Edita cualquier campo                                                                                                                                                        |
-| DELETE | `/api/services/:id` | admin   | Soft delete (`active = 0`)                                                                                                                                                   |
+| Método | Ruta                | Auth    | Body / Query                                                              | Notas                                                                 |
+| ------ | ------------------- | ------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| GET    | `/api/services`     | público | `?category=<slug>&q=<texto>&page=1&limit=10&includeInactive=1` (admin)   | Devuelve `{ data: [...], pagination: {...} }`. Admin ve inactivos.   |
+| GET    | `/api/services/:id` | público | —                                                                         | —                                                                     |
+| POST   | `/api/services`     | admin   | `{ category_id, name, description?, duration_minutes, price_cents }`      | —                                                                     |
+| PUT    | `/api/services/:id` | admin   | `{ category_id?, name?, description?, duration_minutes?, price_cents? }`  | Edita cualquier campo                                                 |
+| DELETE | `/api/services/:id` | admin   | —                                                                         | Soft delete (`active = 0`)                                            |
 
 #### Appointments
 
-| Método | Ruta                           | Auth          | Notas                                                                                                   |
-| ------ | ------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/appointments`            | cliente       | Cliente ve los suyos. Admin ve todos. Query: `status`, `from`, `to`, `user_id` (solo admin)             |
-| GET    | `/api/appointments/:id`        | cliente       | Cliente solo si es suyo; admin cualquiera                                                               |
-| POST   | `/api/appointments`            | cliente       | `{ service_id, appointment_at, notes? }`. Valida que `appointment_at` sea futuro y no haya solapamiento |
-| PATCH  | `/api/appointments/:id/status` | cliente/admin | Cliente solo puede pasar a `cancelled`. Admin puede pasar a cualquier estado                            |
+| Método | Ruta                               | Auth          | Body / Query                                                                  | Notas                                                                |
+| ------ | ---------------------------------- | ------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| GET    | `/api/appointments`                | cliente       | `?status=pending&from=...&to=...&user_id=...` (admin) &page=1&limit=20        | Cliente ve los suyos. Admin ve todos (filtro `user_id` solo admin). |
+| GET    | `/api/appointments/:id`            | cliente       | —                                                                             | Cliente solo si es suyo; admin cualquiera                            |
+| POST   | `/api/appointments`                | cliente       | `{ service_id, appointment_at, notes? }`                                      | Valida futuro, servicio activo, sin solapamiento                     |
+| PATCH  | `/api/appointments/:id/status`     | cliente/admin | `{ status }`                                                                  | Cliente solo `cancelled`. Admin cualquier estado                     |
 
 #### Users (admin)
 
 | Método | Ruta         | Auth  | Notas                                  |
 | ------ | ------------ | ----- | -------------------------------------- |
-| GET    | `/api/users` | admin | Lista todos (útil para el panel admin) |
-
-### 5.3 Headers y auth
-
-- Header: `Authorization: Bearer <jwt>`
-- JWT payload: `{ sub: userId, role: 'client'|'admin' }`
-- Expiración: 7 días
-- El front guarda el token en `localStorage` y lo manda en cada request
+| GET    | `/api/users` | admin | Lista todos los usuarios               |
 
 ---
 
@@ -259,38 +266,38 @@ Códigos HTTP usados: `200`, `201`, `204`, `400`, `401`, `403`, `404`, `409`, `5
 
 | Ruta                | Página                                                | Acceso                                  |
 | ------------------- | ----------------------------------------------------- | --------------------------------------- |
-| `/`                 | Home (servicios destacados + CTA)                     | público                                 |
-| `/servicios`        | Listado con filtros y búsqueda                        | público                                 |
+| `/`                 | Home (hero + cómo funciona)                           | público                                 |
+| `/servicios`        | Listado con búsqueda, filtro por categoría, paginación | público                                 |
 | `/servicios/:id`    | Detalle + botón "Reservar"                            | público                                 |
 | `/login`            | Login                                                 | público (redirige a `/` si ya logueado) |
 | `/register`         | Registro                                              | público (redirige a `/` si ya logueado) |
 | `/mis-turnos`       | Lista de turnos del usuario logueado                  | cliente                                 |
 | `/mis-turnos/nuevo` | Form de reserva (servicio + fecha+hora + notas)       | cliente                                 |
+| `/admin`            | Redirige a `/admin/servicios`                         | admin                                   |
 | `/admin/servicios`  | Tabla CRUD de servicios                               | admin                                   |
 | `/admin/categorias` | Tabla CRUD de categorías                              | admin                                   |
 | `/admin/turnos`     | Tabla de todos los turnos, filtros y cambio de estado | admin                                   |
 
 ### 6.2 Componentes globales
 
-- **Navbar** con links condicionales según `useAuth().user.role`
-- **RequireAuth** / **RequireAdmin**: guards de ruta que redirigen a `/login` si corresponde
-- **AuthProvider**: Context con `user`, `token`, `login()`, `logout()`, `register()`
-- **apiClient**: instancia de axios con interceptor que agrega `Authorization` y maneja 401 → logout automático
+- **Navbar** con links dinámicos según `session.user.role`
+- **Middleware** protege `/mis-turnos/*` (requiere auth) y `/admin/*` (requiere rol admin)
+- **Server Components** por defecto. `"use client"` solo donde hay estado o eventos del browser.
 
 ### 6.3 Decisiones de UX
 
-- Formularios con manejo de loading y errores inline (no alerts feos)
+- Formularios con manejo de loading y errores inline
 - Empty states para listas vacías
-- Loading skeletons o spinners simples para fetching
-- Filtros y búsqueda con debounce de 300ms
-- Paginación clásica (prev/next + número) — no infinite scroll
+- Loading states (texto o esqueletos) para fetching
+- Filtros y búsqueda con submit explícito (sin debounce automático)
+- Paginación clásica (prev/next + número de página)
 - Fechas: `<input type="datetime-local">` nativo, sin librerías de calendario
 
 ---
 
 ## 7. Seed (datos iniciales)
 
-Se ejecuta automáticamente al levantar el backend si la tabla `users` está vacía.
+Se ejecuta automáticamente al levantar el backend si la tabla `users` está vacía (vía `lib/db/seed.ts`).
 
 **Usuarios:**
 
@@ -323,13 +330,14 @@ Se ejecuta automáticamente al levantar el backend si la tabla `users` está vac
 ## 8. Reglas de negocio (importantes)
 
 1. **No se puede reservar un turno en el pasado** → `400`.
-2. **No puede haber dos turnos a la misma hora con el mismo peluquero**. Como no hay "peluquero" asignado, el modelo es: **un solo turno activo por slot de tiempo para todo el negocio**. Validaló con una query que cuente `appointments` con `appointment_at = ?` y `status IN ('pending','confirmed')`.
+2. **No puede haber dos turnos activos en el mismo horario**. El modelo es: un solo turno activo por slot de tiempo para todo el negocio. Se valida con count de `appointments` con `appointment_at = ?` y `status IN ('pending','confirmed')`.
 3. **Cancelar** un turno es válido en cualquier momento. Pasar a `cancelled` libera el slot.
 4. **El admin ve y puede editar todo.** El cliente solo ve y modifica lo propio.
-5. **Soft delete de servicios**: los turnos viejos siguen mostrando el nombre del servicio aunque esté `active=0`. La query de detalle de turno hace `LEFT JOIN services` sin filtrar por `active`.
+5. **Soft delete de servicios**: los turnos viejos siguen mostrando el nombre del servicio aunque esté `active=0`. Las queries de turnos hacen JOIN con services sin filtrar por `active`.
 6. **Username y email únicos** (validación Zod + constraint UNIQUE).
 7. **Password mínimo 6 caracteres** (validación Zod).
 8. **No permitir borrar una categoría con servicios asociados** → `409`.
+9. **Cliente solo puede cancelar turnos** (no confirmar/completar). Admin puede transicionar a cualquier estado.
 
 ---
 
@@ -350,42 +358,21 @@ Se ejecuta automáticamente al levantar el backend si la tabla `users` está vac
 
 ## 10. Milestones de implementación
 
-### Milestone 1 — Andamiaje (~1 sesión)
+### Fase 1 — DB + Auth (~cerrada 2026-06-06)
 
-- `pnpm-workspace.yaml`, root `package.json` con scripts de orquestación
-- `apps/api` con Express + endpoint `GET /api/health` → `{ ok: true, db: 'up' }`
-- `apps/web` con Vite + React renderizando "Hola"
-- `pnpm dev` levanta ambos en paralelo
-- `.nvmrc`, `.gitignore`, tsconfigs
+DB (connection, migrations, seed), Auth (NextAuth v5, register, login, me), middleware protección de rutas, páginas de login/register, migración a Next.js full stack.
 
-### Milestone 2 — DB + Auth (~2 sesiones)
+### Fase 2 — Servicios y categorías (~cerrada)
 
-- `db/connection.ts`, `db/migrations.ts`, `db/seed.ts`
-- Módulo `auth/` completo: register, login, `/me`, middlewares `auth.ts` y `requireAdmin`
-- Validación con Zod en cada endpoint
-- Pruebas con `curl` o `.http` files
+Endpoints CRUD de services y categories con filtros, paginación, soft delete. Páginas públicas `/servicios` y `/servicios/[id]`. Admin CRUD en `/admin/servicios` y `/admin/categorias`.
 
-### Milestone 3 — Servicios y categorías (~1–2 sesiones)
+### Fase 3 — Turnos (~cerrada)
 
-- Endpoints de categories y services
-- Paginación + búsqueda + filtro por categoría
-- Página React `/servicios` con TanStack Query
-- Páginas de detalle y admin CRUD
+Endpoints CRUD de appointments con validación anti-solapamiento y reglas por rol. Páginas cliente `/mis-turnos` y `/mis-turnos/nuevo`. Admin panel `/admin/turnos` con filtros y cambio de estado.
 
-### Milestone 4 — Turnos (~2 sesiones)
+### Fase 4 — Polish (~cerrada)
 
-- Endpoints de appointments con la regla anti-solapamiento
-- UI cliente: reservar turno + "Mis turnos" + cancelar
-- UI admin: ver todos, confirmar, marcar como completado
-
-### Milestone 5 — Polish (~1 sesión)
-
-- Guards de ruta en React según rol
-- Manejo de errores prolijo en el front
-- Loading / empty states
-- README final con instrucciones exactas
-
-**Total estimado:** 7–10 sesiones cortas.
+Redirección `/admin` → `/admin/servicios`, metadata en todas las páginas, errores inline en vez de `alert()`, README actualizado.
 
 ---
 
@@ -405,33 +392,37 @@ pnpm install
 ### Desarrollo
 
 ```bash
-# Levanta api (puerto 3000) y web (puerto 5173) en paralelo
-pnpm dev
+pnpm dev    # next dev en http://localhost:3000
 ```
 
-### Variables de entorno (api)
+### Producción
 
-Crear `apps/api/.env` (opcional, hay defaults):
+```bash
+pnpm build  # next build
+pnpm start  # next start en http://localhost:3000
+```
+
+### Variables de entorno
+
+Crear `.env` (opcional, defaults razonables):
 
 ```
-PORT=3000
-JWT_SECRET=cambiame-en-prod
+AUTH_SECRET=cambiame-en-prod          # requerido en prod, en dev NextAuth lo autogenera
+AUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000
 DB_PATH=./data/turnos.db
-CORS_ORIGIN=http://localhost:5173
 ```
 
 ---
 
-## 12. Scripts (root)
+## 12. Scripts (package.json)
 
-| Script              | Hace                                   |
-| ------------------- | -------------------------------------- |
-| `pnpm dev`          | Levanta `api` y `web` en paralelo      |
-| `pnpm build`        | `tsc` en `api` + `vite build` en `web` |
-| `pnpm typecheck`    | `tsc --noEmit` en ambos paquetes       |
-| `pnpm -F api dev`   | Solo el backend                        |
-| `pnpm -F web dev`   | Solo el frontend                       |
-| `pnpm -F api build` | Compila el backend a `dist/`           |
+| Script           | Hace                          |
+| ---------------- | ----------------------------- |
+| `pnpm dev`       | `next dev`                    |
+| `pnpm build`     | `next build`                  |
+| `pnpm start`     | `next start`                  |
+| `pnpm typecheck` | `tsc --noEmit` (verificación) |
 
 > **No hay scripts de test, lint ni format.** No se configuran a menos que se pidan explícitamente.
 
@@ -439,43 +430,42 @@ CORS_ORIGIN=http://localhost:5173
 
 ## 13. Verificación manual
 
-### Backend
-
 ```bash
-# Health
-curl -i http://localhost:3000/api/health
+# Health — revisar que la app responde
+curl -i http://localhost:3000/
 
-# Login
-curl -i -X POST http://localhost:3000/api/auth/login \
+# Login como admin
+curl -i -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@barberia.test","password":"admin123"}'
+  -d '{"email":"admin@barberia.test","password":"admin123","username":"admin"}'
 
-# Listar servicios
+# Listar servicios públicos
 curl -i http://localhost:3000/api/services
+
+# Listar categorías
+curl -i http://localhost:3000/api/categories
 ```
 
-### Frontend
+### Flujo completo
 
-1. Abrir `http://localhost:5173`
-2. Verificar que carga el home
-3. Loguearse como admin, ir a `/admin/servicios`, crear uno nuevo
-4. Logout, loguearse como cliente, ir a `/servicios`, reservar un turno
-5. Loguearse como admin, ir a `/admin/turnos`, confirmar el turno
-
-### Criterios de "andamiaje terminado"
-
-- [ ] `pnpm dev` levanta los dos sin errores
-- [ ] `pnpm typecheck` pasa sin errores
-- [ ] El health check responde
-- [ ] La home de React carga y muestra el navbar
+1. Abrir `http://localhost:3000`
+2. Registrarse como cliente o loguearse con `juani@test.com` / `1234`
+3. Explorar servicios en `/servicios`
+4. Reservar un turno desde `/mis-turnos/nuevo`
+5. Ver turnos en `/mis-turnos`
+6. Loguearse como admin (`admin@barberia.test` / `admin123`)
+7. Ir a `/admin/turnos`, confirmar o completar turnos
+8. CRUD de servicios en `/admin/servicios` y categorías en `/admin/categorias`
 
 ---
 
 ## 14. Convenciones
 
-- **TypeScript estricto** en ambos paquetes. Cero `any`.
+- **TypeScript estricto** en toda la app. Cero `any`.
 - **Validación en backend con Zod**, no confiar en el cliente.
 - **Errores uniformes** con códigos HTTP correctos.
-- **Manejo de errores en frontend** con TanStack Query (`error`, `isError`) y mensajes al usuario.
-- **Commits chicos y descriptivos** (sin convención estricta, pero que se entienda qué cambia cada uno).
-- **Comentarios en español** en código, para mantener el estilo del repo.
+- **Precios en centavos** (`price_cents`, entero). Formateo con `formatPrice()`.
+- **Next.js Server Components** por defecto. `"use client"` solo donde es necesario.
+- **Imports** con alias `@/` (configurado en `tsconfig.json` paths).
+- **Commits chicos y descriptivos** (sin convención estricta, pero que se entienda qué cambia).
+- **Comentarios y mensajes de UI en español**, manteniendo el estilo del repo.

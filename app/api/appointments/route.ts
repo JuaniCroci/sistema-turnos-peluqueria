@@ -1,0 +1,115 @@
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { auth } from '@/lib/auth';
+import { findAppointments, findAppointmentById, createAppointment } from '@/lib/db/appointments';
+import { findServiceById } from '@/lib/db/services';
+import { errorResponse, zodDetails } from '@/lib/utils/api';
+
+const listQuerySchema = z.object({
+  status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  user_id: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+const createSchema = z.object({
+  service_id: z.number().int().positive('El servicio es requerido'),
+  appointment_at: z.string().min(1, 'La fecha y hora son requeridas'),
+  notes: z.string().max(500).optional(),
+});
+
+export async function GET(request: Request): Promise<NextResponse> {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return errorResponse('UNAUTHORIZED', 'No autenticado');
+    }
+
+    const { searchParams } = new URL(request.url);
+    const raw: Record<string, string> = {};
+    searchParams.forEach((value, key) => { raw[key] = value; });
+
+    const parsed = listQuerySchema.safeParse(raw);
+    if (!parsed.success) {
+      return errorResponse('VALIDATION_ERROR', 'Parametros de busqueda invalidos', zodDetails(parsed.error));
+    }
+
+    const isAdmin = session.user.role === 'admin';
+
+    if (!isAdmin && parsed.data.user_id !== undefined) {
+      return errorResponse('FORBIDDEN', 'No puedes filtrar por usuario');
+    }
+
+    const userId = isAdmin ? parsed.data.user_id : Number(session.user.id);
+
+    const result = findAppointments({
+      userId,
+      status: parsed.data.status,
+      from: parsed.data.from,
+      to: parsed.data.to,
+      page: parsed.data.page,
+      limit: parsed.data.limit,
+    });
+
+    return NextResponse.json(result);
+  } catch {
+    return errorResponse('INTERNAL_ERROR', 'Error al obtener turnos');
+  }
+}
+
+export async function POST(request: Request): Promise<NextResponse> {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return errorResponse('UNAUTHORIZED', 'No autenticado');
+    }
+
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse('VALIDATION_ERROR', 'Body JSON invalido');
+    }
+
+    const parsed = createSchema.safeParse(body);
+    if (!parsed.success) {
+      return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
+    }
+
+    const service = findServiceById(parsed.data.service_id);
+    if (!service) {
+      return errorResponse('VALIDATION_ERROR', 'El servicio especificado no existe');
+    }
+
+    if (!service.active) {
+      return errorResponse('VALIDATION_ERROR', 'El servicio no esta disponible');
+    }
+
+    const appointmentAt = parsed.data.appointment_at;
+    if (new Date(appointmentAt) <= new Date()) {
+      return errorResponse('VALIDATION_ERROR', 'No se puede reservar un turno en el pasado');
+    }
+
+    try {
+      const appointment = createAppointment({
+        user_id: Number(session.user.id),
+        service_id: parsed.data.service_id,
+        appointment_at: appointmentAt,
+        notes: parsed.data.notes,
+      });
+      return NextResponse.json({ data: appointment }, { status: 201 });
+    } catch (e) {
+      if (e instanceof Error && e.message.includes('Ya existe un turno')) {
+        return errorResponse('CONFLICT', e.message);
+      }
+      throw e;
+    }
+  } catch (e) {
+    if (e instanceof Error && e.message.includes('Ya existe un turno')) {
+      return errorResponse('CONFLICT', 'Ya existe un turno en ese horario');
+    }
+    return errorResponse('INTERNAL_ERROR', 'Error al crear turno');
+  }
+}

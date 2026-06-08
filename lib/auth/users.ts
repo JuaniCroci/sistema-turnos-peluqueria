@@ -43,6 +43,21 @@ export interface CreateUserInput {
   role?: Role;
 }
 
+export interface PublicUserRow {
+  id: number;
+  email: string;
+  username: string;
+  role: Role;
+  created_at: string;
+}
+
+export const listAllUsers = (): PublicUserRow[] => {
+  const db = getDb();
+  return db
+    .prepare('SELECT id, email, username, role, created_at FROM users ORDER BY created_at DESC')
+    .all() as PublicUserRow[];
+};
+
 export const createUser = (input: CreateUserInput): UserRow => {
   const db = getDb();
   const role: Role = input.role ?? 'client';

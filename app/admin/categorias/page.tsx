@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Trash2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
 import type { Category } from '@/lib/types';
@@ -17,6 +17,7 @@ export default function AdminCategoriesPage() {
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -82,17 +83,18 @@ export default function AdminCategoriesPage() {
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Eliminar esta categoria?')) return;
+    setDeleteError(null);
 
     try {
       const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const json = await res.json();
-        alert(json.error?.message ?? 'Error al eliminar');
+        setDeleteError(json.error?.message ?? 'Error al eliminar');
         return;
       }
       await fetchCategories();
     } catch {
-      alert('Error al eliminar categoria');
+      setDeleteError('Error al eliminar categoria');
     }
   };
 
@@ -184,6 +186,16 @@ export default function AdminCategoriesPage() {
               </div>
             </form>
           </Card>
+        )}
+
+        {deleteError && (
+          <div className={styles.errorBox}>
+            <AlertCircle size={16} aria-hidden="true" />
+            {deleteError}
+            <button className={styles.dismissBtn} onClick={() => setDeleteError(null)} aria-label="Cerrar">
+              <X size={14} />
+            </button>
+          </div>
         )}
 
         <Card padding="none">

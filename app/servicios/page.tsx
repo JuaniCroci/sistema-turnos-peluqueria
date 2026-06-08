@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ServiceCard } from '@/components/ServiceCard/ServiceCard';
@@ -5,6 +6,11 @@ import { findAllActiveCategoriesWithCount, findServices } from '@/lib/db/service
 import { CategoryFilter } from './_components/CategoryFilter';
 import type { Service } from '@/lib/types';
 import styles from './ServicesList.module.css';
+
+export const metadata: Metadata = {
+  title: 'Servicios · Sistema de Turnos — Peluquería',
+  description: 'Explorá nuestros servicios de peluquería: cortes, barba, coloración y tratamientos.',
+};
 
 interface ServicesListPageProps {
   searchParams: Promise<{ category?: string; q?: string; page?: string }>;

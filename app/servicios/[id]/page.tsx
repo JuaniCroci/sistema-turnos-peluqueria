@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Clock, Tag, ArrowLeft, Calendar } from 'lucide-react';
@@ -6,6 +7,20 @@ import { findCategoryById } from '@/lib/db/categories';
 import { formatDuration, formatPrice } from '@/lib/utils/format';
 import { auth } from '@/lib/auth';
 import styles from './ServiceDetail.module.css';
+
+export async function generateMetadata({ params }: ServiceDetailPageProps): Promise<Metadata> {
+  const { id: idStr } = await params;
+  const id = Number(idStr);
+  if (!Number.isFinite(id)) return { title: 'Servicio no encontrado' };
+
+  const service = findServiceById(id);
+  if (!service) return { title: 'Servicio no encontrado' };
+
+  return {
+    title: `${service.name} · Sistema de Turnos — Peluquería`,
+    description: service.description ?? `Servicio de ${service.name} en nuestra peluquería.`,
+  };
+}
 
 interface ServiceDetailPageProps {
   params: Promise<{ id: string }>;

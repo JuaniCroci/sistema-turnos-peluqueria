@@ -37,6 +37,7 @@ export default function AdminServicesPage() {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const fetchServices = useCallback(async () => {
     try {
@@ -142,17 +143,18 @@ export default function AdminServicesPage() {
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Eliminar este servicio? (soft delete)')) return;
+    setDeleteError(null);
 
     try {
       const res = await fetch(`/api/services/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const json = await res.json();
-        alert(json.error?.message ?? 'Error al eliminar');
+        setDeleteError(json.error?.message ?? 'Error al eliminar');
         return;
       }
       await fetchServices();
     } catch {
-      alert('Error al eliminar servicio');
+      setDeleteError('Error al eliminar servicio');
     }
   };
 
@@ -240,6 +242,16 @@ export default function AdminServicesPage() {
               </div>
             </form>
           </Card>
+        )}
+
+        {deleteError && (
+          <div className={styles.errorBox}>
+            <AlertCircle size={16} aria-hidden="true" />
+            {deleteError}
+            <button className={styles.dismissBtn} onClick={() => setDeleteError(null)} aria-label="Cerrar">
+              <X size={14} />
+            </button>
+          </div>
         )}
 
         <Card padding="none">

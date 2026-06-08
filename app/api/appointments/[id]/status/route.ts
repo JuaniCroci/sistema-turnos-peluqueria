@@ -1,0 +1,70 @@
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { auth } from '@/lib/auth';
+import { findAppointmentById, updateAppointmentStatus } from '@/lib/db/appointments';
+import { errorResponse, zodDetails } from '@/lib/utils/api';
+import type { AppointmentStatus } from '@/lib/types';
+
+const patchSchema = z.object({
+  status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']),
+});
+
+const CLIENT_ALLOWED: AppointmentStatus[] = ['cancelled'];
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse> {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return errorResponse('UNAUTHORIZED', 'No autenticado');
+    }
+
+    const { id: idStr } = await params;
+    const id = Number(idStr);
+    if (!Number.isFinite(id)) {
+      return errorResponse('VALIDATION_ERROR', 'ID invalido');
+    }
+
+    const appointment = findAppointmentById(id);
+    if (!appointment) {
+      return errorResponse('NOT_FOUND', 'Turno no encontrado');
+    }
+
+    const isAdmin = session.user.role === 'admin';
+
+    if (!isAdmin && appointment.user_id !== Number(session.user.id)) {
+      return errorResponse('FORBIDDEN', 'No puedes modificar este turno');
+    }
+
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse('VALIDATION_ERROR', 'Body JSON invalido');
+    }
+
+    const parsed = patchSchema.safeParse(body);
+    if (!parsed.success) {
+      return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
+    }
+
+    const newStatus = parsed.data.status;
+
+    if (!isAdmin && !CLIENT_ALLOWED.includes(newStatus)) {
+      return errorResponse('FORBIDDEN', 'Solo puedes cancelar tus turnos');
+    }
+
+    if (!isAdmin && newStatus === 'cancelled' && appointment.status === 'cancelled') {
+      return errorResponse('VALIDATION_ERROR', 'El turno ya esta cancelado');
+    }
+
+    updateAppointmentStatus(id, newStatus);
+    const updated = findAppointmentById(id);
+
+    return NextResponse.json({ data: updated });
+  } catch {
+    return errorResponse('INTERNAL_ERROR', 'Error al actualizar turno');
+  }
+}

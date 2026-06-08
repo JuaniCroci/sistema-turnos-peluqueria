@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, Clock, UserCheck } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import styles from './page.module.css';
+
+export const metadata: Metadata = {
+  title: 'Inicio · Sistema de Turnos — Peluquería',
+  description: 'Reservá tu turno en la peluquería en segundos.',
+};
 
 export default async function HomePage() {
   const session = await auth();

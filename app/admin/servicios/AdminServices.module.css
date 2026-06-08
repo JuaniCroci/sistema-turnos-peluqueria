@@ -50,6 +50,25 @@
   font-size: var(--font-size-sm);
 }
 
+.dismissBtn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-danger);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.dismissBtn:hover {
+  background: rgba(220, 38, 38, 0.12);
+}
+
 .form {
   display: flex;
   flex-direction: column;
