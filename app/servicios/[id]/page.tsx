@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: ServiceDetailPageProps): Prom
   const id = Number(idStr);
   if (!Number.isFinite(id)) return { title: 'Servicio no encontrado' };
 
-  const service = findServiceById(id);
+  const service = await findServiceById(id);
   if (!service || !service.active) return { title: 'Servicio no encontrado' };
 
   return {
@@ -33,12 +33,12 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
     notFound();
   }
 
-  const service = findServiceById(id);
+  const service = await findServiceById(id);
   if (!service || !service.active) {
     notFound();
   }
 
-  const category = service ? findCategoryById(service.category_id) : null;
+  const category = service ? await findCategoryById(service.category_id) : null;
   const session = await auth();
   const isLoggedIn = Boolean(session?.user);
 

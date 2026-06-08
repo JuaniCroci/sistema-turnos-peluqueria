@@ -36,7 +36,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     const isAdmin = session?.user?.role === 'admin';
     const includeInactive = isAdmin && parsed.data.includeInactive === 1;
 
-    const result = findServices({
+    const result = await findServices({
       categorySlug: parsed.data.category,
       q: parsed.data.q,
       page: parsed.data.page,
@@ -72,12 +72,12 @@ export async function POST(request: Request): Promise<NextResponse> {
       return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
     }
 
-    const category = findCategoryById(parsed.data.category_id);
+    const category = await findCategoryById(parsed.data.category_id);
     if (!category) {
       return errorResponse('VALIDATION_ERROR', 'La categoria especificada no existe');
     }
 
-    const service = createService(parsed.data);
+    const service = await createService(parsed.data);
     return NextResponse.json({ data: service }, { status: 201 });
   } catch {
     return errorResponse('INTERNAL_ERROR', 'Error al crear servicio');

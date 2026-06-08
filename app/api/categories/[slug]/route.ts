@@ -9,7 +9,7 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const { slug } = await params;
-    const category = findCategoryBySlug(slug);
+    const category = await findCategoryBySlug(slug);
     if (!category) {
       return errorResponse('NOT_FOUND', 'Categoria no encontrada');
     }
@@ -38,16 +38,16 @@ export async function DELETE(
       return errorResponse('VALIDATION_ERROR', 'ID invalido');
     }
 
-    const category = findCategoryById(id);
+    const category = await findCategoryById(id);
     if (!category) {
       return errorResponse('NOT_FOUND', 'Categoria no encontrada');
     }
 
-    if (categoryHasServices(id)) {
+    if (await categoryHasServices(id)) {
       return errorResponse('CONFLICT', 'No se puede eliminar una categoria con servicios asociados');
     }
 
-    deleteCategoryById(id);
+    await deleteCategoryById(id);
     return NextResponse.json({}, { status: 200 });
   } catch {
     return errorResponse('INTERNAL_ERROR', 'Error al eliminar categoria');

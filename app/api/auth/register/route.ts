@@ -29,15 +29,15 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const { email, username, password } = parsed.data;
 
-  if (findUserByEmail(email)) {
+  if (await findUserByEmail(email)) {
     return errorResponse('CONFLICT', 'El email ya esta registrado');
   }
-  if (findUserByUsername(username)) {
+  if (await findUserByUsername(username)) {
     return errorResponse('CONFLICT', 'El nombre de usuario ya esta en uso');
   }
 
   const passwordHash = hashPassword(password);
-  const user = createUser({ email, username, passwordHash, role: 'client' });
+  const user = await createUser({ email, username, passwordHash, role: 'client' });
 
   return NextResponse.json(
     {

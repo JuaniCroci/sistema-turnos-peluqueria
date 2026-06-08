@@ -34,7 +34,7 @@ export async function PATCH(
       return errorResponse('VALIDATION_ERROR', 'ID invalido');
     }
 
-    const appointment = findAppointmentById(id);
+    const appointment = await findAppointmentById(id);
     if (!appointment) {
       return errorResponse('NOT_FOUND', 'Turno no encontrado');
     }
@@ -71,8 +71,8 @@ export async function PATCH(
       );
     }
 
-    updateAppointmentStatus(id, newStatus);
-    const updated = findAppointmentById(id);
+    await updateAppointmentStatus(id, newStatus);
+    const updated = await findAppointmentById(id);
 
     return NextResponse.json({ data: updated });
   } catch {

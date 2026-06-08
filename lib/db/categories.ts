@@ -2,25 +2,46 @@ import { cache } from 'react';
 import { getDb } from './connection';
 import type { Category } from '@/lib/types';
 
-export const findAllCategories = cache((): Category[] => {
+export const findAllCategories = cache(async (): Promise<Category[]> => {
   const db = getDb();
-  return db.prepare('SELECT id, name, slug, description FROM categories ORDER BY name').all() as Category[];
+  const { data, error } = await db
+    .from('categories')
+    .select('id, name, slug, description')
+    .order('name');
+  if (error) throw error;
+  return (data ?? []) as Category[];
 });
 
-export const findCategoryBySlug = cache((slug: string): Category | undefined => {
+export const findCategoryBySlug = cache(async (slug: string): Promise<Category | undefined> => {
   const db = getDb();
-  return db.prepare('SELECT id, name, slug, description FROM categories WHERE slug = ?').get(slug) as Category | undefined;
+  const { data, error } = await db
+    .from('categories')
+    .select('id, name, slug, description')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as Category | undefined) ?? undefined;
 });
 
-export const findCategoryById = cache((id: number): Category | undefined => {
+export const findCategoryById = cache(async (id: number): Promise<Category | undefined> => {
   const db = getDb();
-  return db.prepare('SELECT id, name, slug, description FROM categories WHERE id = ?').get(id) as Category | undefined;
+  const { data, error } = await db
+    .from('categories')
+    .select('id, name, slug, description')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as Category | undefined) ?? undefined;
 });
 
-export const categoryHasServices = cache((id: number): boolean => {
+export const categoryHasServices = cache(async (id: number): Promise<boolean> => {
   const db = getDb();
-  const row = db.prepare('SELECT COUNT(*) as count FROM services WHERE category_id = ?').get(id) as { count: number };
-  return row.count > 0;
+  const { count, error } = await db
+    .from('services')
+    .select('*', { count: 'exact', head: true })
+    .eq('category_id', id);
+  if (error) throw error;
+  return (count ?? 0) > 0;
 });
 
 export interface CreateCategoryInput {
@@ -29,22 +50,24 @@ export interface CreateCategoryInput {
   description?: string;
 }
 
-export const createCategory = (input: CreateCategoryInput): Category => {
+export const createCategory = async (input: CreateCategoryInput): Promise<Category> => {
   const db = getDb();
-  const result = db.prepare('INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)').run(
-    input.name,
-    input.slug,
-    input.description ?? null,
-  );
-  const id = Number(result.lastInsertRowid);
-  const category = findCategoryById(id);
-  if (!category) {
-    throw new Error('No se encontro la categoria recien creada');
-  }
-  return category;
+  const { data, error } = await db
+    .from('categories')
+    .insert({
+      name: input.name,
+      slug: input.slug,
+      description: input.description ?? null,
+    })
+    .select('id, name, slug, description')
+    .single();
+
+  if (error) throw error;
+  return data as Category;
 };
 
-export const deleteCategoryById = (id: number): void => {
+export const deleteCategoryById = async (id: number): Promise<void> => {
   const db = getDb();
-  db.prepare('DELETE FROM categories WHERE id = ?').run(id);
+  const { error } = await db.from('categories').delete().eq('id', id);
+  if (error) throw error;
 };

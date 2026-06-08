@@ -44,7 +44,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
     const userId = isAdmin ? parsed.data.user_id : Number(session.user.id);
 
-    const result = findAppointments({
+    const result = await findAppointments({
       userId,
       status: parsed.data.status,
       from: parsed.data.from,
@@ -78,7 +78,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
     }
 
-    const service = findServiceById(parsed.data.service_id);
+    const service = await findServiceById(parsed.data.service_id);
     if (!service) {
       return errorResponse('VALIDATION_ERROR', 'El servicio especificado no existe');
     }
@@ -93,7 +93,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     try {
-      const appointment = createAppointment({
+      const appointment = await createAppointment({
         user_id: Number(session.user.id),
         service_id: parsed.data.service_id,
         appointment_at: appointmentAt,

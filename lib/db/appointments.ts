@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { getDb } from './connection';
+import { flattenRow } from './flatten';
 import type { Appointment, AppointmentStatus } from '@/lib/types';
 
 export interface AppointmentRow extends Appointment {
@@ -32,77 +33,70 @@ export interface AppointmentListResult {
   };
 }
 
-const appointmentSelect = `
-  a.id, a.user_id, a.service_id, a.appointment_at, a.status, a.notes, a.created_at,
-  s.name AS service_name,
-  s.duration_minutes AS service_duration_minutes,
-  s.price_cents AS service_price_cents,
-  c.name AS category_name
+const APPOINTMENT_SELECT = `
+  id, user_id, service_id, appointment_at, status, notes, created_at,
+  services:service_id (
+    name, duration_minutes, price_cents,
+    categories:category_id (name)
+  ),
+  users:user_id (email, username)
 `;
 
-const appointmentJoins = `
-  FROM appointments a
-  JOIN services s ON s.id = a.service_id
-  LEFT JOIN categories c ON c.id = s.category_id
-`;
-
-export const findAppointments = cache((options: AppointmentListOptions): AppointmentListResult => {
+export const findAppointments = cache(async (options: AppointmentListOptions): Promise<AppointmentListResult> => {
   const db = getDb();
-  const conditions: string[] = [];
-  const params: unknown[] = [];
+
+  let countQuery = db.from('appointments').select('*', { count: 'exact', head: true });
+  let dataQuery = db.from('appointments').select(APPOINTMENT_SELECT, { count: 'exact' });
 
   if (options.userId !== undefined) {
-    conditions.push('a.user_id = ?');
-    params.push(options.userId);
+    countQuery = countQuery.eq('user_id', options.userId);
+    dataQuery = dataQuery.eq('user_id', options.userId);
   }
 
   if (options.status) {
-    conditions.push('a.status = ?');
-    params.push(options.status);
+    countQuery = countQuery.eq('status', options.status);
+    dataQuery = dataQuery.eq('status', options.status);
   }
 
   if (options.from) {
-    conditions.push('a.appointment_at >= ?');
-    params.push(options.from);
+    countQuery = countQuery.gte('appointment_at', options.from);
+    dataQuery = dataQuery.gte('appointment_at', options.from);
   }
 
   if (options.to) {
-    conditions.push('a.appointment_at <= ?');
-    params.push(options.to);
+    countQuery = countQuery.lte('appointment_at', options.to);
+    dataQuery = dataQuery.lte('appointment_at', options.to);
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const { count, error: countErr } = await countQuery;
+  if (countErr) throw countErr;
 
-  const countRow = db.prepare(`
-    SELECT COUNT(*) as count
-    ${appointmentJoins}
-    ${whereClause}
-  `).get(...params) as { count: number };
-
-  const total = countRow.count;
+  const total = count ?? 0;
   const offset = (options.page - 1) * options.limit;
 
-  const data = db.prepare(`
-    SELECT ${appointmentSelect}
-    ${appointmentJoins}
-    ${whereClause}
-    ORDER BY a.appointment_at DESC
-    LIMIT ? OFFSET ?
-  `).all(...params, options.limit, offset) as AppointmentAdminRow[];
+  const { data, error } = await dataQuery
+    .order('appointment_at', { ascending: false })
+    .range(offset, offset + options.limit - 1);
 
-  return { data, pagination: { page: options.page, limit: options.limit, total } };
+  if (error) throw error;
+
+  return {
+    data: (data ?? []).map((row) => flattenRow<AppointmentAdminRow>(row as Record<string, unknown>)),
+    pagination: { page: options.page, limit: options.limit, total },
+  };
 });
 
-export const findAppointmentById = cache((id: number): AppointmentAdminRow | undefined => {
+export const findAppointmentById = cache(async (id: number): Promise<AppointmentAdminRow | undefined> => {
   const db = getDb();
-  return db.prepare(`
-    SELECT ${appointmentSelect},
-           u.email AS user_email,
-           u.username AS user_username
-    ${appointmentJoins}
-    JOIN users u ON u.id = a.user_id
-    WHERE a.id = ?
-  `).get(id) as AppointmentAdminRow | undefined;
+  const { data, error } = await db
+    .from('appointments')
+    .select(APPOINTMENT_SELECT)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return undefined;
+  return flattenRow<AppointmentAdminRow>(data as Record<string, unknown>);
 });
 
 export interface CreateAppointmentInput {
@@ -112,51 +106,52 @@ export interface CreateAppointmentInput {
   notes?: string;
 }
 
-export const hasActiveAppointmentAt = (appointmentAt: string, excludeId?: number): boolean => {
+export const hasActiveAppointmentAt = async (appointmentAt: string, excludeId?: number): Promise<boolean> => {
   const db = getDb();
-  let sql = "SELECT COUNT(*) as count FROM appointments WHERE appointment_at = ? AND status IN ('pending', 'confirmed')";
-  const params: unknown[] = [appointmentAt];
+  let query = db
+    .from('appointments')
+    .select('*', { count: 'exact', head: true })
+    .eq('appointment_at', appointmentAt)
+    .in('status', ['pending', 'confirmed']);
 
   if (excludeId !== undefined) {
-    sql += ' AND id != ?';
-    params.push(excludeId);
+    query = query.neq('id', excludeId);
   }
 
-  const row = db.prepare(sql).get(...params) as { count: number };
-  return row.count > 0;
+  const { count, error } = await query;
+  if (error) throw error;
+  return (count ?? 0) > 0;
 };
 
-export const createAppointment = (input: CreateAppointmentInput): Appointment => {
-  const db = getDb();
-
+export const createAppointment = async (input: CreateAppointmentInput): Promise<Appointment> => {
   const appointmentAt = input.appointment_at;
   if (new Date(appointmentAt) <= new Date()) {
     throw new Error('No se puede reservar un turno en el pasado');
   }
 
-  if (hasActiveAppointmentAt(appointmentAt)) {
+  if (await hasActiveAppointmentAt(appointmentAt)) {
     throw new Error('Ya existe un turno confirmado o pendiente en ese horario');
   }
 
-  const result = db.prepare(`
-    INSERT INTO appointments (user_id, service_id, appointment_at, notes, status)
-    VALUES (?, ?, ?, ?, 'pending')
-  `).run(
-    input.user_id,
-    input.service_id,
-    appointmentAt,
-    input.notes ?? null,
-  );
+  const db = getDb();
+  const { data, error } = await db
+    .from('appointments')
+    .insert({
+      user_id: input.user_id,
+      service_id: input.service_id,
+      appointment_at: appointmentAt,
+      notes: input.notes ?? null,
+      status: 'pending',
+    })
+    .select('*')
+    .single();
 
-  const id = Number(result.lastInsertRowid);
-  const appointment = db.prepare('SELECT * FROM appointments WHERE id = ?').get(id) as Appointment | undefined;
-  if (!appointment) {
-    throw new Error('No se encontro el turno recien creado');
-  }
-  return appointment;
+  if (error) throw error;
+  return data as Appointment;
 };
 
-export const updateAppointmentStatus = (id: number, status: AppointmentStatus): void => {
+export const updateAppointmentStatus = async (id: number, status: AppointmentStatus): Promise<void> => {
   const db = getDb();
-  db.prepare('UPDATE appointments SET status = ? WHERE id = ?').run(status, id);
+  const { error } = await db.from('appointments').update({ status }).eq('id', id);
+  if (error) throw error;
 };

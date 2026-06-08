@@ -24,7 +24,7 @@ export async function GET(
       return errorResponse('VALIDATION_ERROR', 'ID invalido');
     }
 
-    const service = findServiceById(id);
+    const service = await findServiceById(id);
     if (!service) {
       return errorResponse('NOT_FOUND', 'Servicio no encontrado');
     }
@@ -54,7 +54,7 @@ export async function PUT(
       return errorResponse('VALIDATION_ERROR', 'ID invalido');
     }
 
-    const existing = findServiceById(id);
+    const existing = await findServiceById(id);
     if (!existing) {
       return errorResponse('NOT_FOUND', 'Servicio no encontrado');
     }
@@ -72,13 +72,13 @@ export async function PUT(
     }
 
     if (parsed.data.category_id !== undefined) {
-      const category = findCategoryById(parsed.data.category_id);
+      const category = await findCategoryById(parsed.data.category_id);
       if (!category) {
         return errorResponse('VALIDATION_ERROR', 'La categoria especificada no existe');
       }
     }
 
-    const service = updateService(id, parsed.data);
+    const service = await updateService(id, parsed.data);
     return NextResponse.json({ data: service });
   } catch {
     return errorResponse('INTERNAL_ERROR', 'Error al actualizar servicio');
@@ -104,12 +104,12 @@ export async function DELETE(
       return errorResponse('VALIDATION_ERROR', 'ID invalido');
     }
 
-    const existing = findServiceById(id);
+    const existing = await findServiceById(id);
     if (!existing) {
       return errorResponse('NOT_FOUND', 'Servicio no encontrado');
     }
 
-    softDeleteService(id);
+    await softDeleteService(id);
     return NextResponse.json({}, { status: 200 });
   } catch {
     return errorResponse('INTERNAL_ERROR', 'Error al eliminar servicio');

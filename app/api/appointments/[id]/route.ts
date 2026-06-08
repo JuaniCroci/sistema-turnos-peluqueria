@@ -19,7 +19,7 @@ export async function GET(
       return errorResponse('VALIDATION_ERROR', 'ID invalido');
     }
 
-    const appointment = findAppointmentById(id);
+    const appointment = await findAppointmentById(id);
     if (!appointment) {
       return errorResponse('NOT_FOUND', 'Turno no encontrado');
     }

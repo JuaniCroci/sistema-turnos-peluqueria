@@ -9,14 +9,14 @@ const credentialsSchema = z.object({
   password: z.string().min(1).max(200),
 });
 
-const authorize = (raw: unknown) => {
+const authorize = async (raw: unknown) => {
   const parsed = credentialsSchema.safeParse(raw);
   if (!parsed.success) {
     return null;
   }
   const { email, password } = parsed.data;
 
-  const user = findUserByEmail(email.toLowerCase());
+  const user = await findUserByEmail(email.toLowerCase());
   if (!user) {
     return null;
   }

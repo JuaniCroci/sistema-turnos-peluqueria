@@ -19,52 +19,39 @@ export interface ServiceListResult {
   };
 }
 
-export const findServices = cache((options: ServiceListOptions): ServiceListResult => {
+export const findServices = cache(async (options: ServiceListOptions): Promise<ServiceListResult> => {
   const db = getDb();
-  const conditions: string[] = [];
-  const params: unknown[] = [];
+  let query = db.from('services').select('*', { count: 'exact' });
 
   if (!options.includeInactive) {
-    conditions.push('s.active = 1');
+    query = query.eq('active', true);
   }
 
   if (options.categorySlug) {
-    conditions.push('c.slug = ?');
-    params.push(options.categorySlug);
+    query = query.eq('categories.slug', options.categorySlug);
   }
 
   if (options.q) {
-    conditions.push('s.name LIKE ?');
-    params.push(`%${options.q}%`);
+    query = query.ilike('name', `%${options.q}%`);
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-  const countRow = db.prepare(`
-    SELECT COUNT(*) as count
-    FROM services s
-    LEFT JOIN categories c ON c.id = s.category_id
-    ${whereClause}
-  `).get(...params) as { count: number };
-
-  const total = countRow.count;
   const offset = (options.page - 1) * options.limit;
+  const { data, count, error } = await query
+    .order('name')
+    .range(offset, offset + options.limit - 1);
 
-  const data = db.prepare(`
-    SELECT s.*
-    FROM services s
-    LEFT JOIN categories c ON c.id = s.category_id
-    ${whereClause}
-    ORDER BY s.name
-    LIMIT ? OFFSET ?
-  `).all(...params, options.limit, offset) as Service[];
-
-  return { data, pagination: { page: options.page, limit: options.limit, total } };
+  if (error) throw error;
+  return {
+    data: (data ?? []) as Service[],
+    pagination: { page: options.page, limit: options.limit, total: count ?? 0 },
+  };
 });
 
-export const findServiceById = cache((id: number): Service | undefined => {
+export const findServiceById = cache(async (id: number): Promise<Service | undefined> => {
   const db = getDb();
-  return db.prepare('SELECT * FROM services WHERE id = ?').get(id) as Service | undefined;
+  const { data, error } = await db.from('services').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return (data as Service | undefined) ?? undefined;
 });
 
 export interface CreateServiceInput {
@@ -75,24 +62,23 @@ export interface CreateServiceInput {
   price_cents: number;
 }
 
-export const createService = (input: CreateServiceInput): Service => {
+export const createService = async (input: CreateServiceInput): Promise<Service> => {
   const db = getDb();
-  const result = db.prepare(`
-    INSERT INTO services (category_id, name, description, duration_minutes, price_cents, active)
-    VALUES (?, ?, ?, ?, ?, 1)
-  `).run(
-    input.category_id,
-    input.name,
-    input.description ?? null,
-    input.duration_minutes,
-    input.price_cents,
-  );
-  const id = Number(result.lastInsertRowid);
-  const service = findServiceById(id);
-  if (!service) {
-    throw new Error('No se encontro el servicio recien creado');
-  }
-  return service;
+  const { data, error } = await db
+    .from('services')
+    .insert({
+      category_id: input.category_id,
+      name: input.name,
+      description: input.description ?? null,
+      duration_minutes: input.duration_minutes,
+      price_cents: input.price_cents,
+      active: true,
+    })
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return data as Service;
 };
 
 export interface UpdateServiceInput {
@@ -103,60 +89,64 @@ export interface UpdateServiceInput {
   price_cents?: number;
 }
 
-export const updateService = (id: number, input: UpdateServiceInput): Service => {
+export const updateService = async (id: number, input: UpdateServiceInput): Promise<Service> => {
   const db = getDb();
-  const sets: string[] = [];
-  const params: unknown[] = [];
+  const updates: Record<string, unknown> = {};
+  if (input.category_id !== undefined) updates.category_id = input.category_id;
+  if (input.name !== undefined) updates.name = input.name;
+  if (input.description !== undefined) updates.description = input.description;
+  if (input.duration_minutes !== undefined) updates.duration_minutes = input.duration_minutes;
+  if (input.price_cents !== undefined) updates.price_cents = input.price_cents;
 
-  if (input.category_id !== undefined) {
-    sets.push('category_id = ?');
-    params.push(input.category_id);
-  }
-  if (input.name !== undefined) {
-    sets.push('name = ?');
-    params.push(input.name);
-  }
-  if (input.description !== undefined) {
-    sets.push('description = ?');
-    params.push(input.description);
-  }
-  if (input.duration_minutes !== undefined) {
-    sets.push('duration_minutes = ?');
-    params.push(input.duration_minutes);
-  }
-  if (input.price_cents !== undefined) {
-    sets.push('price_cents = ?');
-    params.push(input.price_cents);
-  }
-
-  if (sets.length === 0) {
-    const service = findServiceById(id);
-    if (!service) {
-      throw new Error('Servicio no encontrado');
-    }
+  if (Object.keys(updates).length === 0) {
+    const service = await findServiceById(id);
+    if (!service) throw new Error('Servicio no encontrado');
     return service;
   }
 
-  params.push(id);
-  db.prepare(`UPDATE services SET ${sets.join(', ')} WHERE id = ?`).run(...params);
-  const service = findServiceById(id);
-  if (!service) {
-    throw new Error('Servicio no encontrado despues de actualizar');
+  const { data, error } = await db
+    .from('services')
+    .update(updates)
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  return data as Service;
+};
+
+export const softDeleteService = async (id: number): Promise<void> => {
+  const db = getDb();
+  const { error } = await db.from('services').update({ active: false }).eq('id', id);
+  if (error) throw error;
+};
+
+export const findAllActiveCategoriesWithCount = cache(async (): Promise<
+  Array<{ id: number; name: string; slug: string; description: string | null; service_count: number }>
+> => {
+  const db = getDb();
+
+  const { data: counts, error: countErr } = await db
+    .from('services')
+    .select('category_id')
+    .eq('active', true);
+
+  if (countErr) throw countErr;
+
+  const countMap = new Map<number, number>();
+  for (const row of counts ?? []) {
+    countMap.set(row.category_id, (countMap.get(row.category_id) ?? 0) + 1);
   }
-  return service;
-};
 
-export const softDeleteService = (id: number): void => {
-  const db = getDb();
-  db.prepare('UPDATE services SET active = 0 WHERE id = ?').run(id);
-};
+  const { data: categories, error: catErr } = await db
+    .from('categories')
+    .select('id, name, slug, description')
+    .order('name');
 
-export const findAllActiveCategoriesWithCount = cache((): Array<{ id: number; name: string; slug: string; description: string | null; service_count: number }> => {
-  const db = getDb();
-  return db.prepare(`
-    SELECT c.id, c.name, c.slug, c.description,
-           (SELECT COUNT(*) FROM services s WHERE s.category_id = c.id AND s.active = 1) AS service_count
-    FROM categories c
-    ORDER BY c.name
-  `).all() as Array<{ id: number; name: string; slug: string; description: string | null; service_count: number }>;
+  if (catErr) throw catErr;
+
+  return (categories ?? []).map((cat) => ({
+    ...cat,
+    service_count: countMap.get(cat.id) ?? 0,
+  }));
 });

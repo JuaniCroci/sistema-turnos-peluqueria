@@ -9,31 +9,37 @@ export interface UserRow {
   role: Role;
 }
 
-export const findUserByEmail = (email: string): UserRow | undefined => {
+export const findUserByEmail = async (email: string): Promise<UserRow | undefined> => {
   const db = getDb();
-  return db
-    .prepare(
-      'SELECT id, email, username, password_hash, role FROM users WHERE email = ?',
-    )
-    .get(email.toLowerCase()) as UserRow | undefined;
+  const { data, error } = await db
+    .from('users')
+    .select('id, email, username, password_hash, role')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
+  if (error) throw error;
+  return (data as UserRow | undefined) ?? undefined;
 };
 
-export const findUserByUsername = (username: string): UserRow | undefined => {
+export const findUserByUsername = async (username: string): Promise<UserRow | undefined> => {
   const db = getDb();
-  return db
-    .prepare(
-      'SELECT id, email, username, password_hash, role FROM users WHERE username = ?',
-    )
-    .get(username) as UserRow | undefined;
+  const { data, error } = await db
+    .from('users')
+    .select('id, email, username, password_hash, role')
+    .eq('username', username)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as UserRow | undefined) ?? undefined;
 };
 
-export const findUserById = (id: number): UserRow | undefined => {
+export const findUserById = async (id: number): Promise<UserRow | undefined> => {
   const db = getDb();
-  return db
-    .prepare(
-      'SELECT id, email, username, password_hash, role FROM users WHERE id = ?',
-    )
-    .get(id) as UserRow | undefined;
+  const { data, error } = await db
+    .from('users')
+    .select('id, email, username, password_hash, role')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as UserRow | undefined) ?? undefined;
 };
 
 export interface CreateUserInput {
@@ -51,25 +57,31 @@ export interface PublicUserRow {
   created_at: string;
 }
 
-export const listAllUsers = (): PublicUserRow[] => {
+export const listAllUsers = async (): Promise<PublicUserRow[]> => {
   const db = getDb();
-  return db
-    .prepare('SELECT id, email, username, role, created_at FROM users ORDER BY created_at DESC')
-    .all() as PublicUserRow[];
+  const { data, error } = await db
+    .from('users')
+    .select('id, email, username, role, created_at')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as PublicUserRow[];
 };
 
-export const createUser = (input: CreateUserInput): UserRow => {
+export const createUser = async (input: CreateUserInput): Promise<UserRow> => {
   const db = getDb();
   const role: Role = input.role ?? 'client';
-  const result = db
-    .prepare(
-      'INSERT INTO users (email, username, password_hash, role) VALUES (?, ?, ?, ?)',
-    )
-    .run(input.email.toLowerCase(), input.username, input.passwordHash, role);
-  const id = Number(result.lastInsertRowid);
-  const user = findUserById(id);
-  if (!user) {
-    throw new Error('No se encontro el usuario recien creado');
-  }
-  return user;
+
+  const { data, error } = await db
+    .from('users')
+    .insert({
+      email: input.email.toLowerCase(),
+      username: input.username,
+      password_hash: input.passwordHash,
+      role,
+    })
+    .select('id, email, username, password_hash, role')
+    .single();
+
+  if (error) throw error;
+  return data as UserRow;
 };

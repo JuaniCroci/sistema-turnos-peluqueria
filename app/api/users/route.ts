@@ -13,7 +13,7 @@ export async function GET(): Promise<NextResponse> {
       return errorResponse('FORBIDDEN', 'Se requiere rol admin');
     }
 
-    const users = listAllUsers();
+    const users = await listAllUsers();
     return NextResponse.json({ data: users });
   } catch {
     return errorResponse('INTERNAL_ERROR', 'Error al obtener usuarios');

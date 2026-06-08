@@ -53,15 +53,15 @@ export const registerAction = async (
   const rawCallbackUrl = String(formData.get('callbackUrl') ?? '').trim();
   const callbackUrl = callbackUrlPattern.safeParse(rawCallbackUrl).data;
 
-  if (findUserByEmail(email)) {
+  if (await findUserByEmail(email)) {
     return { error: 'El email ya está registrado', fieldErrors: {} };
   }
-  if (findUserByUsername(username)) {
+  if (await findUserByUsername(username)) {
     return { error: 'El nombre de usuario ya está en uso', fieldErrors: {} };
   }
 
   try {
-    createUser({
+    await createUser({
       email,
       username,
       passwordHash: hashPassword(password),

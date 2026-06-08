@@ -16,7 +16,7 @@ const createSchema = z.object({
 
 export async function GET(): Promise<NextResponse> {
   try {
-    const categories = findAllCategories();
+    const categories = await findAllCategories();
     return NextResponse.json({ data: categories });
   } catch {
     return errorResponse('INTERNAL_ERROR', 'Error al obtener categorias');
@@ -45,12 +45,12 @@ export async function POST(request: Request): Promise<NextResponse> {
       return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
     }
 
-    const existing = findCategoryBySlug(parsed.data.slug);
+    const existing = await findCategoryBySlug(parsed.data.slug);
     if (existing) {
       return errorResponse('CONFLICT', 'Ya existe una categoria con ese slug');
     }
 
-    const category = createCategory(parsed.data);
+    const category = await createCategory(parsed.data);
     return NextResponse.json({ data: category }, { status: 201 });
   } catch {
     return errorResponse('INTERNAL_ERROR', 'Error al crear categoria');

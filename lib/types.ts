@@ -22,7 +22,7 @@ export interface Service {
   description: string | null;
   duration_minutes: number;
   price_cents: number;
-  active: 0 | 1;
+  active: boolean;
   created_at: string;
 }
 
