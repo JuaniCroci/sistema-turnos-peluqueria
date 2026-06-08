@@ -18,6 +18,8 @@ const registerSchema = z.object({
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').max(200),
 });
 
+const callbackUrlPattern = z.string().startsWith('/').max(500);
+
 export interface RegisterState {
   error: string | null;
   fieldErrors: Partial<Record<'email' | 'username' | 'password', string>>;
@@ -48,6 +50,8 @@ export const registerAction = async (
   }
 
   const { email, username, password } = parsed.data;
+  const rawCallbackUrl = String(formData.get('callbackUrl') ?? '').trim();
+  const callbackUrl = callbackUrlPattern.safeParse(rawCallbackUrl).data;
 
   if (findUserByEmail(email)) {
     return { error: 'El email ya está registrado', fieldErrors: {} };
@@ -81,7 +85,7 @@ export const registerAction = async (
       };
     }
 
-    redirect('/');
+    redirect(callbackUrl ?? '/');
   } catch (error) {
     if (error instanceof AuthError) {
       return {

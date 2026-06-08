@@ -8,10 +8,15 @@ export const metadata = {
   title: 'Crear cuenta · Peluquería',
 };
 
-export default async function RegisterPage() {
+interface RegisterPageProps {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}
+
+export default async function RegisterPage({ searchParams }: RegisterPageProps) {
+  const { callbackUrl } = await searchParams;
   const session = await auth();
   if (session?.user) {
-    redirect('/');
+    redirect(callbackUrl && callbackUrl.startsWith('/') ? callbackUrl : '/');
   }
 
   return (
@@ -23,7 +28,7 @@ export default async function RegisterPage() {
             Registrate para reservar turnos y ver tu historial. La cuenta se crea como cliente.
           </p>
         </header>
-        <RegisterForm />
+        <RegisterForm callbackUrl={callbackUrl} />
       </Card>
     </div>
   );

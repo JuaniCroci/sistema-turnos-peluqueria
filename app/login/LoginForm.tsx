@@ -24,6 +24,10 @@ export const LoginForm = () => {
 
   return (
     <form action={formAction} className={styles.form} noValidate>
+      {callbackUrl && (
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
+      )}
+
       {registered ? (
         <div className={styles.success}>
           <CheckCircle2 size={16} className={styles.errorIcon} aria-hidden="true" />

@@ -35,7 +35,7 @@ export async function DELETE(
     const { slug } = await params;
     const id = Number(slug);
     if (!Number.isFinite(id)) {
-      return errorResponse('VALIDATION_ERROR', 'El ID debe ser un numero');
+      return errorResponse('VALIDATION_ERROR', 'ID invalido');
     }
 
     const category = findCategoryById(id);

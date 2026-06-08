@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Calendar, Clock, XCircle, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/Badge/Badge';
 import { Button } from '@/components/Button/Button';
@@ -15,7 +16,12 @@ const statusConfig: Record<string, { tone: 'warning' | 'success' | 'neutral' | '
   completed: { tone: 'info', label: 'Completado' },
 };
 
+const getStatusConfig = (status: string) => {
+  return statusConfig[status] ?? { tone: 'neutral' as const, label: status };
+};
+
 export default function MyAppointmentsPage() {
+  const router = useRouter();
   const [appointments, setAppointments] = useState<AppointmentAdminRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +101,7 @@ export default function MyAppointmentsPage() {
             <Calendar size={48} className={styles.emptyIcon} aria-hidden="true" />
             <p className={styles.emptyTitle}>Sin turnos</p>
             <p className={styles.emptyDesc}>Todavia no reservaste ningun turno.</p>
-            <Button onClick={() => window.location.href = '/mis-turnos/nuevo'}>
+            <Button onClick={() => router.push('/mis-turnos/nuevo')}>
               Reservar turno
             </Button>
           </div>
@@ -103,7 +109,7 @@ export default function MyAppointmentsPage() {
           <>
             <div className={styles.list}>
               {appointments.map((apt) => {
-                const cfg = statusConfig[apt.status]!;
+                const cfg = getStatusConfig(apt.status);
                 const canCancel = apt.status === 'pending' || apt.status === 'confirmed';
                 return (
                   <div key={apt.id} className={`${styles.card} ${apt.status === 'cancelled' ? styles.cancelledCard : ''}`}>

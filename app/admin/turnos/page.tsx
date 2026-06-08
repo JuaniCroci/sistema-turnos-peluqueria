@@ -23,6 +23,10 @@ const statusConfig: Record<string, { tone: 'warning' | 'success' | 'neutral' | '
   completed: { tone: 'info', label: 'Completado' },
 };
 
+const getStatusConfig = (status: string) => {
+  return statusConfig[status] ?? { tone: 'neutral' as const, label: status };
+};
+
 export default function AdminAppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentAdminRow[]>([]);
   const [users, setUsers] = useState<UserOption[]>([]);
@@ -195,7 +199,7 @@ export default function AdminAppointmentsPage() {
                         </td>
                       </tr>
                     ) : appointments.map((apt) => {
-                      const cfg = statusConfig[apt.status]!;
+                      const cfg = getStatusConfig(apt.status);
                       const isLoading = changingStatus?.id === apt.id;
 
                       return (

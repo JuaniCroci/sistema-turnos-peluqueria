@@ -11,6 +11,13 @@ const patchSchema = z.object({
 
 const CLIENT_ALLOWED: AppointmentStatus[] = ['cancelled'];
 
+const ALLOWED_TRANSITIONS: Record<AppointmentStatus, AppointmentStatus[]> = {
+  pending: ['confirmed', 'cancelled'],
+  confirmed: ['completed', 'cancelled'],
+  cancelled: ['pending'],
+  completed: [],
+};
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -56,8 +63,12 @@ export async function PATCH(
       return errorResponse('FORBIDDEN', 'Solo puedes cancelar tus turnos');
     }
 
-    if (!isAdmin && newStatus === 'cancelled' && appointment.status === 'cancelled') {
-      return errorResponse('VALIDATION_ERROR', 'El turno ya esta cancelado');
+    const allowedTransitions = ALLOWED_TRANSITIONS[appointment.status];
+    if (!allowedTransitions.includes(newStatus)) {
+      return errorResponse(
+        'VALIDATION_ERROR',
+        `No se puede cambiar de "${appointment.status}" a "${newStatus}"`,
+      );
     }
 
     updateAppointmentStatus(id, newStatus);

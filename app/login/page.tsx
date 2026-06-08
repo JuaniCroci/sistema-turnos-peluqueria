@@ -1,6 +1,8 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Card } from '@/components/Card/Card';
+import { Spinner } from '@/components/Spinner/Spinner';
 import { auth } from '@/lib/auth';
 import { LoginForm } from './LoginForm';
 import styles from '../auth.module.css';
@@ -29,7 +31,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Ingresá con tu email y contraseña para reservar turnos y ver tu historial.
           </p>
         </header>
-        <LoginForm />
+        <Suspense fallback={<Spinner />}>
+          <LoginForm />
+        </Suspense>
       </Card>
     </div>
   );

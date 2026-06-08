@@ -11,11 +11,18 @@ import styles from '../auth.module.css';
 
 const INITIAL_STATE: RegisterState = { error: null, fieldErrors: {} };
 
-export const RegisterForm = () => {
+interface RegisterFormProps {
+  callbackUrl?: string;
+}
+
+export const RegisterForm = ({ callbackUrl }: RegisterFormProps) => {
   const [state, formAction, isPending] = useActionState(registerAction, INITIAL_STATE);
 
   return (
     <form action={formAction} className={styles.form} noValidate>
+      {callbackUrl && (
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
+      )}
       {state.error ? (
         <div className={styles.error} role="alert">
           <AlertCircle size={16} className={styles.errorIcon} aria-hidden="true" />

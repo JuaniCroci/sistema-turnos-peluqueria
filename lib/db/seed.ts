@@ -51,7 +51,9 @@ export const seedIfEmpty = (db: Database.Database): void => {
      VALUES (?, ?, ?, ?, ?, 1)`,
   );
 
+  // admin@barberia.test / admin123
   const adminHash = '$2b$10$HrkvNaLOXV0PuSw1Mz0Y8.QZcExRrrEZNWPVN8eV.vu8vUTRrfS4m';
+  // juani@test.com / 1234
   const clientHash = '$2b$10$IaiLUNkIj3n0jL2c5l8GdewXpzk0daJ8M53iE1oQqRVtaECQEZRdG';
 
   db.exec('BEGIN');

@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: ServiceDetailPageProps): Prom
   if (!Number.isFinite(id)) return { title: 'Servicio no encontrado' };
 
   const service = findServiceById(id);
-  if (!service) return { title: 'Servicio no encontrado' };
+  if (!service || !service.active) return { title: 'Servicio no encontrado' };
 
   return {
     title: `${service.name} · Sistema de Turnos — Peluquería`,

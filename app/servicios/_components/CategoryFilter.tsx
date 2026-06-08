@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { SlidersHorizontal } from 'lucide-react';
 import styles from '../ServicesList.module.css';
 
@@ -17,6 +18,8 @@ interface CategoryFilterProps {
 }
 
 export const CategoryFilter = ({ categories, current }: CategoryFilterProps) => {
+  const router = useRouter();
+
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const form = (e.target as HTMLElement).closest('form');
@@ -27,11 +30,11 @@ export const CategoryFilter = ({ categories, current }: CategoryFilterProps) => 
           if (e.target.value) params.set('category', e.target.value);
           if (qInput.value) params.set('q', qInput.value);
           const qs = params.toString();
-          window.location.href = `/servicios${qs ? `?${qs}` : ''}`;
+          router.push(`/servicios${qs ? `?${qs}` : ''}`);
         }
       }
     },
-    [],
+    [router],
   );
 
   return (

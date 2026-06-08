@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar, Clock, CheckCircle, AlertCircle, Scissors } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
+import { Spinner } from '@/components/Spinner/Spinner';
 import { formatDuration, formatPrice } from '@/lib/utils/format';
 import type { Service } from '@/lib/types';
 import styles from './NewAppointment.module.css';
 
-export default function NewAppointmentPage() {
+function NewAppointmentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedServiceId = searchParams.get('servicio');
@@ -202,5 +203,23 @@ export default function NewAppointmentPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function NewAppointmentPage() {
+  return (
+    <Suspense fallback={
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Reservar turno</h1>
+            <p className={styles.subtitle}>Cargando...</p>
+          </div>
+          <Spinner />
+        </div>
+      </div>
+    }>
+      <NewAppointmentForm />
+    </Suspense>
   );
 }

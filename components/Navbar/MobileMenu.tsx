@@ -2,11 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { X, LogIn, UserPlus, Calendar, LayoutDashboard, CalendarPlus } from 'lucide-react';
 import { LogoutButton } from './LogoutButton';
 import type { NavUser } from './Navbar';
 import styles from './MobileMenu.module.css';
+
+const isActivePath = (pathname: string, href: string): boolean => {
+  if (href === '/') {
+    return pathname === '/';
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+};
 
 interface MobileMenuProps {
   open: boolean;
@@ -15,6 +23,7 @@ interface MobileMenuProps {
 }
 
 export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -75,19 +84,35 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
           </button>
         </div>
         <nav className={styles.nav}>
-          <Link href="/servicios" className={styles.link} onClick={onClose}>
+          <Link
+            href="/servicios"
+            className={[styles.link, isActivePath(pathname, '/servicios') ? styles.active : ''].join(' ')}
+            onClick={onClose}
+          >
             <ScissorsIcon /> Servicios
           </Link>
           {isAuthenticated ? (
             <>
-              <Link href="/mis-turnos" className={styles.link} onClick={onClose}>
+              <Link
+                href="/mis-turnos"
+                className={[styles.link, isActivePath(pathname, '/mis-turnos') ? styles.active : ''].join(' ')}
+                onClick={onClose}
+              >
                 <Calendar /> Mis turnos
               </Link>
-              <Link href="/mis-turnos/nuevo" className={styles.link} onClick={onClose}>
+              <Link
+                href="/mis-turnos/nuevo"
+                className={[styles.link, isActivePath(pathname, '/mis-turnos/nuevo') ? styles.active : ''].join(' ')}
+                onClick={onClose}
+              >
                 <CalendarPlus /> Reservar
               </Link>
               {isAdmin ? (
-                <Link href="/admin/servicios" className={styles.link} onClick={onClose}>
+                <Link
+                  href="/admin/servicios"
+                  className={[styles.link, isActivePath(pathname, '/admin') ? styles.active : ''].join(' ')}
+                  onClick={onClose}
+                >
                   <LayoutDashboard /> Panel admin
                 </Link>
               ) : null}
@@ -95,10 +120,18 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
             </>
           ) : (
             <>
-              <Link href="/login" className={styles.link} onClick={onClose}>
+              <Link
+                href="/login"
+                className={[styles.link, isActivePath(pathname, '/login') ? styles.active : ''].join(' ')}
+                onClick={onClose}
+              >
                 <LogIn /> Ingresar
               </Link>
-              <Link href="/register" className={styles.link} onClick={onClose}>
+              <Link
+                href="/register"
+                className={[styles.link, isActivePath(pathname, '/register') ? styles.active : ''].join(' ')}
+                onClick={onClose}
+              >
                 <UserPlus /> Registrarse
               </Link>
             </>
