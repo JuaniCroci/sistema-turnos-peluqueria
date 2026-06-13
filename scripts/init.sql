@@ -32,11 +32,12 @@ CREATE TABLE IF NOT EXISTS services (
 
 CREATE TABLE IF NOT EXISTS appointments (
   id             SERIAL PRIMARY KEY,
-  user_id        INTEGER NOT NULL REFERENCES users(id),
+  user_id        INTEGER REFERENCES users(id),
   service_id     INTEGER NOT NULL REFERENCES services(id),
   appointment_at TIMESTAMPTZ NOT NULL,
   status         TEXT NOT NULL CHECK(status IN ('pending', 'confirmed', 'cancelled', 'completed')) DEFAULT 'pending',
   notes          TEXT,
+  client_name    TEXT,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -47,6 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_services_active     ON services(active);
 CREATE INDEX IF NOT EXISTS idx_appointments_user   ON appointments(user_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_date   ON appointments(appointment_at);
 CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
+CREATE INDEX IF NOT EXISTS idx_appointments_client_name ON appointments(client_name);
 
 -- Previene dos turnos activos (pending/confirmed) en el mismo horario
 CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_unique_active_slot

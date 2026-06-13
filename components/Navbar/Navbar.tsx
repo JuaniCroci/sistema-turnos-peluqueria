@@ -66,35 +66,26 @@ export const Navbar = ({ user }: NavbarProps) => {
                   Turnos agendados
                 </Link>
               ) : (
-                <Link
-                  href="/mis-turnos"
-                  className={[
-                    styles.navLink,
-                    isActivePath(pathname, '/mis-turnos') ? styles.navLinkActive : '',
-                  ].join(' ')}
-                >
-                  Mis turnos
-                </Link>
-              )}
-              {isAdmin ? (
-                <Link
-                  href="/admin/turnos"
-                  className={[
-                    styles.navLink,
-                  ].join(' ')}
-                >
-                  Agregar turno
-                </Link>
-              ) : (
-                <Link
-                  href="/mis-turnos/nuevo"
-                  className={[
-                    styles.navLink,
-                    isActivePath(pathname, '/mis-turnos/nuevo') ? styles.navLinkActive : '',
-                  ].join(' ')}
-                >
-                  Reservar
-                </Link>
+                <>
+                  <Link
+                    href="/mis-turnos"
+                    className={[
+                      styles.navLink,
+                      isActivePath(pathname, '/mis-turnos') ? styles.navLinkActive : '',
+                    ].join(' ')}
+                  >
+                    Mis turnos
+                  </Link>
+                  <Link
+                    href="/mis-turnos/nuevo"
+                    className={[
+                      styles.navLink,
+                      isActivePath(pathname, '/mis-turnos/nuevo') ? styles.navLinkActive : '',
+                    ].join(' ')}
+                  >
+                    Reservar
+                  </Link>
+                </>
               )}
               <LogoutButton variant="desktop" />
             </>

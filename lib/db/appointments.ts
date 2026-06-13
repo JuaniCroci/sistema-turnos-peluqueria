@@ -2,6 +2,7 @@ import { cache } from 'react';
 import { getDb } from './connection';
 import { flattenRow } from './flatten';
 import type { Appointment, AppointmentStatus } from '@/lib/types';
+import type { Service } from '@/lib/types';
 
 export interface AppointmentRow extends Appointment {
   service_name: string;
@@ -100,10 +101,12 @@ export const findAppointmentById = cache(async (id: number): Promise<Appointment
 });
 
 export interface CreateAppointmentInput {
-  user_id: number;
+  user_id: number | null;
   service_id: number;
   appointment_at: string;
   notes?: string;
+  client_name?: string | null;
+  skipPastCheck?: boolean;
 }
 
 export const hasActiveAppointmentAt = async (appointmentAt: string, excludeId?: number): Promise<boolean> => {
@@ -125,7 +128,7 @@ export const hasActiveAppointmentAt = async (appointmentAt: string, excludeId?: 
 
 export const createAppointment = async (input: CreateAppointmentInput): Promise<Appointment> => {
   const appointmentAt = input.appointment_at;
-  if (new Date(appointmentAt) <= new Date()) {
+  if (!input.skipPastCheck && new Date(appointmentAt) <= new Date()) {
     throw new Error('No se puede reservar un turno en el pasado');
   }
 
@@ -141,6 +144,7 @@ export const createAppointment = async (input: CreateAppointmentInput): Promise<
       service_id: input.service_id,
       appointment_at: appointmentAt,
       notes: input.notes ?? null,
+      client_name: input.client_name ?? null,
       status: 'pending',
     })
     .select('*')
@@ -148,6 +152,43 @@ export const createAppointment = async (input: CreateAppointmentInput): Promise<
 
   if (error) throw error;
   return data as Appointment;
+};
+
+export const getOccupiedSlots = async (date: string): Promise<string[]> => {
+  const db = getDb();
+
+  const { data, error } = await db
+    .from('appointments')
+    .select(`
+      appointment_at,
+      services:service_id (duration_minutes)
+    `)
+    .gte('appointment_at', `${date}T00:00:00`)
+    .lt('appointment_at', `${date}T23:59:59`)
+    .in('status', ['pending', 'confirmed']);
+
+  if (error) throw error;
+
+  const occupied = new Set<string>();
+
+  for (const row of data ?? []) {
+    const r = row as Record<string, unknown>;
+    const aptAt = r.appointment_at as string;
+    const svc = r.services as { duration_minutes: number } | null;
+
+    const aptDate = new Date(aptAt);
+    const startMinutes = aptDate.getHours() * 60 + aptDate.getMinutes();
+    const duration = svc?.duration_minutes ?? 60;
+    const endMinutes = startMinutes + duration;
+
+    for (let m = startMinutes; m < endMinutes; m += 30) {
+      const h = Math.floor(m / 60);
+      const min = m % 60;
+      occupied.add(`${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+    }
+  }
+
+  return [...occupied].sort();
 };
 
 export const updateAppointmentStatus = async (id: number, status: AppointmentStatus): Promise<void> => {

@@ -412,6 +412,12 @@
   cursor: pointer;
 }
 
+.fieldHint {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  line-height: 1.4;
+}
+
 .formError {
   display: flex;
   align-items: center;

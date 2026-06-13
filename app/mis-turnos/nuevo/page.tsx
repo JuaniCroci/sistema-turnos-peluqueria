@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar, Clock, CheckCircle, AlertCircle, Scissors } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
@@ -10,6 +10,21 @@ import { formatDuration, formatPrice } from '@/lib/utils/format';
 import type { Service } from '@/lib/types';
 import styles from './NewAppointment.module.css';
 
+const TIME_SLOTS = Array.from({ length: 23 }, (_, i) => {
+  const h = Math.floor((i * 30 + 540) / 60);
+  const m = (i * 30 + 540) % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+});
+
+function getTodayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getCurrentTimeMinutes(): number {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
 function NewAppointmentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,11 +33,16 @@ function NewAppointmentForm() {
   const [services, setServices] = useState<Service[]>([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const [serviceId, setServiceId] = useState(preselectedServiceId || '');
-  const [appointmentAt, setAppointmentAt] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [occupiedSlots, setOccupiedSlots] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const todayStr = useMemo(getTodayStr, []);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -40,11 +60,47 @@ function NewAppointmentForm() {
     fetchServices();
   }, []);
 
+  const fetchOccupiedSlots = useCallback(async (dateStr: string) => {
+    setLoadingSlots(true);
+    try {
+      const res = await fetch(`/api/appointments/slots?date=${dateStr}`);
+      if (!res.ok) throw new Error('Error al consultar horarios');
+      const json = await res.json();
+      setOccupiedSlots(json.slots ?? []);
+    } catch {
+      setOccupiedSlots([]);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (date) {
+      setTime('');
+      fetchOccupiedSlots(date);
+    } else {
+      setOccupiedSlots([]);
+    }
+  }, [date, fetchOccupiedSlots]);
+
   const selectedService = services.find((s) => String(s.id) === serviceId);
 
-  const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
-  const minDateStr = minDate.toISOString().slice(0, 16);
+  const availableSlots = useMemo(() => {
+    const isToday = date === todayStr;
+    const currentMinutes = getCurrentTimeMinutes();
+
+    return TIME_SLOTS.filter((slot) => {
+      if (occupiedSlots.includes(slot)) return false;
+
+      if (isToday) {
+        const [hStr, mStr] = slot.split(':');
+        const slotMinutes = Number(hStr) * 60 + Number(mStr);
+        if (slotMinutes <= currentMinutes) return false;
+      }
+
+      return true;
+    });
+  }, [date, todayStr, occupiedSlots]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,14 +110,16 @@ function NewAppointmentForm() {
       setError('Selecciona un servicio');
       return;
     }
-    if (!appointmentAt) {
-      setError('Selecciona fecha y hora');
+    if (!date) {
+      setError('Selecciona una fecha');
       return;
     }
-    if (new Date(appointmentAt) <= new Date()) {
-      setError('La fecha debe ser futura');
+    if (!time) {
+      setError('Selecciona un horario');
       return;
     }
+
+    const appointmentAt = `${date}T${time}:00`;
 
     setSaving(true);
     try {
@@ -103,7 +161,7 @@ function NewAppointmentForm() {
                 <Button onClick={() => router.push('/mis-turnos')}>
                   Ver mis turnos
                 </Button>
-                <Button variant="ghost" onClick={() => { setSuccess(false); setServiceId(''); setAppointmentAt(''); setNotes(''); }}>
+                <Button variant="ghost" onClick={() => { setSuccess(false); setServiceId(''); setDate(''); setTime(''); setNotes(''); }}>
                   Reservar otro
                 </Button>
               </div>
@@ -158,18 +216,49 @@ function NewAppointmentForm() {
             )}
 
             <div className={styles.field}>
-              <label htmlFor="datetime">Fecha y hora</label>
+              <label htmlFor="date">Fecha</label>
               <input
-                id="datetime"
-                type="datetime-local"
-                value={appointmentAt}
-                onChange={(e) => setAppointmentAt(e.target.value)}
-                min={minDateStr}
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                min={todayStr}
                 className={styles.input}
               />
-              <span className={styles.fieldHint}>
-                Elegi una fecha y hora disponible. No puede haber otro turno en el mismo horario.
-              </span>
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="time">Horario</label>
+              {loadingSlots ? (
+                <p className={styles.fieldHint}>Consultando horarios disponibles...</p>
+              ) : (
+                <select
+                  id="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className={styles.select}
+                  disabled={!date}
+                >
+                  <option value="">
+                    {date ? 'Seleccionar horario...' : 'Primero seleccioná una fecha'}
+                  </option>
+                  {availableSlots.length === 0 && date && (
+                    <option value="" disabled>
+                      No hay horarios disponibles para esta fecha
+                    </option>
+                  )}
+                  {availableSlots.map((slot) => (
+                    <option key={slot} value={slot}>
+                      {slot} hs
+                    </option>
+                  ))}
+                </select>
+              )}
+              {date && availableSlots.length > 0 && (
+                <span className={styles.fieldHint}>
+                  Se muestran solo los horarios libres. {date === todayStr ? 'Hoy solo horarios futuros.' : ''}
+                </span>
+              )}
             </div>
 
             <div className={styles.field}>

@@ -102,30 +102,22 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
                   <Calendar /> Turnos agendados
                 </Link>
               ) : (
-                <Link
-                  href="/mis-turnos"
-                  className={[styles.link, isActivePath(pathname, '/mis-turnos') ? styles.active : ''].join(' ')}
-                  onClick={onClose}
-                >
-                  <Calendar /> Mis turnos
-                </Link>
-              )}
-              {isAdmin ? (
-                <Link
-                  href="/admin/turnos"
-                  className={[styles.link].join(' ')}
-                  onClick={onClose}
-                >
-                  <CalendarPlus /> Agregar turno
-                </Link>
-              ) : (
-                <Link
-                  href="/mis-turnos/nuevo"
-                  className={[styles.link, isActivePath(pathname, '/mis-turnos/nuevo') ? styles.active : ''].join(' ')}
-                  onClick={onClose}
-                >
-                  <CalendarPlus /> Reservar
-                </Link>
+                <>
+                  <Link
+                    href="/mis-turnos"
+                    className={[styles.link, isActivePath(pathname, '/mis-turnos') ? styles.active : ''].join(' ')}
+                    onClick={onClose}
+                  >
+                    <Calendar /> Mis turnos
+                  </Link>
+                  <Link
+                    href="/mis-turnos/nuevo"
+                    className={[styles.link, isActivePath(pathname, '/mis-turnos/nuevo') ? styles.active : ''].join(' ')}
+                    onClick={onClose}
+                  >
+                    <CalendarPlus /> Reservar
+                  </Link>
+                </>
               )}
               <LogoutButton variant="mobile" />
             </>

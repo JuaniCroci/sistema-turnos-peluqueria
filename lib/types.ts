@@ -30,11 +30,12 @@ export type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'complet
 
 export interface Appointment {
   id: number;
-  user_id: number;
+  user_id: number | null;
   service_id: number;
   appointment_at: string;
   status: AppointmentStatus;
   notes: string | null;
+  client_name: string | null;
   created_at: string;
 }
 

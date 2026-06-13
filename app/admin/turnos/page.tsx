@@ -9,12 +9,6 @@ import type { AppointmentAdminRow } from '@/lib/db/appointments';
 import type { AppointmentStatus } from '@/lib/types';
 import styles from './AdminAppointments.module.css';
 
-interface UserOption {
-  id: number;
-  email: string;
-  username: string;
-}
-
 interface Service {
   id: number;
   category_id: number;
@@ -25,7 +19,7 @@ interface Service {
 }
 
 interface FormState {
-  user_id: string;
+  client_name: string;
   service_id: string;
   date: string;
   time: string;
@@ -36,8 +30,15 @@ interface FormState {
 
 const DAYS_TO_SHOW = 5;
 const HOURS = Array.from({ length: 11 }, (_, i) => i + 9);
+
+const TIME_SLOTS = Array.from({ length: 23 }, (_, i) => {
+  const h = Math.floor((i * 30 + 540) / 60);
+  const m = (i * 30 + 540) % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+});
+
 const EMPTY_FORM: FormState = {
-  user_id: '',
+  client_name: '',
   service_id: '',
   date: '',
   time: '',
@@ -94,7 +95,6 @@ function parseHour(timeStr: string): number {
 export default function AdminAppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentAdminRow[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  const [users, setUsers] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -112,7 +112,7 @@ export default function AdminAppointmentsPage() {
   const fetchAppointments = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ from: fromDate, to: toDate, limit: '100' } as Record<string, string>);
+      const params = new URLSearchParams({ from: fromDate, to: `${toDate}T23:59:59`, limit: '100' } as Record<string, string>);
       const res = await fetch(`/api/appointments?${params}`);
       if (!res.ok) throw new Error('Error al cargar turnos');
       const json = await res.json();
@@ -135,26 +135,14 @@ export default function AdminAppointmentsPage() {
     }
   }, []);
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      const res = await fetch('/api/users');
-      if (!res.ok) return;
-      const json = await res.json();
-      setUsers(json.data ?? []);
-    } catch {
-      // silencioso
-    }
-  }, []);
-
   useEffect(() => {
     fetchAppointments();
     fetchServices();
-    fetchUsers();
-  }, [fetchAppointments, fetchServices, fetchUsers]);
+  }, [fetchAppointments, fetchServices]);
 
   const openForm = (date: string, time: string) => {
     setForm({
-      user_id: '',
+      client_name: '',
       service_id: '',
       date,
       time,
@@ -175,7 +163,7 @@ export default function AdminAppointmentsPage() {
     e.preventDefault();
     setFormError(null);
 
-    if (!form.user_id || !form.service_id || !form.date || !form.time) {
+    if (!form.service_id || !form.date || !form.time) {
       setFormError('Completá todos los campos requeridos');
       return;
     }
@@ -190,7 +178,7 @@ export default function AdminAppointmentsPage() {
         body: JSON.stringify({
           service_id: Number(form.service_id),
           appointment_at: appointmentAt,
-          user_id: Number(form.user_id),
+          client_name: form.client_name.trim() || undefined,
           notes: form.notes.trim() || undefined,
         }),
       });
@@ -314,7 +302,7 @@ export default function AdminAppointmentsPage() {
                                   <Badge tone={cfg.tone}>{cfg.label}</Badge>
                                 </div>
                                 <div className={styles.apptClient}>
-                                  {apt.user_username || apt.user_email}
+                                  {apt.client_name ?? apt.user_username ?? apt.user_email ?? 'Cliente sin cuenta'}
                                 </div>
                                 <div className={styles.apptMeta}>
                                   <span>{formatTime(apt.appointment_at)}</span>
@@ -438,14 +426,18 @@ export default function AdminAppointmentsPage() {
 
               <div className={styles.field}>
                 <label htmlFor="form-time">Horario</label>
-                <input
+                <select
                   id="form-time"
-                  type="time"
                   value={form.time}
                   onChange={(e) => setForm({ ...form, time: e.target.value })}
-                  className={styles.input}
+                  className={styles.select}
                   required
-                />
+                >
+                  <option value="">Seleccionar horario...</option>
+                  {TIME_SLOTS.map((slot) => (
+                    <option key={slot} value={slot}>{slot}</option>
+                  ))}
+                </select>
               </div>
 
               <div className={styles.field}>
@@ -467,21 +459,18 @@ export default function AdminAppointmentsPage() {
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="form-user">Cliente</label>
-                <select
-                  id="form-user"
-                  value={form.user_id}
-                  onChange={(e) => setForm({ ...form, user_id: e.target.value })}
-                  className={styles.select}
-                  required
-                >
-                  <option value="">Seleccionar cliente...</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.username} ({u.email})
-                    </option>
-                  ))}
-                </select>
+                <label htmlFor="form-client">Nombre del cliente</label>
+                <input
+                  id="form-client"
+                  type="text"
+                  value={form.client_name}
+                  onChange={(e) => setForm({ ...form, client_name: e.target.value })}
+                  className={styles.input}
+                  placeholder="Ej: Juan Pérez"
+                />
+                <span className={styles.fieldHint}>
+                  Si el cliente no tiene cuenta en la app, ingresá su nombre acá
+                </span>
               </div>
 
               <div className={styles.field}>

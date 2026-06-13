@@ -18,6 +18,7 @@ const createSchema = z.object({
   service_id: z.number().int().positive('El servicio es requerido'),
   appointment_at: z.string().min(1, 'La fecha y hora son requeridas'),
   user_id: z.coerce.number().int().positive().optional(),
+  client_name: z.string().min(1).max(200).optional(),
   notes: z.string().max(500).optional(),
 });
 
@@ -90,23 +91,33 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const isAdmin = session.user.role === 'admin';
     const targetUserId = parsed.data.user_id;
-    if (targetUserId !== undefined) {
-      if (!isAdmin) {
-        return errorResponse('FORBIDDEN', 'Solo admin puede crear turnos para otros usuarios');
-      }
+    const clientName = parsed.data.client_name;
+
+    if (targetUserId !== undefined && !isAdmin) {
+      return errorResponse('FORBIDDEN', 'Solo admin puede crear turnos para otros usuarios');
+    }
+
+    if (isAdmin && targetUserId === undefined && !clientName) {
+      return errorResponse('VALIDATION_ERROR', 'Debes especificar un cliente registrado o un nombre');
+    }
+
+    if (!isAdmin && targetUserId !== undefined) {
+      return errorResponse('FORBIDDEN', 'No puedes asignar un turno a otro usuario');
     }
 
     const appointmentAt = parsed.data.appointment_at;
-    if (new Date(appointmentAt) <= new Date()) {
+    if (!isAdmin && new Date(appointmentAt) <= new Date()) {
       return errorResponse('VALIDATION_ERROR', 'No se puede reservar un turno en el pasado');
     }
 
     try {
       const appointment = await createAppointment({
-        user_id: targetUserId ?? Number(session.user.id),
+        user_id: targetUserId ?? null,
         service_id: parsed.data.service_id,
         appointment_at: appointmentAt,
         notes: parsed.data.notes,
+        client_name: clientName ?? null,
+        skipPastCheck: isAdmin,
       });
       return NextResponse.json({ data: appointment }, { status: 201 });
     } catch (e) {
