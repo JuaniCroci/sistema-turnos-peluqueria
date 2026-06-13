@@ -90,25 +90,42 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const isAdmin = session.user.role === 'admin';
+
+    if (!isAdmin) {
+      const appointmentAt = parsed.data.appointment_at;
+      if (new Date(appointmentAt) <= new Date()) {
+        return errorResponse('VALIDATION_ERROR', 'No se puede reservar un turno en el pasado');
+      }
+
+      try {
+        const appointment = await createAppointment({
+          user_id: Number(session.user.id),
+          service_id: parsed.data.service_id,
+          appointment_at: appointmentAt,
+          notes: parsed.data.notes,
+        });
+        return NextResponse.json({ data: appointment }, { status: 201 });
+      } catch (e) {
+        if (e instanceof Error && e.message.includes('Ya existe un turno')) {
+          return errorResponse('CONFLICT', e.message);
+        }
+        throw e;
+      }
+    }
+
+    // Admin: puede asignar a un usuario registrado (user_id) o walk-in (client_name)
     const targetUserId = parsed.data.user_id;
     const clientName = parsed.data.client_name;
 
-    if (targetUserId !== undefined && !isAdmin) {
-      return errorResponse('FORBIDDEN', 'Solo admin puede crear turnos para otros usuarios');
+    if (targetUserId !== undefined && clientName) {
+      return errorResponse('VALIDATION_ERROR', 'Elegi cliente registrado O nombre, no ambos');
     }
 
-    if (isAdmin && targetUserId === undefined && !clientName) {
+    if (targetUserId === undefined && !clientName) {
       return errorResponse('VALIDATION_ERROR', 'Debes especificar un cliente registrado o un nombre');
     }
 
-    if (!isAdmin && targetUserId !== undefined) {
-      return errorResponse('FORBIDDEN', 'No puedes asignar un turno a otro usuario');
-    }
-
     const appointmentAt = parsed.data.appointment_at;
-    if (!isAdmin && new Date(appointmentAt) <= new Date()) {
-      return errorResponse('VALIDATION_ERROR', 'No se puede reservar un turno en el pasado');
-    }
 
     try {
       const appointment = await createAppointment({
@@ -117,7 +134,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         appointment_at: appointmentAt,
         notes: parsed.data.notes,
         client_name: clientName ?? null,
-        skipPastCheck: isAdmin,
+        skipPastCheck: true,
       });
       return NextResponse.json({ data: appointment }, { status: 201 });
     } catch (e) {
