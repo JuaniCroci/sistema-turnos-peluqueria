@@ -92,7 +92,7 @@ function NewAppointmentForm() {
     return (
       <div className={styles.page}>
         <div className={styles.container}>
-          <Card padding="lg">
+          <Card padding="lg" variant="highlight">
             <div className={styles.successBox}>
               <CheckCircle size={48} color="var(--color-success)" aria-hidden="true" />
               <p className={styles.successTitle}>Turno reservado</p>
@@ -122,7 +122,7 @@ function NewAppointmentForm() {
           <p className={styles.subtitle}>Elegi servicio, fecha y hora</p>
         </div>
 
-        <Card padding="lg">
+        <Card padding="lg" variant="highlight">
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
               <label htmlFor="service">Servicio</label>

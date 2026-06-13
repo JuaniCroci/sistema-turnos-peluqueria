@@ -1,37 +1,43 @@
-/* Tokens semánticos — light minimalista (estilo Fresha/Stripe).
-   Acento: negro. Sin sombras, bordes hairline 1px.
-   Jerarquía por tipografía y espaciado, no por color. */
+/* Tokens semánticos — Peluquería Clásica (light cálido).
+   Acento principal: bronce (#c17f3b). Acento secundario: carbón peluquero (#2c2220).
+   Jerarquía por tipografía, espaciado y superficies cálidas.
+   Sin sombras, bordes hairline 1px con tinte marrón. */
 
 :root {
   color-scheme: light;
 
-  /* ----- Surfaces (light, jerarquía por oscuridad sutil) ----- */
-  --color-bg: #ffffff;
-  --color-surface: #fafafa;        /* neutral-50, secciones con fondo sutil */
-  --color-surface-2: #f5f5f5;      /* neutral-100, inputs y hover */
+  /* ----- Surfaces (cálidas, jerarquía por oscuridad sutil) ----- */
+  --color-bg: #fbfbf7;              /* crudo, como toalla limpia */
+  --color-surface: #f5f3ee;         /* madera clara */
+  --color-surface-2: #eeebe3;       /* superficie elevada, inputs, hover */
 
-  /* ----- Foreground ----- */
-  --color-fg: #0a0a0a;             /* neutral-950, casi negro */
-  --color-fg-muted: #575757;       /* WCAG AA compliant (> 5.5:1 on --color-bg) */
+  /* ----- Foreground (cálido) ----- */
+  --color-fg: #1a1612;              /* casi negro con tinte marrón */
+  --color-fg-muted: #6b6152;        /* marrón suave, 6.3:1 sobre --color-bg (AA) */
 
-  /* ----- Borders (hairline 1px) ----- */
-  --color-border: rgba(0, 0, 0, 0.08);
-  --color-border-strong: rgba(0, 0, 0, 0.16);
+  /* ----- Borders (hairline 1px, tinte marrón) ----- */
+  --color-border: rgba(60, 45, 30, 0.08);
+  --color-border-strong: rgba(60, 45, 30, 0.16);
 
-  /* ----- Acento: negro (sin color de marca) ----- */
-  --color-accent: #1f1a17;        /* carbon cálido, personalidad premium */
-  --color-accent-hover: #332b27;
+  /* ----- Acento principal: bronce / latón ----- */
+  --color-accent: #c17f3b;
+  --color-accent-hover: #a66e2e;
   --color-accent-fg: #ffffff;
-  --color-accent-soft: #525252;    /* neutral-600, links inline y focus */
-  --color-accent-brand: #c5a880;  /* bronce sutil para detalles estéticos */
-  --color-accent-brand-hover: #b4966e;
+  --color-accent-soft: #8a7a66;     /* links inline y focus */
 
-  /* ----- Semánticos (desaturados) ----- */
-  --color-danger: #dc2626;
-  --color-danger-hover: #b91c1c;
-  --color-success: #16a34a;
-  --color-warning: #ca8a04;
-  --color-info: #0284c7;
+  /* ----- Acento secundario: carbón peluquero ----- */
+  --color-accent-secondary: #2c2220;
+  --color-accent-secondary-hover: #3d302c;
+
+  /* ----- Semánticos (desaturados, cálidos) ----- */
+  --color-danger: #c0392b;          /* rojo barbería, apagado */
+  --color-danger-hover: #a33226;
+  --color-success: #4a7c59;         /* verde salvaje */
+  --color-success-hover: #3d6a4a;
+  --color-warning: #b8893a;         /* ámbar mostaza */
+  --color-warning-hover: #a07830;
+  --color-info: #3a7b9e;           /* azul acero lavado */
+  --color-info-hover: #2e6685;
 
   /* ----- Spacing (alias de open-props --size-*) ----- */
   --space-1: var(--size-1, 0.25rem);
@@ -54,11 +60,11 @@
   --radius-xl: 16px;
   --radius-pill: 9999px;
 
-  /* ----- Shadows (deshabilitados, bordes-only) ----- */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-  --shadow-focus: 0 0 0 3px rgba(10, 10, 10, 0.12);
+  /* ----- Shadows (tinte cálido, solo para focus y paneles modales) ----- */
+  --shadow-sm: 0 1px 2px 0 rgba(60, 45, 30, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(60, 45, 30, 0.08), 0 2px 4px -2px rgba(60, 45, 30, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(60, 45, 30, 0.04), 0 4px 6px -4px rgba(60, 45, 30, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(60, 45, 30, 0.12);
 
   /* ----- Tipografía ----- */
   --font-sans: var(--font-inter, 'Inter'), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
