@@ -55,35 +55,47 @@ export const Navbar = ({ user }: NavbarProps) => {
           </Link>
           {isAuthenticated ? (
             <>
-              <Link
-                href="/mis-turnos"
-                className={[
-                  styles.navLink,
-                  isActivePath(pathname, '/mis-turnos') ? styles.navLinkActive : '',
-                ].join(' ')}
-              >
-                Mis turnos
-              </Link>
-              <Link
-                href="/mis-turnos/nuevo"
-                className={[
-                  styles.navLink,
-                  isActivePath(pathname, '/mis-turnos/nuevo') ? styles.navLinkActive : '',
-                ].join(' ')}
-              >
-                Reservar
-              </Link>
               {isAdmin ? (
                 <Link
-                  href="/admin/servicios"
+                  href="/admin/turnos"
                   className={[
                     styles.navLink,
-                    isActivePath(pathname, '/admin') ? styles.navLinkActive : '',
+                    isActivePath(pathname, '/admin/turnos') ? styles.navLinkActive : '',
                   ].join(' ')}
                 >
-                  Panel admin
+                  Turnos agendados
                 </Link>
-              ) : null}
+              ) : (
+                <Link
+                  href="/mis-turnos"
+                  className={[
+                    styles.navLink,
+                    isActivePath(pathname, '/mis-turnos') ? styles.navLinkActive : '',
+                  ].join(' ')}
+                >
+                  Mis turnos
+                </Link>
+              )}
+              {isAdmin ? (
+                <Link
+                  href="/admin/turnos"
+                  className={[
+                    styles.navLink,
+                  ].join(' ')}
+                >
+                  Agregar turno
+                </Link>
+              ) : (
+                <Link
+                  href="/mis-turnos/nuevo"
+                  className={[
+                    styles.navLink,
+                    isActivePath(pathname, '/mis-turnos/nuevo') ? styles.navLinkActive : '',
+                  ].join(' ')}
+                >
+                  Reservar
+                </Link>
+              )}
               <LogoutButton variant="desktop" />
             </>
           ) : (

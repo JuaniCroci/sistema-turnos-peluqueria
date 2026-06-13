@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Calendar, Clock, UserCheck } from 'lucide-react';
+import { Calendar, Clock, UserCheck, Scissors, Tag, ListTodo } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import styles from './page.module.css';
 
@@ -12,6 +12,39 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const session = await auth();
   const isLoggedIn = Boolean(session?.user);
+  const isAdmin = session?.user?.role === 'admin';
+
+  if (isAdmin) {
+    return (
+      <main className={styles.root}>
+        <section className={styles.adminDashboard}>
+          <div className={styles.adminInner}>
+            <h1 className={styles.adminTitle}>Panel de administración</h1>
+            <p className={styles.adminSubtitle}>
+              Gestioná turnos, servicios y categorías desde un solo lugar.
+            </p>
+            <div className={styles.adminGrid}>
+              <Link href="/admin/turnos" className={styles.adminCard}>
+                <ListTodo size={24} aria-hidden="true" />
+                <span className={styles.adminCardTitle}>Turnos agendados</span>
+                <span className={styles.adminCardDesc}>Ver y gestionar turnos por día</span>
+              </Link>
+              <Link href="/admin/servicios" className={styles.adminCard}>
+                <Scissors size={24} aria-hidden="true" />
+                <span className={styles.adminCardTitle}>Servicios</span>
+                <span className={styles.adminCardDesc}>Administrar el catálogo de servicios</span>
+              </Link>
+              <Link href="/admin/categorias" className={styles.adminCard}>
+                <Tag size={24} aria-hidden="true" />
+                <span className={styles.adminCardTitle}>Categorías</span>
+                <span className={styles.adminCardDesc}>Organizar servicios por categoría</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className={styles.root}>

@@ -59,7 +59,7 @@ WHERE status IN ('pending', 'confirmed');
 
 INSERT INTO users (email, username, password_hash, role)
 VALUES
-  ('admin@barberia.test', 'admin', '$2b$10$HrkvNaLOXV0PuSw1Mz0Y8.QZcExRrrEZNWPVN8eV.vu8vUTRrfS4m', 'admin'),
+  ('admin@barberia.test', 'admin', '$2b$10$2f1x0MIXU8nW8a2SeYqwb.640NfcSezVNxBL.V7cTC3rwna3oP9mq', 'admin'),
   ('juani@test.com',      'juani', '$2b$10$IaiLUNkIj3n0jL2c5l8GdewXpzk0daJ8M53iE1oQqRVtaECQEZRdG', 'client')
 ON CONFLICT (email) DO NOTHING;
 

@@ -17,6 +17,7 @@ const listQuerySchema = z.object({
 const createSchema = z.object({
   service_id: z.number().int().positive('El servicio es requerido'),
   appointment_at: z.string().min(1, 'La fecha y hora son requeridas'),
+  user_id: z.coerce.number().int().positive().optional(),
   notes: z.string().max(500).optional(),
 });
 
@@ -87,6 +88,14 @@ export async function POST(request: Request): Promise<NextResponse> {
       return errorResponse('VALIDATION_ERROR', 'El servicio no esta disponible');
     }
 
+    const isAdmin = session.user.role === 'admin';
+    const targetUserId = parsed.data.user_id;
+    if (targetUserId !== undefined) {
+      if (!isAdmin) {
+        return errorResponse('FORBIDDEN', 'Solo admin puede crear turnos para otros usuarios');
+      }
+    }
+
     const appointmentAt = parsed.data.appointment_at;
     if (new Date(appointmentAt) <= new Date()) {
       return errorResponse('VALIDATION_ERROR', 'No se puede reservar un turno en el pasado');
@@ -94,7 +103,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     try {
       const appointment = await createAppointment({
-        user_id: Number(session.user.id),
+        user_id: targetUserId ?? Number(session.user.id),
         service_id: parsed.data.service_id,
         appointment_at: appointmentAt,
         notes: parsed.data.notes,

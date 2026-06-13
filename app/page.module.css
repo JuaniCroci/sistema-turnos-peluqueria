@@ -121,6 +121,72 @@
   flex-shrink: 0;
 }
 
+/* ----- Admin Dashboard ----- */
+.adminDashboard {
+  padding: var(--space-12) var(--space-4);
+  background: var(--color-bg);
+}
+
+.adminInner {
+  max-width: var(--container-default);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.adminTitle {
+  font-family: var(--font-display);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.03em;
+  color: var(--color-fg);
+  margin: 0;
+}
+
+.adminSubtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+.adminGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.adminCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--color-fg);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.adminCard:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
+}
+
+.adminCard svg {
+  color: var(--color-accent);
+}
+
+.adminCardTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--weight-semibold);
+}
+
+.adminCardDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+}
+
 /* ----- Responsive ----- */
 @media (max-width: 640px) {
   .hero {

@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AlertCircle, ChevronLeft, ChevronRight, Check, X, RotateCcw } from 'lucide-react';
+import { AlertCircle, Check, X, RotateCcw, Plus, Clock, Calendar } from 'lucide-react';
 import { Badge } from '@/components/Badge/Badge';
 import { Button } from '@/components/Button/Button';
-import { Card } from '@/components/Card/Card';
 import { formatLongDate, formatTime, formatPrice } from '@/lib/utils/format';
 import type { AppointmentAdminRow } from '@/lib/db/appointments';
 import type { AppointmentStatus } from '@/lib/types';
@@ -15,6 +14,37 @@ interface UserOption {
   email: string;
   username: string;
 }
+
+interface Service {
+  id: number;
+  category_id: number;
+  name: string;
+  duration_minutes: number;
+  price_cents: number;
+  active: boolean;
+}
+
+interface FormState {
+  user_id: string;
+  service_id: string;
+  date: string;
+  time: string;
+  notes: string;
+  slotDate: string;
+  slotTime: string;
+}
+
+const DAYS_TO_SHOW = 5;
+const HOURS = Array.from({ length: 11 }, (_, i) => i + 9);
+const EMPTY_FORM: FormState = {
+  user_id: '',
+  service_id: '',
+  date: '',
+  time: '',
+  notes: '',
+  slotDate: '',
+  slotTime: '',
+};
 
 const statusConfig: Record<string, { tone: 'warning' | 'success' | 'neutral' | 'danger' | 'info'; label: string }> = {
   pending: { tone: 'warning', label: 'Pendiente' },
@@ -27,46 +57,83 @@ const getStatusConfig = (status: string) => {
   return statusConfig[status] ?? { tone: 'neutral' as const, label: status };
 };
 
+function getDateString(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function getDayLabel(dateStr: string): string {
+  const todayStr = getDateString(new Date());
+  if (dateStr === todayStr) return 'Hoy';
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (dateStr === getDateString(tomorrow)) return 'Mañana';
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'short' });
+}
+
+function getDayShort(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric' });
+}
+
+function getDateDays(days: number): string[] {
+  const result: string[] = [];
+  const today = new Date();
+  for (let i = 0; i < days; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    result.push(getDateString(d));
+  }
+  return result;
+}
+
+function parseHour(timeStr: string): number {
+  return parseInt(timeStr.slice(0, 2), 10);
+}
+
 export default function AdminAppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentAdminRow[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [users, setUsers] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-
-  const [filterStatus, setFilterStatus] = useState('');
-  const [filterUserId, setFilterUserId] = useState('');
-  const [filterFrom, setFilterFrom] = useState('');
-  const [filterTo, setFilterTo] = useState('');
-
-  const resetPage = () => setPage(1);
-
-  const [changingStatus, setChangingStatus] = useState<{ id: number; status: AppointmentStatus } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [changingStatus, setChangingStatus] = useState<{ id: number; status: AppointmentStatus } | null>(null);
 
-  const fetchAppointments = useCallback(async (p: number) => {
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const dates = getDateDays(DAYS_TO_SHOW);
+  const fromDate = dates[0];
+  const toDate = dates[dates.length - 1];
+
+  const fetchAppointments = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      params.set('page', String(p));
-      params.set('limit', '30');
-      if (filterStatus) params.set('status', filterStatus);
-      if (filterUserId) params.set('user_id', filterUserId);
-      if (filterFrom) params.set('from', filterFrom);
-      if (filterTo) params.set('to', filterTo);
-
+      const params = new URLSearchParams({ from: fromDate, to: toDate, limit: '100' } as Record<string, string>);
       const res = await fetch(`/api/appointments?${params}`);
       if (!res.ok) throw new Error('Error al cargar turnos');
       const json = await res.json();
       setAppointments(json.data ?? []);
-      setTotalPages(Math.max(1, Math.ceil((json.pagination?.total ?? 0) / (json.pagination?.limit ?? 30))));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
-  }, [filterStatus, filterUserId, filterFrom, filterTo]);
+  }, [fromDate, toDate]);
+
+  const fetchServices = useCallback(async () => {
+    try {
+      const res = await fetch('/api/services?limit=100');
+      if (!res.ok) return;
+      const json = await res.json();
+      setServices((json.data ?? []).filter((s: Service) => s.active));
+    } catch {
+      // silencioso
+    }
+  }, []);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -80,15 +147,69 @@ export default function AdminAppointmentsPage() {
   }, []);
 
   useEffect(() => {
+    fetchAppointments();
+    fetchServices();
     fetchUsers();
-  }, [fetchUsers]);
+  }, [fetchAppointments, fetchServices, fetchUsers]);
 
-  useEffect(() => {
-    fetchAppointments(page);
-  }, [fetchAppointments, page]);
+  const openForm = (date: string, time: string) => {
+    setForm({
+      user_id: '',
+      service_id: '',
+      date,
+      time,
+      notes: '',
+      slotDate: date,
+      slotTime: time,
+    });
+    setFormError(null);
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setForm(EMPTY_FORM);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+
+    if (!form.user_id || !form.service_id || !form.date || !form.time) {
+      setFormError('Completá todos los campos requeridos');
+      return;
+    }
+
+    const appointmentAt = `${form.date}T${form.time}:00`;
+
+    setSaving(true);
+    try {
+      const res = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: Number(form.service_id),
+          appointment_at: appointmentAt,
+          user_id: Number(form.user_id),
+          notes: form.notes.trim() || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error?.message ?? 'Error al crear turno');
+      }
+      closeForm();
+      await fetchAppointments();
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : 'Error desconocido');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleStatusChange = async (id: number, status: AppointmentStatus) => {
     setChangingStatus({ id, status });
+    setActionError(null);
     try {
       const res = await fetch(`/api/appointments/${id}/status`, {
         method: 'PATCH',
@@ -100,7 +221,7 @@ export default function AdminAppointmentsPage() {
         setActionError(json.error?.message ?? 'Error al actualizar');
         return;
       }
-      await fetchAppointments(page);
+      await fetchAppointments();
     } catch {
       setActionError('Error al actualizar turno');
     } finally {
@@ -108,203 +229,292 @@ export default function AdminAppointmentsPage() {
     }
   };
 
+  const getAppointmentsForDay = (dateStr: string): AppointmentAdminRow[] => {
+    return appointments
+      .filter((a) => a.appointment_at.startsWith(dateStr))
+      .sort((a, b) => a.appointment_at.localeCompare(b.appointment_at));
+  };
+
+  const isSlotOccupied = (dayApps: AppointmentAdminRow[], hour: number): boolean => {
+    return dayApps.some((a) => {
+      const aptHour = parseHour(a.appointment_at);
+      const duration = a.service_duration_minutes;
+      const endHour = aptHour + Math.ceil(duration / 60);
+      return hour >= aptHour && hour < endHour;
+    });
+  };
+
+  const getAppointmentForSlot = (dayApps: AppointmentAdminRow[], hour: number): AppointmentAdminRow | null => {
+    return dayApps.find((a) => parseHour(a.appointment_at) === hour) ?? null;
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
         <div className={styles.header}>
           <div>
-            <h1 className={styles.title}>Turnos</h1>
-            <p className={styles.subtitle}>Gestion de todas las reservas</p>
+            <h1 className={styles.title}>Turnos agendados</h1>
+            <p className={styles.subtitle}>Vista de los próximos 5 días</p>
           </div>
         </div>
 
-        <Card padding="md">
-          <div className={styles.filters}>
-            <div className={styles.filterField}>
-              <label htmlFor="filter-status">Estado</label>
-              <select id="filter-status" value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); resetPage(); }} className={styles.filterSelect}>
-                <option value="">Todos</option>
-                <option value="pending">Pendiente</option>
-                <option value="confirmed">Confirmado</option>
-                <option value="cancelled">Cancelado</option>
-                <option value="completed">Completado</option>
-              </select>
-            </div>
-
-            <div className={styles.filterField}>
-              <label htmlFor="filter-user">Cliente</label>
-              <select id="filter-user" value={filterUserId} onChange={(e) => { setFilterUserId(e.target.value); resetPage(); }} className={styles.filterSelect}>
-                <option value="">Todos</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>{u.email}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.filterField}>
-              <label htmlFor="filter-from">Desde</label>
-              <input id="filter-from" type="date" value={filterFrom} onChange={(e) => { setFilterFrom(e.target.value); resetPage(); }} className={styles.filterInput} />
-            </div>
-
-            <div className={styles.filterField}>
-              <label htmlFor="filter-to">Hasta</label>
-              <input id="filter-to" type="date" value={filterTo} onChange={(e) => { setFilterTo(e.target.value); resetPage(); }} className={styles.filterInput} />
-            </div>
-
-            {(filterStatus || filterUserId || filterFrom || filterTo) && (
-              <Button size="sm" variant="ghost" onClick={() => { setFilterStatus(''); setFilterUserId(''); setFilterFrom(''); setFilterTo(''); resetPage(); }}>
-                Limpiar filtros
-              </Button>
-            )}
-          </div>
-        </Card>
-
         {actionError && (
-          <div className={styles.errorBox}>
+          <div className={styles.errorBox} role="alert">
             <AlertCircle size={16} aria-hidden="true" />
-            {actionError}
+            <span>{actionError}</span>
+            <button className={styles.dismissBtn} onClick={() => setActionError(null)} aria-label="Cerrar">
+              <X size={14} />
+            </button>
           </div>
         )}
 
-        {loading && appointments.length === 0 ? (
+        {loading ? (
           <p className={styles.loading}>Cargando turnos...</p>
         ) : error ? (
-          <div className={styles.errorBox}>
+          <div className={styles.errorBox} role="alert">
             <AlertCircle size={16} aria-hidden="true" />
-            {error}
+            <span>{error}</span>
           </div>
         ) : (
           <>
-            <Card padding="none">
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Servicio</th>
-                      <th>Cliente</th>
-                      <th>Fecha</th>
-                      <th>Horario</th>
-                      <th>Monto</th>
-                      <th>Estado</th>
-                      <th className={styles.actionsCol}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {appointments.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className={styles.emptyRow}>
-                          No se encontraron turnos.
-                        </td>
-                      </tr>
-                    ) : appointments.map((apt) => {
-                      const cfg = getStatusConfig(apt.status);
-                      const isLoading = changingStatus?.id === apt.id;
+            <div className={styles.dayGrid}>
+              {dates.map((dateStr) => {
+                const dayApps = getAppointmentsForDay(dateStr);
+                return (
+                  <div key={dateStr} className={styles.dayColumn}>
+                    <div className={styles.dayHeader}>
+                      <span className={styles.dayLabel}>{getDayLabel(dateStr)}</span>
+                      <span className={styles.dayDate}>{getDayShort(dateStr)}</span>
+                    </div>
 
-                      return (
-                        <tr key={apt.id}>
-                          <td className={styles.serviceCell}>{apt.service_name}</td>
-                          <td className={styles.userCell}>{apt.user_email}</td>
-                          <td className={styles.dateCell}>{formatLongDate(apt.appointment_at)}</td>
-                          <td className={styles.dateCell}>{formatTime(apt.appointment_at)}</td>
-                          <td className={styles.dateCell}>{formatPrice(apt.service_price_cents)}</td>
-                          <td>
-                            <Badge tone={cfg.tone}>{cfg.label}</Badge>
-                          </td>
-                          <td className={styles.actionsCol}>
-                            {apt.status === 'pending' && (
-                              <div className={styles.rowActions}>
-                                <button
-                                  className={styles.actionBtnSuccess}
-                                  disabled={!!isLoading}
-                                  onClick={() => handleStatusChange(apt.id, 'confirmed')}
-                                  title="Confirmar"
-                                >
-                                  <Check size={12} aria-hidden="true" />
-                                  Confirmar
-                                </button>
-                                <button
-                                  className={styles.actionBtnDanger}
-                                  disabled={!!isLoading}
-                                  onClick={() => handleStatusChange(apt.id, 'cancelled')}
-                                  title="Cancelar"
-                                >
-                                  <X size={12} aria-hidden="true" />
-                                  Cancelar
-                                </button>
-                              </div>
-                            )}
-                            {apt.status === 'confirmed' && (
-                              <div className={styles.rowActions}>
-                                <button
-                                  className={styles.actionBtnSuccess}
-                                  disabled={!!isLoading}
-                                  onClick={() => handleStatusChange(apt.id, 'completed')}
-                                  title="Completar"
-                                >
-                                  <Check size={12} aria-hidden="true" />
-                                  Completar
-                                </button>
-                                <button
-                                  className={styles.actionBtnDanger}
-                                  disabled={!!isLoading}
-                                  onClick={() => handleStatusChange(apt.id, 'cancelled')}
-                                  title="Cancelar"
-                                >
-                                  <X size={12} aria-hidden="true" />
-                                  Cancelar
-                                </button>
-                              </div>
-                            )}
-                            {apt.status === 'cancelled' && (
-                              <div className={styles.rowActions}>
-                                <button
-                                  className={styles.actionBtn}
-                                  disabled={!!isLoading}
-                                  onClick={() => handleStatusChange(apt.id, 'pending')}
-                                  title="Reabrir"
-                                >
-                                  <RotateCcw size={12} aria-hidden="true" />
-                                  Reabrir
-                                </button>
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
+                    <div className={styles.timeline}>
+                      {HOURS.map((hour) => {
+                        const timeStr = `${String(hour).padStart(2, '0')}:00`;
+                        const occupied = isSlotOccupied(dayApps, hour);
+                        const apt = getAppointmentForSlot(dayApps, hour);
 
-            {totalPages > 1 && (
-              <nav className={styles.pagination} aria-label="Paginacion">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  iconLeft={<ChevronLeft size={14} />}
-                >
-                  Anterior
-                </Button>
-                <span className={styles.pageInfo}>
-                  Pagina {page} de {totalPages}
-                </span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={page >= totalPages}
-                  onClick={() => setPage((p) => p + 1)}
-                  iconRight={<ChevronRight size={14} />}
-                >
-                  Siguiente
-                </Button>
-              </nav>
-            )}
+                        if (occupied && apt) {
+                          const duration = apt.service_duration_minutes;
+                          const span = Math.max(1, Math.ceil(duration / 60));
+                          const cfg = getStatusConfig(apt.status);
+                          const isLoading = changingStatus?.id === apt.id;
+
+                          return (
+                            <div
+                              key={`${dateStr}-${hour}`}
+                              className={styles.appointmentSlot}
+                              style={{ gridRow: `span ${span}` }}
+                            >
+                              <div className={styles.apptTime}>
+                                {timeStr}
+                              </div>
+                              <div className={styles.apptCard}>
+                                <div className={styles.apptHeader}>
+                                  <span className={styles.apptService}>{apt.service_name}</span>
+                                  <Badge tone={cfg.tone}>{cfg.label}</Badge>
+                                </div>
+                                <div className={styles.apptClient}>
+                                  {apt.user_username || apt.user_email}
+                                </div>
+                                <div className={styles.apptMeta}>
+                                  <span>{formatTime(apt.appointment_at)}</span>
+                                  <span>{formatPrice(apt.service_price_cents)}</span>
+                                </div>
+                                <div className={styles.apptActions}>
+                                  {apt.status === 'pending' && (
+                                    <>
+                                      <button
+                                        className={styles.actionBtnSuccess}
+                                        disabled={!!isLoading}
+                                        onClick={() => handleStatusChange(apt.id, 'confirmed')}
+                                        title="Confirmar"
+                                      >
+                                        <Check size={12} aria-hidden="true" />
+                                        Confirmar
+                                      </button>
+                                      <button
+                                        className={styles.actionBtnDanger}
+                                        disabled={!!isLoading}
+                                        onClick={() => handleStatusChange(apt.id, 'cancelled')}
+                                        title="Cancelar"
+                                      >
+                                        <X size={12} aria-hidden="true" />
+                                        Cancelar
+                                      </button>
+                                    </>
+                                  )}
+                                  {apt.status === 'confirmed' && (
+                                    <>
+                                      <button
+                                        className={styles.actionBtnSuccess}
+                                        disabled={!!isLoading}
+                                        onClick={() => handleStatusChange(apt.id, 'completed')}
+                                        title="Completar"
+                                      >
+                                        <Check size={12} aria-hidden="true" />
+                                        Completar
+                                      </button>
+                                      <button
+                                        className={styles.actionBtnDanger}
+                                        disabled={!!isLoading}
+                                        onClick={() => handleStatusChange(apt.id, 'cancelled')}
+                                        title="Cancelar"
+                                      >
+                                        <X size={12} aria-hidden="true" />
+                                        Cancelar
+                                      </button>
+                                    </>
+                                  )}
+                                  {apt.status === 'cancelled' && (
+                                    <button
+                                      className={styles.actionBtn}
+                                      disabled={!!isLoading}
+                                      onClick={() => handleStatusChange(apt.id, 'pending')}
+                                      title="Reabrir"
+                                    >
+                                      <RotateCcw size={12} aria-hidden="true" />
+                                      Reabrir
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <button
+                            key={`${dateStr}-${hour}`}
+                            className={styles.emptySlot}
+                            onClick={() => openForm(dateStr, timeStr)}
+                            aria-label={`Agregar turno a las ${timeStr}`}
+                          >
+                            <span className={styles.emptyTime}>{timeStr}</span>
+                            <span className={styles.emptyPlus}>
+                              <Plus size={14} aria-hidden="true" />
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      className={styles.addDayButton}
+                      onClick={() => openForm(dateStr, '09:00')}
+                    >
+                      <Plus size={16} aria-hidden="true" />
+                      Agregar turno
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </>
         )}
       </div>
+
+      {showForm && (
+        <div className={styles.overlay} onClick={closeForm}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Agregar turno">
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Agregar turno</h2>
+              <button className={styles.modalClose} onClick={closeForm} aria-label="Cerrar">
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className={styles.modalForm}>
+              <div className={styles.field}>
+                <label htmlFor="form-date">Fecha</label>
+                <input
+                  id="form-date"
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                  className={styles.input}
+                  required
+                />
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="form-time">Horario</label>
+                <input
+                  id="form-time"
+                  type="time"
+                  value={form.time}
+                  onChange={(e) => setForm({ ...form, time: e.target.value })}
+                  className={styles.input}
+                  required
+                />
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="form-service">Servicio</label>
+                <select
+                  id="form-service"
+                  value={form.service_id}
+                  onChange={(e) => setForm({ ...form, service_id: e.target.value })}
+                  className={styles.select}
+                  required
+                >
+                  <option value="">Seleccionar servicio...</option>
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({formatPrice(s.price_cents)} · {s.duration_minutes} min)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="form-user">Cliente</label>
+                <select
+                  id="form-user"
+                  value={form.user_id}
+                  onChange={(e) => setForm({ ...form, user_id: e.target.value })}
+                  className={styles.select}
+                  required
+                >
+                  <option value="">Seleccionar cliente...</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.username} ({u.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="form-notes">Nota (opcional)</label>
+                <textarea
+                  id="form-notes"
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  className={styles.textarea}
+                  rows={2}
+                  placeholder="Alguna observación..."
+                />
+              </div>
+
+              {formError && (
+                <div className={styles.formError} role="alert">
+                  <AlertCircle size={14} aria-hidden="true" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              <div className={styles.modalActions}>
+                <Button type="submit" loading={saving}>
+                  Guardar turno
+                </Button>
+                <Button variant="ghost" onClick={closeForm} type="button">
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
