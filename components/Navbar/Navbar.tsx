@@ -63,7 +63,7 @@ export const Navbar = ({ user }: NavbarProps) => {
                     isActivePath(pathname, '/admin/turnos') ? styles.navLinkActive : '',
                   ].join(' ')}
                 >
-                  Turnos agendados
+                  Ver turnos
                 </Link>
               ) : (
                 <>

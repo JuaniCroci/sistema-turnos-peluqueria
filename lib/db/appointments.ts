@@ -2,7 +2,6 @@ import { cache } from 'react';
 import { getDb } from './connection';
 import { flattenRow } from './flatten';
 import type { Appointment, AppointmentStatus } from '@/lib/types';
-import type { Service } from '@/lib/types';
 
 export interface AppointmentRow extends Appointment {
   service_name: string;
@@ -43,11 +42,19 @@ const APPOINTMENT_SELECT = `
   users:user_id (email, username)
 `;
 
+const LIST_APPOINTMENT_SELECT = `
+  id, user_id, service_id, appointment_at, status, notes, created_at,
+  services:service_id (
+    name, duration_minutes, price_cents,
+    categories:category_id (name)
+  )
+`;
+
 export const findAppointments = cache(async (options: AppointmentListOptions): Promise<AppointmentListResult> => {
   const db = getDb();
 
   let countQuery = db.from('appointments').select('*', { count: 'exact', head: true });
-  let dataQuery = db.from('appointments').select(APPOINTMENT_SELECT, { count: 'exact' });
+  let dataQuery = db.from('appointments').select(LIST_APPOINTMENT_SELECT, { count: 'exact' });
 
   if (options.userId !== undefined) {
     countQuery = countQuery.eq('user_id', options.userId);
@@ -81,8 +88,26 @@ export const findAppointments = cache(async (options: AppointmentListOptions): P
 
   if (error) throw error;
 
+  const rows = (data ?? []).map((row) => flattenRow<AppointmentRow>(row as Record<string, unknown>));
+
+  const userIds = [...new Set(rows.map(a => a.user_id).filter((id): id is number => id !== null))];
+  const userMap = new Map<number, { email: string; username: string }>();
+
+  if (userIds.length > 0) {
+    const { data: users } = await db.from('users').select('id, email, username').in('id', userIds);
+    for (const u of (users ?? [])) {
+      userMap.set(u.id, u);
+    }
+  }
+
+  const result = rows.map(a => ({
+    ...a,
+    user_email: a.user_id ? userMap.get(a.user_id)?.email ?? '' : '',
+    user_username: a.user_id ? userMap.get(a.user_id)?.username ?? '' : '',
+  }));
+
   return {
-    data: (data ?? []).map((row) => flattenRow<AppointmentAdminRow>(row as Record<string, unknown>)),
+    data: result as AppointmentAdminRow[],
     pagination: { page: options.page, limit: options.limit, total },
   };
 });
