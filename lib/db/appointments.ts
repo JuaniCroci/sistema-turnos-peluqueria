@@ -162,16 +162,21 @@ export const createAppointment = async (input: CreateAppointmentInput): Promise<
   }
 
   const db = getDb();
+
+  const insertData: Record<string, unknown> = {
+    user_id: input.user_id,
+    service_id: input.service_id,
+    appointment_at: appointmentAt,
+    notes: input.notes ?? null,
+    status: 'pending',
+  };
+  if (input.client_name) {
+    insertData.client_name = input.client_name;
+  }
+
   const { data, error } = await db
     .from('appointments')
-    .insert({
-      user_id: input.user_id,
-      service_id: input.service_id,
-      appointment_at: appointmentAt,
-      notes: input.notes ?? null,
-      client_name: input.client_name ?? null,
-      status: 'pending',
-    })
+    .insert(insertData)
     .select('*')
     .single();
 
