@@ -34,20 +34,18 @@ export async function DELETE(
 
     const { slug } = await params;
     const id = Number(slug);
-    if (!Number.isFinite(id)) {
-      return errorResponse('VALIDATION_ERROR', 'ID invalido');
-    }
-
-    const category = await findCategoryById(id);
+    const category = Number.isFinite(id)
+      ? await findCategoryById(id)
+      : await findCategoryBySlug(slug);
     if (!category) {
       return errorResponse('NOT_FOUND', 'Categoria no encontrada');
     }
 
-    if (await categoryHasServices(id)) {
+    if (await categoryHasServices(category.id)) {
       return errorResponse('CONFLICT', 'No se puede eliminar una categoria con servicios asociados');
     }
 
-    await deleteCategoryById(id);
+    await deleteCategoryById(category.id);
     return NextResponse.json({}, { status: 200 });
   } catch {
     return errorResponse('INTERNAL_ERROR', 'Error al eliminar categoria');

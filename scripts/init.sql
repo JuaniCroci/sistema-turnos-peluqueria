@@ -48,6 +48,11 @@ CREATE INDEX IF NOT EXISTS idx_appointments_user   ON appointments(user_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_date   ON appointments(appointment_at);
 CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
 
+-- Previene dos turnos activos (pending/confirmed) en el mismo horario
+CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_unique_active_slot
+ON appointments (appointment_at)
+WHERE status IN ('pending', 'confirmed');
+
 -- =============================================================
 -- seed
 -- =============================================================

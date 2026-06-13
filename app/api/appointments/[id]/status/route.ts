@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { findAppointmentById, updateAppointmentStatus } from '@/lib/db/appointments';
+import { findAppointmentById, updateAppointmentStatus, hasActiveAppointmentAt } from '@/lib/db/appointments';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 import type { AppointmentStatus } from '@/lib/types';
 
@@ -71,8 +71,18 @@ export async function PATCH(
       );
     }
 
+    // Al reabrir un turno cancelado, verificar que el slot siga disponible
+    if (newStatus === 'pending' && appointment.status === 'cancelled') {
+      const slotTaken = await hasActiveAppointmentAt(appointment.appointment_at, id);
+      if (slotTaken) {
+        return errorResponse('CONFLICT', 'El horario ya fue ocupado por otro turno');
+      }
+    }
+
     await updateAppointmentStatus(id, newStatus);
-    const updated = await findAppointmentById(id);
+    // No llamar a findAppointmentById de nuevo: React.cache() devuelve
+    // el resultado memoizado de la llamada anterior (stale).
+    const updated = { ...appointment, status: newStatus };
 
     return NextResponse.json({ data: updated });
   } catch {
