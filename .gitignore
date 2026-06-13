@@ -19,6 +19,7 @@ pnpm-debug.log*
 .vscode/
 .idea/
 .DS_Store
+desktop.ini
 
 # next
 next-env.d.ts
