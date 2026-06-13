@@ -35,18 +35,18 @@ export interface AppointmentListResult {
 
 const APPOINTMENT_SELECT = `
   id, user_id, service_id, appointment_at, status, notes, created_at,
-  services:service_id (
+  service:service_id (
     name, duration_minutes, price_cents,
-    categories:category_id (name)
+    category:category_id (name)
   ),
-  users:user_id (email, username)
+  user:user_id (email, username)
 `;
 
 const LIST_APPOINTMENT_SELECT = `
   id, user_id, service_id, appointment_at, status, notes, created_at,
-  services:service_id (
+  service:service_id (
     name, duration_minutes, price_cents,
-    categories:category_id (name)
+    category:category_id (name)
   )
 `;
 
@@ -191,7 +191,7 @@ export const getOccupiedSlots = async (date: string): Promise<string[]> => {
     .from('appointments')
     .select(`
       appointment_at,
-      services:service_id (duration_minutes)
+      service:service_id (duration_minutes)
     `)
     .gte('appointment_at', `${date}T00:00:00`)
     .lt('appointment_at', `${date}T23:59:59`)
@@ -204,7 +204,7 @@ export const getOccupiedSlots = async (date: string): Promise<string[]> => {
   for (const row of data ?? []) {
     const r = row as Record<string, unknown>;
     const aptAt = r.appointment_at as string;
-    const svc = r.services as { duration_minutes: number } | null;
+    const svc = r.service as { duration_minutes: number } | null;
 
     const aptDate = new Date(aptAt);
     const startMinutes = aptDate.getHours() * 60 + aptDate.getMinutes();

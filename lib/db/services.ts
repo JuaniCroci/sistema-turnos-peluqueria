@@ -28,7 +28,7 @@ export const findServices = cache(async (options: ServiceListOptions): Promise<S
   }
 
   if (options.categorySlug) {
-    query = query.eq('categories.slug', options.categorySlug);
+    query = query.eq('category.slug', options.categorySlug);
   }
 
   if (options.q) {

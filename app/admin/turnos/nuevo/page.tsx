@@ -117,7 +117,7 @@ export default function NewAdminAppointmentPage() {
       return;
     }
 
-    const appointmentAt = `${date}T${time}:00`;
+    const appointmentAt = new Date(`${date}T${time}:00`).toISOString();
 
     setSaving(true);
     try {
