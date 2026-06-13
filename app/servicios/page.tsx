@@ -20,13 +20,10 @@ export default async function ServicesListPage({ searchParams }: ServicesListPag
   const { category, q, page: pageStr } = await searchParams;
   const currentPage = Math.max(1, Number(pageStr) || 1);
 
-  const categories = await findAllActiveCategoriesWithCount();
-  const result = await findServices({
-    categorySlug: category,
-    q,
-    page: currentPage,
-    limit: 10,
-  });
+  const [categories, result] = await Promise.all([
+    findAllActiveCategoriesWithCount(),
+    findServices({ categorySlug: category, q, page: currentPage, limit: 10 }),
+  ]);
 
   const { data: services, pagination } = result;
   const totalPages = Math.max(1, Math.ceil(pagination.total / pagination.limit));

@@ -38,8 +38,10 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
     notFound();
   }
 
-  const category = service ? await findCategoryById(service.category_id) : null;
-  const session = await auth();
+  const [category, session] = await Promise.all([
+    findCategoryById(service.category_id),
+    auth(),
+  ]);
   const isLoggedIn = Boolean(session?.user);
 
   const reserveHref = isLoggedIn

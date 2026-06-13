@@ -40,6 +40,8 @@ export default function AdminAppointmentsPage() {
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
 
+  const resetPage = () => setPage(1);
+
   const [changingStatus, setChangingStatus] = useState<{ id: number; status: AppointmentStatus } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -85,10 +87,6 @@ export default function AdminAppointmentsPage() {
     fetchAppointments(page);
   }, [fetchAppointments, page]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [filterStatus, filterUserId, filterFrom, filterTo]);
-
   const handleStatusChange = async (id: number, status: AppointmentStatus) => {
     setChangingStatus({ id, status });
     try {
@@ -124,7 +122,7 @@ export default function AdminAppointmentsPage() {
           <div className={styles.filters}>
             <div className={styles.filterField}>
               <label htmlFor="filter-status">Estado</label>
-              <select id="filter-status" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={styles.filterSelect}>
+              <select id="filter-status" value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); resetPage(); }} className={styles.filterSelect}>
                 <option value="">Todos</option>
                 <option value="pending">Pendiente</option>
                 <option value="confirmed">Confirmado</option>
@@ -135,7 +133,7 @@ export default function AdminAppointmentsPage() {
 
             <div className={styles.filterField}>
               <label htmlFor="filter-user">Cliente</label>
-              <select id="filter-user" value={filterUserId} onChange={(e) => setFilterUserId(e.target.value)} className={styles.filterSelect}>
+              <select id="filter-user" value={filterUserId} onChange={(e) => { setFilterUserId(e.target.value); resetPage(); }} className={styles.filterSelect}>
                 <option value="">Todos</option>
                 {users.map((u) => (
                   <option key={u.id} value={u.id}>{u.email}</option>
@@ -145,16 +143,16 @@ export default function AdminAppointmentsPage() {
 
             <div className={styles.filterField}>
               <label htmlFor="filter-from">Desde</label>
-              <input id="filter-from" type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} className={styles.filterInput} />
+              <input id="filter-from" type="date" value={filterFrom} onChange={(e) => { setFilterFrom(e.target.value); resetPage(); }} className={styles.filterInput} />
             </div>
 
             <div className={styles.filterField}>
               <label htmlFor="filter-to">Hasta</label>
-              <input id="filter-to" type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} className={styles.filterInput} />
+              <input id="filter-to" type="date" value={filterTo} onChange={(e) => { setFilterTo(e.target.value); resetPage(); }} className={styles.filterInput} />
             </div>
 
             {(filterStatus || filterUserId || filterFrom || filterTo) && (
-              <Button size="sm" variant="ghost" onClick={() => { setFilterStatus(''); setFilterUserId(''); setFilterFrom(''); setFilterTo(''); }}>
+              <Button size="sm" variant="ghost" onClick={() => { setFilterStatus(''); setFilterUserId(''); setFilterFrom(''); setFilterTo(''); resetPage(); }}>
                 Limpiar filtros
               </Button>
             )}

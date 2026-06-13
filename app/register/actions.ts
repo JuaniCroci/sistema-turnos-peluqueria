@@ -1,6 +1,6 @@
 'use server';
 
-import { AuthError } from 'next-auth';
+import { AuthError, CredentialsSignin } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { signIn } from '@/lib/auth';
@@ -72,24 +72,23 @@ export const registerAction = async (
   }
 
   try {
-    const result = await signIn('credentials', {
+    await signIn('credentials', {
       email,
       password,
       redirect: false,
     });
 
-    if (result?.error) {
+    redirect(callbackUrl ?? '/');
+  } catch (error) {
+    if (error instanceof CredentialsSignin) {
       return {
         error: 'Cuenta creada, pero no se pudo iniciar sesión. Probá hacer login.',
         fieldErrors: {},
       };
     }
-
-    redirect(callbackUrl ?? '/');
-  } catch (error) {
     if (error instanceof AuthError) {
       return {
-        error: 'Cuenta creada, pero no se pudo iniciar sesión. Probá hacer login.',
+        error: 'No se pudo iniciar sesion. Intentá de nuevo.',
         fieldErrors: {},
       };
     }

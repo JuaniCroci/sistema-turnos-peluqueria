@@ -2,11 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import { LogoutButton } from './LogoutButton';
-import { MobileMenu } from './MobileMenu';
 import styles from './Navbar.module.css';
+
+const MobileMenu = dynamic(() => import('./MobileMenu').then((m) => m.MobileMenu), {
+  ssr: false,
+});
 
 export type NavRole = 'client' | 'admin';
 
