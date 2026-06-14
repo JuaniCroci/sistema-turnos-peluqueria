@@ -6,7 +6,6 @@ import { findCategoryById } from '@/lib/db/categories';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 
 const listQuerySchema = z.object({
-  category: z.string().optional(),
   q: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
@@ -37,7 +36,6 @@ export async function GET(request: Request): Promise<NextResponse> {
     const includeInactive = isAdmin && parsed.data.includeInactive === 1;
 
     const result = await findServices({
-      categorySlug: parsed.data.category,
       q: parsed.data.q,
       page: parsed.data.page,
       limit: parsed.data.limit,

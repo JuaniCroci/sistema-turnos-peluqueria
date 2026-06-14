@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ServiceCard } from '@/components/ServiceCard/ServiceCard';
-import { findAllActiveCategoriesWithCount, findServices } from '@/lib/db/services';
-import { CategoryFilter } from './_components/CategoryFilter';
+import { findServices } from '@/lib/db/services';
 import type { Service } from '@/lib/types';
 import styles from './ServicesList.module.css';
 
@@ -13,27 +12,22 @@ export const metadata: Metadata = {
 };
 
 interface ServicesListPageProps {
-  searchParams: Promise<{ category?: string; q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }
 
 export default async function ServicesListPage({ searchParams }: ServicesListPageProps) {
-  const { category, q, page: pageStr } = await searchParams;
+  const { q, page: pageStr } = await searchParams;
   const currentPage = Math.max(1, Number(pageStr) || 1);
 
-  const [categories, result] = await Promise.all([
-    findAllActiveCategoriesWithCount(),
-    findServices({ categorySlug: category, q, page: currentPage, limit: 10 }),
-  ]);
+  const result = await findServices({ q, page: currentPage, limit: 10 });
 
   const { data: services, pagination } = result;
   const totalPages = Math.max(1, Math.ceil(pagination.total / pagination.limit));
 
   const buildHref = (overrides: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
-    const nextCategory = overrides.category !== undefined ? overrides.category : category;
     const nextQ = overrides.q !== undefined ? overrides.q : q;
     const nextPage = overrides.page !== undefined ? overrides.page : String(currentPage);
-    if (nextCategory) params.set('category', nextCategory);
     if (nextQ) params.set('q', nextQ);
     if (nextPage && nextPage !== '1') params.set('page', nextPage);
     const qs = params.toString();
@@ -63,11 +57,9 @@ export default async function ServicesListPage({ searchParams }: ServicesListPag
             />
           </div>
 
-          <CategoryFilter categories={categories} current={category} />
-
           <button type="submit" className={styles.submitBtn}>Filtrar</button>
 
-          {(q || category) && (
+          {q && (
             <Link href="/servicios" className={styles.clearBtn}>
               Limpiar filtros
             </Link>

@@ -81,7 +81,7 @@ export default function AdminServicesPage() {
       name: service.name,
       description: service.description ?? '',
       duration_minutes: String(service.duration_minutes),
-      price_cents: String(service.price_cents),
+      price_cents: String(service.price_cents / 100),
     });
     setEditingId(service.id);
     setShowForm(true);
@@ -94,7 +94,7 @@ export default function AdminServicesPage() {
 
     const category_id = Number(form.category_id);
     const duration_minutes = Number(form.duration_minutes);
-    const price_cents = Number(form.price_cents);
+    const price_cents = Number(form.price_cents) * 100;
 
     if (!form.name.trim()) {
       setFormError('El nombre es requerido');
@@ -215,8 +215,8 @@ export default function AdminServicesPage() {
                 </div>
 
                 <div className={styles.field}>
-                  <label htmlFor="price">Precio (en centavos)</label>
-                  <input id="price" type="number" min="0" value={form.price_cents} onChange={(e) => setForm({ ...form, price_cents: e.target.value })} className={styles.input} placeholder="Ej: 300000" />
+                  <label htmlFor="price">Precio ($)</label>
+                  <input id="price" type="number" min="0" step="1" value={form.price_cents} onChange={(e) => setForm({ ...form, price_cents: e.target.value })} className={styles.input} placeholder="Ej: 3000" />
                 </div>
 
                 <div className={styles.fieldFull}>

@@ -3,7 +3,6 @@ import { getDb } from './connection';
 import type { Service } from '@/lib/types';
 
 export interface ServiceListOptions {
-  categorySlug?: string;
   q?: string;
   page: number;
   limit: number;
@@ -25,10 +24,6 @@ export const findServices = cache(async (options: ServiceListOptions): Promise<S
 
   if (!options.includeInactive) {
     query = query.eq('active', true);
-  }
-
-  if (options.categorySlug) {
-    query = query.eq('category.slug', options.categorySlug);
   }
 
   if (options.q) {
@@ -121,32 +116,4 @@ export const softDeleteService = async (id: number): Promise<void> => {
   if (error) throw error;
 };
 
-export const findAllActiveCategoriesWithCount = cache(async (): Promise<
-  Array<{ id: number; name: string; slug: string; description: string | null; service_count: number }>
-> => {
-  const db = getDb();
 
-  const { data: counts, error: countErr } = await db
-    .from('services')
-    .select('category_id')
-    .eq('active', true);
-
-  if (countErr) throw countErr;
-
-  const countMap = new Map<number, number>();
-  for (const row of counts ?? []) {
-    countMap.set(row.category_id, (countMap.get(row.category_id) ?? 0) + 1);
-  }
-
-  const { data: categories, error: catErr } = await db
-    .from('categories')
-    .select('id, name, slug, description')
-    .order('name');
-
-  if (catErr) throw catErr;
-
-  return (categories ?? []).map((cat) => ({
-    ...cat,
-    service_count: countMap.get(cat.id) ?? 0,
-  }));
-});
