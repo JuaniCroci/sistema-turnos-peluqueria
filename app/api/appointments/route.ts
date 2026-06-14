@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { findAppointments, findAppointmentById, createAppointment, countActiveAppointmentsThisWeek } from '@/lib/db/appointments';
+import { findAppointments, findAppointmentById, createAppointment, countActiveAppointments } from '@/lib/db/appointments';
 import { findServiceById } from '@/lib/db/services';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 
@@ -97,9 +97,9 @@ export async function POST(request: Request): Promise<NextResponse> {
         return errorResponse('VALIDATION_ERROR', 'No se puede reservar un turno en el pasado');
       }
 
-      const weekCount = await countActiveAppointmentsThisWeek(Number(session.user.id));
-      if (weekCount >= 2) {
-        return errorResponse('LIMIT_EXCEEDED', 'Ya alcanzaste el límite de 2 turnos para esta semana. Podés reservar otro a partir del lunes próximo.');
+      const activeCount = await countActiveAppointments(Number(session.user.id));
+      if (activeCount >= 2) {
+        return errorResponse('LIMIT_EXCEEDED', 'Ya alcanzaste el límite de 2 turnos activos. Cancelá uno para poder reservar otro.');
       }
 
       try {

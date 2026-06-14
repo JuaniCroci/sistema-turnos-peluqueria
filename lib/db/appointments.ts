@@ -227,23 +227,14 @@ export const updateAppointmentStatus = async (id: number, status: AppointmentSta
   if (error) throw error;
 };
 
-export const countActiveAppointmentsThisWeek = async (userId: number): Promise<number> => {
+export const countActiveAppointments = async (userId: number): Promise<number> => {
   const db = getDb();
-  const now = new Date();
-  const day = now.getDay();
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diffToMonday);
-  monday.setHours(0, 0, 0, 0);
-  const nextMonday = new Date(monday);
-  nextMonday.setDate(monday.getDate() + 7);
-
+  const now = new Date().toISOString();
   const { count, error } = await db
     .from('appointments')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .gte('appointment_at', monday.toISOString())
-    .lt('appointment_at', nextMonday.toISOString())
+    .gte('appointment_at', now)
     .in('status', ['pending', 'confirmed']);
 
   if (error) throw error;
