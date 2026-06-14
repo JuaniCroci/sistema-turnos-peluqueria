@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { AlertCircle, Check, X, RotateCcw, Plus, Calendar } from 'lucide-react';
+import { AlertCircle, Check, X, RotateCcw, Plus, Calendar, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/Badge/Badge';
 import { Button } from '@/components/Button/Button';
 import { formatPrice } from '@/lib/utils/format';
@@ -49,6 +49,7 @@ export default function AdminAppointmentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [changingStatus, setChangingStatus] = useState<{ id: number; status: AppointmentStatus } | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const [fromDate, setFromDate] = useState(defaultFrom);
   const [toDate, setToDate] = useState(defaultTo);
@@ -102,6 +103,25 @@ export default function AdminAppointmentsPage() {
       setActionError('Error al actualizar turno');
     } finally {
       setChangingStatus(null);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('¿Eliminar este turno cancelado?')) return;
+    setDeletingId(id);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/appointments/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const json = await res.json();
+        setActionError(json.error?.message ?? 'Error al eliminar');
+        return;
+      }
+      await fetchAppointments();
+    } catch {
+      setActionError('Error al eliminar turno');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -258,14 +278,24 @@ export default function AdminAppointmentsPage() {
                           </>
                         )}
                         {apt.status === 'cancelled' && (
-                          <button
-                            className={styles.actionBtn}
-                            disabled={!!isLoading}
-                            onClick={() => handleStatusChange(apt.id, 'pending')}
-                            title="Reabrir"
-                          >
-                            <RotateCcw size={12} aria-hidden="true" />
-                          </button>
+                          <>
+                            <button
+                              className={styles.actionBtn}
+                              disabled={!!isLoading}
+                              onClick={() => handleStatusChange(apt.id, 'pending')}
+                              title="Reabrir"
+                            >
+                              <RotateCcw size={12} aria-hidden="true" />
+                            </button>
+                            <button
+                              className={styles.actionBtnDanger}
+                              disabled={deletingId === apt.id}
+                              onClick={() => handleDelete(apt.id)}
+                              title="Eliminar"
+                            >
+                              <Trash2 size={12} aria-hidden="true" />
+                            </button>
+                          </>
                         )}
                       </td>
                     </tr>

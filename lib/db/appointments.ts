@@ -240,3 +240,9 @@ export const countActiveAppointments = async (userId: number): Promise<number> =
   if (error) throw error;
   return count ?? 0;
 };
+
+export const deleteAppointment = async (id: number): Promise<void> => {
+  const db = getDb();
+  const { error } = await db.from('appointments').delete().eq('id', id);
+  if (error) throw error;
+};
