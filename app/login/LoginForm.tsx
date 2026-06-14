@@ -19,6 +19,7 @@ export const LoginForm = () => {
 
   const registered = searchParams.get('registered') === '1';
   const callbackUrl = searchParams.get('callbackUrl');
+  const oauthError = searchParams.get('error');
   const registerHref = callbackUrl
     ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
     : '/register';
@@ -33,6 +34,13 @@ export const LoginForm = () => {
         <div className={styles.success}>
           <CheckCircle2 size={16} className={styles.errorIcon} aria-hidden="true" />
           <span>Cuenta creada. Iniciá sesión para continuar.</span>
+        </div>
+      ) : null}
+
+      {oauthError ? (
+        <div className={styles.error} role="alert">
+          <AlertCircle size={16} className={styles.errorIcon} aria-hidden="true" />
+          <span>No se pudo iniciar sesión con Google. Intentá de nuevo.</span>
         </div>
       ) : null}
 
@@ -77,7 +85,7 @@ export const LoginForm = () => {
       <Button
         variant="outline"
         fullWidth
-        onClick={() => signIn('google', { redirectTo: callbackUrl ?? '/' })}
+        onClick={() => signIn('google', { callbackUrl: callbackUrl ?? '/' })}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>

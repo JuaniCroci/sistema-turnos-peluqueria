@@ -44,7 +44,8 @@ export const authConfig: NextAuthConfig = {
           user.id = String(dbUser.id);
           user.name = dbUser.username;
           (user as { role: Role }).role = dbUser.role;
-        } catch {
+        } catch (err) {
+          console.error('[auth/google] signIn error:', err);
           return false;
         }
       }
