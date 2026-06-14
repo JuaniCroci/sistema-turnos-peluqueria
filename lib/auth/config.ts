@@ -53,6 +53,7 @@ export const authConfig: NextAuthConfig = {
     },
   },
   providers: [
+    ...(authEdgeConfig.providers ?? []),
     Credentials({
       name: 'Credentials',
       credentials: {
