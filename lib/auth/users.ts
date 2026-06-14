@@ -48,6 +48,7 @@ export interface CreateUserInput {
   username: string;
   passwordHash: string;
   role?: Role;
+  ip_address?: string | null;
 }
 
 export interface PublicUserRow {
@@ -79,12 +80,28 @@ export const createUser = async (input: CreateUserInput): Promise<UserRow> => {
       username: input.username,
       password_hash: input.passwordHash,
       role,
+      ip_address: input.ip_address ?? null,
     })
     .select('id, email, username, password_hash, role')
     .single();
 
   if (error) throw error;
   return data as UserRow;
+};
+
+export const RECENT_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const MAX_REGISTRATIONS_PER_IP = 4;
+
+export const countRecentRegistrationsByIp = async (ip: string): Promise<number> => {
+  const db = getDb();
+  const since = new Date(Date.now() - RECENT_WINDOW_MS).toISOString();
+  const { count, error } = await db
+    .from('users')
+    .select('*', { count: 'exact', head: true })
+    .eq('ip_address', ip)
+    .gte('created_at', since);
+  if (error) throw error;
+  return count ?? 0;
 };
 
 const generateUniqueUsername = async (base: string): Promise<string> => {
@@ -101,6 +118,7 @@ const generateUniqueUsername = async (base: string): Promise<string> => {
 export const findOrCreateGoogleUser = async (
   email: string,
   name?: string | null,
+  ip_address?: string | null,
 ): Promise<UserRow> => {
   const existing = await findUserByEmail(email);
   if (existing) return existing;
@@ -114,5 +132,6 @@ export const findOrCreateGoogleUser = async (
     username,
     passwordHash: placeholderHash,
     role: 'client',
+    ip_address,
   });
 };

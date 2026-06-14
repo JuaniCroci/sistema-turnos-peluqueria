@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { AlertCircle } from 'lucide-react';
@@ -10,6 +10,17 @@ import { Input } from '@/components/Input/Input';
 import { registerAction, type RegisterState } from './actions';
 import styles from '../auth.module.css';
 
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (cb: () => void) => void;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
+    };
+  }
+}
+
+const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? '';
+
 const INITIAL_STATE: RegisterState = { error: null, fieldErrors: {} };
 
 interface RegisterFormProps {
@@ -18,9 +29,39 @@ interface RegisterFormProps {
 
 export const RegisterForm = ({ callbackUrl }: RegisterFormProps) => {
   const [state, formAction, isPending] = useActionState(registerAction, INITIAL_STATE);
+  const recaptchaLoaded = useRef(false);
+
+  useEffect(() => {
+    if (!SITE_KEY || recaptchaLoaded.current) return;
+    recaptchaLoaded.current = true;
+    const script = document.createElement('script');
+    script.src = `https://www.google.com/recaptcha/api.js?render=${SITE_KEY}`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  }, []);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+
+      if (SITE_KEY && window.grecaptcha) {
+        try {
+          const token = await window.grecaptcha.execute(SITE_KEY, { action: 'register' });
+          formData.set('g-recaptcha-response', token);
+        } catch {
+          // reCAPTCHA no disponible — se continua sin token (dev)
+        }
+      }
+
+      formAction(formData);
+    },
+    [formAction],
+  );
 
   return (
-    <form action={formAction} className={styles.form} noValidate>
+    <form onSubmit={handleSubmit} className={styles.form} noValidate>
       {callbackUrl && (
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
       )}

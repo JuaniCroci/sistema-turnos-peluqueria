@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { findAppointments, findAppointmentById, createAppointment } from '@/lib/db/appointments';
+import { findAppointments, findAppointmentById, createAppointment, countActiveAppointmentsThisWeek } from '@/lib/db/appointments';
 import { findServiceById } from '@/lib/db/services';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 
@@ -16,7 +16,7 @@ const listQuerySchema = z.object({
 
 const createSchema = z.object({
   service_id: z.number().int().positive('El servicio es requerido'),
-  appointment_at: z.string().min(1, 'La fecha y hora son requeridas'),
+  appointment_at: z.string().datetime({ message: 'Formato de fecha ISO inválido' }),
   user_id: z.coerce.number().int().positive().optional(),
   client_name: z.string().min(1).max(200).optional(),
   notes: z.string().max(500).optional(),
@@ -95,6 +95,11 @@ export async function POST(request: Request): Promise<NextResponse> {
       const appointmentAt = parsed.data.appointment_at;
       if (new Date(appointmentAt) <= new Date()) {
         return errorResponse('VALIDATION_ERROR', 'No se puede reservar un turno en el pasado');
+      }
+
+      const weekCount = await countActiveAppointmentsThisWeek(Number(session.user.id));
+      if (weekCount >= 2) {
+        return errorResponse('LIMIT_EXCEEDED', 'Ya alcanzaste el límite de 2 turnos para esta semana. Podés reservar otro a partir del lunes próximo.');
       }
 
       try {

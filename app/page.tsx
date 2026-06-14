@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Calendar, Clock, UserCheck, Scissors, Tag, ListTodo } from 'lucide-react';
+import { Calendar, Clock, UserCheck, Scissors, ListTodo } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import styles from './page.module.css';
 
@@ -21,7 +21,7 @@ export default async function HomePage() {
           <div className={styles.adminInner}>
             <h1 className={styles.adminTitle}>Panel de administración</h1>
             <p className={styles.adminSubtitle}>
-              Gestioná turnos, servicios y categorías desde un solo lugar.
+              Gestioná turnos y servicios desde un solo lugar.
             </p>
             <div className={styles.adminGrid}>
               <Link href="/admin/turnos" className={styles.adminCard}>
@@ -33,11 +33,6 @@ export default async function HomePage() {
                 <Scissors size={24} aria-hidden="true" />
                 <span className={styles.adminCardTitle}>Servicios</span>
                 <span className={styles.adminCardDesc}>Administrar el catálogo de servicios</span>
-              </Link>
-              <Link href="/admin/categorias" className={styles.adminCard}>
-                <Tag size={24} aria-hidden="true" />
-                <span className={styles.adminCardTitle}>Categorías</span>
-                <span className={styles.adminCardDesc}>Organizar servicios por categoría</span>
               </Link>
             </div>
           </div>

@@ -1,12 +1,14 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { AuthError, CredentialsSignin } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { signIn } from '@/lib/auth';
-import { createUser, findUserByEmail, findUserByUsername } from '@/lib/auth/users';
+import { createUser, findUserByEmail, findUserByUsername, countRecentRegistrationsByIp, MAX_REGISTRATIONS_PER_IP } from '@/lib/auth/users';
 import { hashPassword } from '@/lib/utils/password';
 import { zodDetails } from '@/lib/utils/api';
+import { verifyRecaptchaToken, RECAPTCHA_THRESHOLD } from '@/lib/utils/recaptcha';
 
 const registerSchema = z.object({
   email: z.string().email('Email inválido').max(120),
@@ -53,11 +55,27 @@ export const registerAction = async (
   const rawCallbackUrl = String(formData.get('callbackUrl') ?? '').trim();
   const callbackUrl = callbackUrlPattern.safeParse(rawCallbackUrl).data;
 
+  const recaptchaToken = String(formData.get('g-recaptcha-response') ?? '');
+  if (recaptchaToken) {
+    const result = await verifyRecaptchaToken(recaptchaToken);
+    if (!result.success || result.score < RECAPTCHA_THRESHOLD) {
+      return { error: 'No se pudo verificar que seas humano. Intentá de nuevo.', fieldErrors: {} };
+    }
+  }
+
+  const headersList = await headers();
+  const ip = headersList.get('x-forwarded-for') ?? headersList.get('x-real-ip') ?? 'unknown';
+
   if (await findUserByEmail(email)) {
     return { error: 'El email ya está registrado', fieldErrors: {} };
   }
   if (await findUserByUsername(username)) {
     return { error: 'El nombre de usuario ya está en uso', fieldErrors: {} };
+  }
+
+  const recentCount = await countRecentRegistrationsByIp(ip);
+  if (recentCount >= MAX_REGISTRATIONS_PER_IP) {
+    return { error: 'Demasiadas cuentas creadas desde esta IP. Intentá de nuevo más tarde.', fieldErrors: {} };
   }
 
   try {
@@ -66,6 +84,7 @@ export const registerAction = async (
       username,
       passwordHash: hashPassword(password),
       role: 'client',
+      ip_address: ip,
     });
   } catch {
     return { error: 'No se pudo crear la cuenta. Intentá de nuevo.', fieldErrors: {} };

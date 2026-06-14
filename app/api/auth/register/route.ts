@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createUser, findUserByEmail, findUserByUsername } from '@/lib/auth/users';
+import { createUser, findUserByEmail, findUserByUsername, countRecentRegistrationsByIp, MAX_REGISTRATIONS_PER_IP } from '@/lib/auth/users';
 import { hashPassword } from '@/lib/utils/password';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
+import { verifyRecaptchaToken, RECAPTCHA_THRESHOLD } from '@/lib/utils/recaptcha';
 
 const registerSchema = z.object({
   email: z.string().email('Email inválido').max(120, 'Email demasiado largo'),
@@ -12,6 +13,7 @@ const registerSchema = z.object({
     .max(40, 'El usuario debe tener como maximo 40 caracteres')
     .regex(/^[a-zA-Z0-9_.-]+$/, 'Solo letras, numeros, guion, guion bajo y punto'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').max(200),
+  recaptcha_token: z.string().optional(),
 });
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -29,6 +31,15 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const { email, username, password } = parsed.data;
 
+  if (parsed.data.recaptcha_token) {
+    const result = await verifyRecaptchaToken(parsed.data.recaptcha_token);
+    if (!result.success || result.score < RECAPTCHA_THRESHOLD) {
+      return errorResponse('VALIDATION_ERROR', 'No se pudo verificar que seas humano');
+    }
+  }
+
+  const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown';
+
   if (await findUserByEmail(email)) {
     return errorResponse('CONFLICT', 'El email ya esta registrado');
   }
@@ -36,8 +47,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     return errorResponse('CONFLICT', 'El nombre de usuario ya esta en uso');
   }
 
+  const recentCount = await countRecentRegistrationsByIp(ip);
+  if (recentCount >= MAX_REGISTRATIONS_PER_IP) {
+    return errorResponse('RATE_LIMITED', 'Demasiadas cuentas desde esta IP');
+  }
+
   const passwordHash = hashPassword(password);
-  const user = await createUser({ email, username, passwordHash, role: 'client' });
+  const user = await createUser({ email, username, passwordHash, role: 'client', ip_address: ip });
 
   return NextResponse.json(
     {

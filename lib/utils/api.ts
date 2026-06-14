@@ -7,6 +7,8 @@ export type ApiErrorCode =
   | 'FORBIDDEN'
   | 'NOT_FOUND'
   | 'CONFLICT'
+  | 'LIMIT_EXCEEDED'
+  | 'RATE_LIMITED'
   | 'INTERNAL_ERROR';
 
 export interface ApiErrorBody {
@@ -23,6 +25,8 @@ const statusForCode: Record<ApiErrorCode, number> = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
+  LIMIT_EXCEEDED: 429,
+  RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
 };
 

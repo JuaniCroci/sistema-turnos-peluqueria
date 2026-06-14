@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
 import type { NextAuthConfig } from 'next-auth';
@@ -40,7 +41,9 @@ export const authConfig: NextAuthConfig = {
     signIn: async ({ user, account }) => {
       if (account?.provider === 'google') {
         try {
-          const dbUser = await findOrCreateGoogleUser(user.email ?? '', user.name);
+          const headersList = await headers();
+          const ip = headersList.get('x-forwarded-for') ?? headersList.get('x-real-ip') ?? 'unknown';
+          const dbUser = await findOrCreateGoogleUser(user.email ?? '', user.name, ip);
           user.id = String(dbUser.id);
           user.name = dbUser.username;
           (user as { role: Role }).role = dbUser.role;
