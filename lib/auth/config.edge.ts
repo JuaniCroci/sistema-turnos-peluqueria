@@ -1,3 +1,4 @@
+import Google from 'next-auth/providers/google';
 import type { NextAuthConfig } from 'next-auth';
 import type { Role } from '@/lib/types';
 
@@ -7,7 +8,12 @@ export const authEdgeConfig: NextAuthConfig = {
   pages: {
     signIn: '/login',
   },
-  providers: [],
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+    }),
+  ],
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {

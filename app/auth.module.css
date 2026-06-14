@@ -77,6 +77,26 @@
   font-size: var(--font-size-sm);
 }
 
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-1) 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.divider span {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+
 .footerLink {
   color: var(--color-accent);
   font-weight: var(--weight-medium);

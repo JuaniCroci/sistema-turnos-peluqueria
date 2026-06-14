@@ -73,6 +73,17 @@
   background: var(--color-surface-2);
 }
 
+.variant-outline {
+  background: transparent;
+  color: var(--color-fg);
+  border-color: var(--color-border-strong);
+}
+
+.variant-outline:not(:disabled):hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-fg-muted);
+}
+
 /* Sizes */
 .size-sm {
   font-size: var(--font-size-sm);

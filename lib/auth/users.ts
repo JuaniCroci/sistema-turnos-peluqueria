@@ -1,4 +1,5 @@
 import { getDb } from '@/lib/db/connection';
+import { hashPassword } from '@/lib/utils/password';
 import type { Role } from '@/lib/types';
 
 export interface UserRow {
@@ -84,4 +85,34 @@ export const createUser = async (input: CreateUserInput): Promise<UserRow> => {
 
   if (error) throw error;
   return data as UserRow;
+};
+
+const generateUniqueUsername = async (base: string): Promise<string> => {
+  let username = base.replace(/[^a-z0-9_.-]/g, '').slice(0, 40) || 'usuario';
+  let suffix = 0;
+  while (await findUserByUsername(username)) {
+    suffix++;
+    const suffixStr = String(suffix);
+    username = `${base.slice(0, 40 - suffixStr.length)}${suffixStr}`;
+  }
+  return username;
+};
+
+export const findOrCreateGoogleUser = async (
+  email: string,
+  name?: string | null,
+): Promise<UserRow> => {
+  const existing = await findUserByEmail(email);
+  if (existing) return existing;
+
+  const baseName = (name ?? email.split('@')[0] ?? 'usuario').toLowerCase();
+  const username = await generateUniqueUsername(baseName);
+  const placeholderHash = hashPassword(crypto.randomUUID());
+
+  return createUser({
+    email,
+    username,
+    passwordHash: placeholderHash,
+    role: 'client',
+  });
 };

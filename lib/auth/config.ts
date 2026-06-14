@@ -1,8 +1,10 @@
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
+import type { NextAuthConfig } from 'next-auth';
 import { verifyPassword } from '@/lib/utils/password';
-import { findUserByEmail } from '@/lib/auth/users';
+import { findUserByEmail, findOrCreateGoogleUser } from '@/lib/auth/users';
 import { authEdgeConfig } from './config.edge';
+import type { Role } from '@/lib/types';
 
 const credentialsSchema = z.object({
   email: z.string().email().max(120),
@@ -31,8 +33,24 @@ const authorize = async (raw: unknown) => {
   };
 };
 
-export const authConfig = {
+export const authConfig: NextAuthConfig = {
   ...authEdgeConfig,
+  callbacks: {
+    ...authEdgeConfig.callbacks,
+    signIn: async ({ user, account }) => {
+      if (account?.provider === 'google') {
+        try {
+          const dbUser = await findOrCreateGoogleUser(user.email ?? '', user.name);
+          user.id = String(dbUser.id);
+          user.name = dbUser.username;
+          (user as { role: Role }).role = dbUser.role;
+        } catch {
+          return false;
+        }
+      }
+      return true;
+    },
+  },
   providers: [
     Credentials({
       name: 'Credentials',
