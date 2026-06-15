@@ -2,12 +2,7 @@
 
 import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  Scissors,
-} from 'lucide-react';
+import { Calendar, CheckCircle, AlertCircle, Scissors } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
 import { Spinner } from '@/components/Spinner/Spinner';
@@ -47,7 +42,7 @@ function NewAppointmentForm() {
   const [occupiedSlots, setOccupiedSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
-  const todayStr = useMemo(getTodayStr, []);
+  const todayStr = useMemo(() => getTodayStr(), []);
 
   useEffect(() => {
     const fetchServices = async () => {

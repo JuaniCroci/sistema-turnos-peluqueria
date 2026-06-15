@@ -4,13 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
-import {
-  X,
-  LogIn,
-  UserPlus,
-  Calendar,
-  CalendarPlus,
-} from 'lucide-react';
+import { X, LogIn, UserPlus, Calendar, CalendarPlus } from 'lucide-react';
 import { LogoutButton } from './LogoutButton';
 import type { NavUser } from './Navbar';
 import styles from './MobileMenu.module.css';

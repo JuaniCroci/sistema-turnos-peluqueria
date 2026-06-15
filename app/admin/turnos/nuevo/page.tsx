@@ -38,7 +38,7 @@ export default function NewAdminAppointmentPage() {
   const [occupiedSlots, setOccupiedSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
-  const todayStr = useMemo(getTodayStr, []);
+  const todayStr = useMemo(() => getTodayStr(), []);
 
   useEffect(() => {
     const fetchServices = async () => {
