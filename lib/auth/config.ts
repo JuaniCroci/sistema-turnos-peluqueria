@@ -6,6 +6,7 @@ import { verifyPassword } from '@/lib/utils/password';
 import { findUserByEmail, findOrCreateGoogleUser } from '@/lib/auth/users';
 import { authEdgeConfig } from './config.edge';
 import type { Role } from '@/lib/types';
+import { getClientIp } from '@/lib/utils/clientIp';
 
 const credentialsSchema = z.object({
   email: z.string().email().max(120),
@@ -42,10 +43,7 @@ export const authConfig: NextAuthConfig = {
       if (account?.provider === 'google') {
         try {
           const headersList = await headers();
-          const ip =
-            headersList.get('x-forwarded-for') ??
-            headersList.get('x-real-ip') ??
-            'unknown';
+          const ip = getClientIp(headersList);
           const dbUser = await findOrCreateGoogleUser(
             user.email ?? '',
             user.name,

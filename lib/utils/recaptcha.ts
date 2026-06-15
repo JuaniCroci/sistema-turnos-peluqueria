@@ -1,8 +1,19 @@
 export async function verifyRecaptchaToken(
   token: string,
 ): Promise<{ success: boolean; score: number }> {
+  const required = process.env.RECAPTCHA_REQUIRED === 'true';
   const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-  if (!secretKey) return { success: true, score: 1.0 };
+
+  if (!secretKey) {
+    if (required) {
+      return { success: false, score: 0 };
+    }
+    return { success: true, score: 1.0 };
+  }
+
+  if (!token) {
+    return { success: false, score: 0 };
+  }
 
   const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
     method: 'POST',

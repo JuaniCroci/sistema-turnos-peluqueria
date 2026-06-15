@@ -31,7 +31,7 @@ match reality. Where a plan overrides an `AGENTS.md` rule it says so explicitly.
 
 | Plan | Title                                                                                 | Priority | Effort | Depends on | Status      |
 | ---- | ------------------------------------------------------------------------------------- | -------- | ------ | ---------- | ----------- |
-| 001  | Harden anti-abuse: mandatory + fail-closed reCAPTCHA, trusted client IP               | P1       | M      | —          | TODO        |
+| 001  | Harden anti-abuse: mandatory + fail-closed reCAPTCHA, trusted client IP               | P1       | M      | —          | DONE        |
 | 002  | Appointment time integrity: timezone-correct slots + server business-hours validation | P1       | M      | —          | TODO        |
 | 003  | Enable Postgres Row Level Security on all tables                                      | P1       | M      | —          | TODO        |
 | 004  | Remove the committed seed admin; secure DB bootstrap                                  | P2       | S      | —          | TODO        |
@@ -39,7 +39,7 @@ match reality. Where a plan overrides an `AGENTS.md` rule it says so explicitly.
 | 006  | Map unique-slot violation (23505) → 409; tighten active-limit race                    | P2       | S      | —          | TODO        |
 | 007  | Add structured error logging to API route handlers                                    | P2       | S      | —          | TODO        |
 | 008  | Remove dead / duplicate code                                                          | P2       | S      | —          | TODO        |
-| 009  | ESLint + Prettier baseline (overrides AGENTS.md)                                      | P2       | M      | —          | IN PROGRESS |
+| 009  | ESLint + Prettier baseline (overrides AGENTS.md)                                      | P2       | M      | —          | DONE        |
 | 010  | Automated test baseline with Vitest (overrides AGENTS.md)                             | P1       | M      | —          | TODO        |
 | 011  | CI pipeline on GitHub Actions (overrides AGENTS.md)                                   | P3       | S      | 009, 010   | TODO        |
 | 012  | Migrate `middleware.ts` → `proxy.ts` (Next 16 readiness)                              | P3       | S      | —          | TODO        |

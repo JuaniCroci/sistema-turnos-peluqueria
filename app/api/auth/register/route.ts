@@ -13,6 +13,7 @@ import {
   verifyRecaptchaToken,
   RECAPTCHA_THRESHOLD,
 } from '@/lib/utils/recaptcha';
+import { getClientIp } from '@/lib/utils/clientIp';
 
 const registerSchema = z.object({
   email: z.string().email('Email inválido').max(120, 'Email demasiado largo'),
@@ -50,6 +51,14 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const { email, username, password } = parsed.data;
 
+  const isRecaptchaRequired = process.env.RECAPTCHA_REQUIRED === 'true';
+  if (isRecaptchaRequired && !parsed.data.recaptcha_token) {
+    return errorResponse(
+      'VALIDATION_ERROR',
+      'No se pudo verificar que seas humano',
+    );
+  }
+
   if (parsed.data.recaptcha_token) {
     const result = await verifyRecaptchaToken(parsed.data.recaptcha_token);
     if (!result.success || result.score < RECAPTCHA_THRESHOLD) {
@@ -60,10 +69,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
   }
 
-  const ip =
-    request.headers.get('x-forwarded-for') ??
-    request.headers.get('x-real-ip') ??
-    'unknown';
+  const ip = getClientIp(request.headers);
 
   if (await findUserByEmail(email)) {
     return errorResponse('CONFLICT', 'El email ya esta registrado');

@@ -322,6 +322,7 @@ pnpm start         # next start en :3000
 AUTH_SECRET=cambiame-en-prod
 AUTH_URL=http://localhost:3000
 NEXTAUTH_URL=http://localhost:3000
+RECAPTCHA_REQUIRED=false   # false en dev; poner true en produccion para exigir reCAPTCHA
 DB_PATH=./data/turnos.db
 ```
 
