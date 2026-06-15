@@ -33,7 +33,7 @@ match reality. Where a plan overrides an `AGENTS.md` rule it says so explicitly.
 | ---- | ------------------------------------------------------------------------------------- | -------- | ------ | ---------- | ----------- |
 | 001  | Harden anti-abuse: mandatory + fail-closed reCAPTCHA, trusted client IP               | P1       | M      | —          | DONE        |
 | 002  | Appointment time integrity: timezone-correct slots + server business-hours validation | P1       | M      | —          | DONE        |
-| 003  | Enable Postgres Row Level Security on all tables                                      | P1       | M      | —          | TODO        |
+| 003  | Enable Postgres Row Level Security on all tables                                      | P1       | M      | —          | DONE        |
 | 004  | Remove the committed seed admin; secure DB bootstrap                                  | P2       | S      | —          | TODO        |
 | 005  | Centralized env-var validation (zod) + `.env.example`                                 | P2       | S      | —          | TODO        |
 | 006  | Map unique-slot violation (23505) → 409; tighten active-limit race                    | P2       | S      | —          | TODO        |

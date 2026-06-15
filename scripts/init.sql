@@ -90,3 +90,11 @@ JOIN categories c ON c.slug = s.cat_slug
 WHERE NOT EXISTS (
   SELECT 1 FROM services WHERE name = s.name
 );
+
+-- =============================================================
+-- Row Level Security
+-- =============================================================
+ALTER TABLE users        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE services     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;

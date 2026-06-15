@@ -326,6 +326,10 @@ RECAPTCHA_REQUIRED=false   # false en dev; poner true en produccion para exigir 
 DB_PATH=./data/turnos.db
 ```
 
+> **Seguridad**: Toda la interacción con la DB usa la **service-role key** de Supabase
+> (bypassea RLS). Las tablas tienen **Row Level Security** habilitado con deny-by-default
+> para evitar accesos no autorizados si la anon key se filtrara.
+
 ---
 
 ## 📜 Scripts
