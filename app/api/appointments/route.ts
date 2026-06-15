@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import {
   findAppointments,
-  findAppointmentById,
   createAppointment,
   countActiveAppointments,
 } from '@/lib/db/appointments';

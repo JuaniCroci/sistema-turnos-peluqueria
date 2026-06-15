@@ -6,7 +6,6 @@ import {
   Edit3,
   Trash2,
   X,
-  Check,
   Clock,
   AlertCircle,
 } from 'lucide-react';

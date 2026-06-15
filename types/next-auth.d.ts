@@ -1,4 +1,3 @@
-import type { DefaultSession } from 'next-auth';
 import type { Role } from '@/lib/types';
 
 type AppUser = {

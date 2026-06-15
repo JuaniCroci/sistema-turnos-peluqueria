@@ -9,7 +9,6 @@ import {
   LogIn,
   UserPlus,
   Calendar,
-  LayoutDashboard,
   CalendarPlus,
 } from 'lucide-react';
 import { LogoutButton } from './LogoutButton';

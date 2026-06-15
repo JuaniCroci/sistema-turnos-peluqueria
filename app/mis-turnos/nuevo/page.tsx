@@ -4,7 +4,6 @@ import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Calendar,
-  Clock,
   CheckCircle,
   AlertCircle,
   Scissors,

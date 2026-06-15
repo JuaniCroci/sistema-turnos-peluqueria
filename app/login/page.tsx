@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Card } from '@/components/Card/Card';
 import { Spinner } from '@/components/Spinner/Spinner';
