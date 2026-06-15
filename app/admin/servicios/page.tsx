@@ -62,6 +62,7 @@ export default function AdminServicesPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchServices();
     fetchCategories();
   }, [fetchServices, fetchCategories]);

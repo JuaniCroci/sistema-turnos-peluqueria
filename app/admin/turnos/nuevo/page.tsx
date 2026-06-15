@@ -70,14 +70,15 @@ export default function NewAdminAppointmentPage() {
       setLoadingSlots(false);
     }
   }, []);
-
-  useEffect(() => {
-    if (date) {
-      fetchOccupiedSlots(date);
+  const handleDateChange = (newDate: string) => {
+    setDate(newDate);
+    setTime('');
+    if (newDate) {
+      void fetchOccupiedSlots(newDate);
     } else {
       setOccupiedSlots([]);
     }
-  }, [date, fetchOccupiedSlots]);
+  };
 
   const availableSlots = useMemo(() => {
     const isToday = date === todayStr;
@@ -164,7 +165,7 @@ export default function NewAdminAppointmentPage() {
               id="date"
               type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(e) => handleDateChange(e.target.value)}
               min={todayStr}
               className={styles.input}
             />

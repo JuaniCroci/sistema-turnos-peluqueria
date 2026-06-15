@@ -73,15 +73,15 @@ function NewAppointmentForm() {
       setLoadingSlots(false);
     }
   }, []);
-
-  useEffect(() => {
-    if (date) {
-      setTime('');
-      fetchOccupiedSlots(date);
+  const handleDateChange = (newDate: string) => {
+    setDate(newDate);
+    setTime('');
+    if (newDate) {
+      void fetchOccupiedSlots(newDate);
     } else {
       setOccupiedSlots([]);
     }
-  }, [date, fetchOccupiedSlots]);
+  };
 
   const selectedService = services.find((s) => String(s.id) === serviceId);
 
@@ -174,6 +174,7 @@ function NewAppointmentForm() {
                     setDate('');
                     setTime('');
                     setNotes('');
+                    setOccupiedSlots([]);
                   }}
                 >
                   Reservar otro
@@ -243,7 +244,7 @@ function NewAppointmentForm() {
                 id="date"
                 type="date"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => handleDateChange(e.target.value)}
                 min={todayStr}
                 className={styles.input}
               />
