@@ -80,6 +80,7 @@ function NewAppointmentForm() {
       setLoadingSlots(false);
     }
   }, []);
+
   const handleDateChange = (newDate: string) => {
     setDate(newDate);
     setTime('');
@@ -92,22 +93,24 @@ function NewAppointmentForm() {
 
   const selectedService = services.find((s) => String(s.id) === serviceId);
 
-  const availableSlots = useMemo(() => {
+  const slotStates = useMemo(() => {
     const isToday = date === todayStr;
     const currentMinutes = getCurrentTimeMinutes();
 
-    return TIME_SLOTS.filter((slot) => {
-      if (occupiedSlots.includes(slot)) return false;
+    return TIME_SLOTS.map((slot) => {
+      const isOccupied = occupiedSlots.includes(slot);
+      const [hStr, mStr] = slot.split(':');
+      const slotMinutes = Number(hStr) * 60 + Number(mStr);
+      const isPast = isToday && slotMinutes <= currentMinutes;
 
-      if (isToday) {
-        const [hStr, mStr] = slot.split(':');
-        const slotMinutes = Number(hStr) * 60 + Number(mStr);
-        if (slotMinutes <= currentMinutes) return false;
-      }
-
-      return true;
+      return { value: slot, disabled: isOccupied || isPast, isOccupied };
     });
   }, [date, todayStr, occupiedSlots]);
+
+  const hasAvailableSlots = useMemo(
+    () => slotStates.some((s) => !s.disabled),
+    [slotStates],
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -276,21 +279,26 @@ function NewAppointmentForm() {
                       ? 'Seleccionar horario...'
                       : 'Primero seleccioná una fecha'}
                   </option>
-                  {availableSlots.length === 0 && date && (
+                  {!hasAvailableSlots && date && (
                     <option value="" disabled>
                       No hay horarios disponibles para esta fecha
                     </option>
                   )}
-                  {availableSlots.map((slot) => (
-                    <option key={slot} value={slot}>
-                      {slot} hs
+                  {slotStates.map((slot) => (
+                    <option
+                      key={slot.value}
+                      value={slot.value}
+                      disabled={slot.disabled}
+                    >
+                      {slot.value} hs
+                      {slot.isOccupied ? ' (ocupado)' : ''}
                     </option>
                   ))}
                 </select>
               )}
-              {date && availableSlots.length > 0 && (
+              {date && hasAvailableSlots && (
                 <span className={styles.fieldHint}>
-                  Se muestran solo los horarios libres.{' '}
+                  Horarios ocupados aparecen deshabilitados.{' '}
                   {date === todayStr ? 'Hoy solo horarios futuros.' : ''}
                 </span>
               )}
