@@ -59,12 +59,6 @@ WHERE status IN ('pending', 'confirmed');
 -- seed
 -- =============================================================
 
-INSERT INTO users (email, username, password_hash, role)
-VALUES
-  ('admin@barberia.test', 'admin', '$2b$10$2f1x0MIXU8nW8a2SeYqwb.640NfcSezVNxBL.V7cTC3rwna3oP9mq', 'admin'),
-  ('juani@test.com',      'juani', '$2b$10$IaiLUNkIj3n0jL2c5l8GdewXpzk0daJ8M53iE1oQqRVtaECQEZRdG', 'client')
-ON CONFLICT (email) DO NOTHING;
-
 INSERT INTO categories (name, slug, description)
 VALUES
   ('Cabello',       'cabello',       'Cortes y peinados para todos.'),

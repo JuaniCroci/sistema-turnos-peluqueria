@@ -254,16 +254,12 @@ Formato uniforme de errores:
 
 ---
 
-## 🧪 Seed (datos iniciales)
+## 🧪 Seed (datos de demostración)
 
-Se ejecuta automáticamente al levantar si la tabla `users` está vacía.
+Solo categorías y servicios. No se siembran usuarios por seguridad.
 
-**Usuarios:**
-
-| Rol     | Email                 | Password   |
-| ------- | --------------------- | ---------- |
-| Admin   | `admin@barberia.test` | `admin123` |
-| Cliente | `juani@test.com`      | `1234`     |
+> ⚠️ **Los seed users fueron eliminados** (commit `28703d1`). Ya no existe un admin ni cliente
+> pre-creados con contraseñas hardcodeadas en el repositorio. Ver [Creación del admin inicial](#creación-del-admin-inicial) abajo.
 
 **Servicios:**
 
@@ -278,6 +274,34 @@ Se ejecuta automáticamente al levantar si la tabla `users` está vacía.
 | Coloración   | Color completo     | 90 min   | $12.000 |
 | Tratamientos | Hidratación        | 40 min   | $6.000  |
 | Tratamientos | Keratina           | 120 min  | $18.000 |
+
+---
+
+## 👤 Creación del admin inicial
+
+Los seed users con contraseñas hardcodeadas fueron eliminados del repositorio por seguridad
+(commit `28703d1`). Para crear el primer admin en un entorno nuevo:
+
+1. Ejecutá `scripts/init.sql` en Supabase SQL Editor (crea tablas + categorías + servicios).
+2. Ejecutá `scripts/create-admin.sql` **pero antes** reemplazá los placeholders:
+
+   - `CAMBIAR@dominio.real` → el email real del admin
+   - `<PEGAR_HASH_BCRYPT>` → un hash bcrypt generado localmente
+
+   Para generar el hash con `bcryptjs` (ya instalado en el proyecto):
+
+   ```bash
+   node -e "const b=require('bcryptjs'); b.hash('contraseña-segura',10).then(console.log)"
+   ```
+
+   Copiá el output y pegálo donde dice `<PEGAR_HASH_BCRYPT>`.
+
+3. Ejecutá el script modificado en Supabase SQL Editor.
+
+> ⚠️ **Rotación en producción**: Si ya tenés un admin existente con `admin@barberia.test`
+> en la base de producción (por haber corrido `init.sql` antes de este cambio),
+> **cambiale la contraseña o borralo** y creá uno nuevo con `create-admin.sql`.
+> El hash hardcodeado que estaba en el repo se considera comprometido.
 
 ---
 
@@ -351,11 +375,6 @@ DB_PATH=./data/turnos.db
 # Health check
 curl -i http://localhost:3000/
 
-# Login como admin
-curl -i -X POST http://localhost:3000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@barberia.test","password":"admin123","username":"admin"}'
-
 # Listar servicios públicos
 curl -i http://localhost:3000/api/services
 
@@ -366,11 +385,11 @@ curl -i http://localhost:3000/api/categories
 ### Flujo completo
 
 1. Abrir `http://localhost:3000`
-2. Registrarse como cliente o loguearse con `juani@test.com` / `1234`
+2. Registrarse como cliente
 3. Explorar servicios en `/servicios`
 4. Reservar un turno desde `/mis-turnos/nuevo`
 5. Ver turnos en `/mis-turnos`
-6. Loguearse como admin (`admin@barberia.test` / `admin123`)
+6. Loguearse como admin (ver [Creación del admin inicial](#creación-del-admin-inicial))
 7. Ir a `/admin/turnos`, confirmar o completar turnos
 8. CRUD de servicios en `/admin/servicios` y categorías en `/admin/categorias`
 
