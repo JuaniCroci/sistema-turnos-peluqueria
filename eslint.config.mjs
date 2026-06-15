@@ -10,9 +10,7 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/ban-ts-comment': 'error',
-      // TODO: re-enable as error once eslint-plugin-react supports the isMounted/
-      // hydration-guard pattern (setMounted(true) in empty-deps useEffect is intentional).
-      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/set-state-in-effect': 'error',
     },
     ignores: ['.next/', 'node_modules/', 'pnpm-lock.yaml'],
   },

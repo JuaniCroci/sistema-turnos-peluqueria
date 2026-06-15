@@ -39,7 +39,7 @@ match reality. Where a plan overrides an `AGENTS.md` rule it says so explicitly.
 | 006  | Map unique-slot violation (23505) → 409; tighten active-limit race                    | P2       | S      | —          | TODO        |
 | 007  | Add structured error logging to API route handlers                                    | P2       | S      | —          | TODO        |
 | 008  | Remove dead / duplicate code                                                          | P2       | S      | —          | TODO        |
-| 009  | ESLint + Prettier baseline (overrides AGENTS.md)                                      | P2       | M      | —          | DONE        |
+| 009  | ESLint + Prettier baseline (overrides AGENTS.md)                                      | P2       | M      | —          | IN PROGRESS |
 | 010  | Automated test baseline with Vitest (overrides AGENTS.md)                             | P1       | M      | —          | TODO        |
 | 011  | CI pipeline on GitHub Actions (overrides AGENTS.md)                                   | P3       | S      | 009, 010   | TODO        |
 | 012  | Migrate `middleware.ts` → `proxy.ts` (Next 16 readiness)                              | P3       | S      | —          | TODO        |

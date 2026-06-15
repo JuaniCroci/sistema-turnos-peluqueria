@@ -27,7 +27,8 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true); // createPortal requires DOM; double-render on mount is intentional
   }, []);
 
   useEffect(() => {
