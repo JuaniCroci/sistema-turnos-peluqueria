@@ -8,6 +8,12 @@ import {
 } from '@/lib/db/appointments';
 import { findServiceById } from '@/lib/db/services';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
+import { getLocalHourMinute } from '@/lib/utils/datetime';
+import {
+  OPEN_HOUR,
+  CLOSE_HOUR,
+  SLOT_MINUTES,
+} from '@/lib/config/business';
 
 const listQuerySchema = z.object({
   status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),
@@ -119,6 +125,20 @@ export async function POST(request: Request): Promise<NextResponse> {
         return errorResponse(
           'VALIDATION_ERROR',
           'No se puede reservar un turno en el pasado',
+        );
+      }
+
+      const { hour, minute } = getLocalHourMinute(appointmentAt);
+      if (hour < OPEN_HOUR || hour >= CLOSE_HOUR) {
+        return errorResponse(
+          'VALIDATION_ERROR',
+          'Horario fuera del horario de atención (09:00 a 20:00)',
+        );
+      }
+      if (minute % SLOT_MINUTES !== 0) {
+        return errorResponse(
+          'VALIDATION_ERROR',
+          'El turno debe empezar en punto o media hora',
         );
       }
 

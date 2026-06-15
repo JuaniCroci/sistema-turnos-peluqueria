@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { getDb } from './connection';
 import { flattenRow } from './flatten';
+import { getLocalHourMinute, utcRangeForLocalDate } from '@/lib/utils/datetime';
 import type { Appointment, AppointmentStatus } from '@/lib/types';
 
 export interface AppointmentRow extends Appointment {
@@ -209,6 +210,8 @@ export const createAppointment = async (
 export const getOccupiedSlots = async (date: string): Promise<string[]> => {
   const db = getDb();
 
+  const { fromIso, toIso } = utcRangeForLocalDate(date);
+
   const { data, error } = await db
     .from('appointments')
     .select(
@@ -217,8 +220,8 @@ export const getOccupiedSlots = async (date: string): Promise<string[]> => {
       service:service_id (duration_minutes)
     `,
     )
-    .gte('appointment_at', `${date}T00:00:00`)
-    .lt('appointment_at', `${date}T23:59:59`)
+    .gte('appointment_at', fromIso)
+    .lt('appointment_at', toIso)
     .in('status', ['pending', 'confirmed']);
 
   if (error) throw error;
@@ -230,8 +233,8 @@ export const getOccupiedSlots = async (date: string): Promise<string[]> => {
     const aptAt = r.appointment_at as string;
     const svc = r.service as { duration_minutes: number } | null;
 
-    const aptDate = new Date(aptAt);
-    const startMinutes = aptDate.getHours() * 60 + aptDate.getMinutes();
+    const { hour, minute } = getLocalHourMinute(aptAt);
+    const startMinutes = hour * 60 + minute;
     const duration = svc?.duration_minutes ?? 60;
     const endMinutes = startMinutes + duration;
 

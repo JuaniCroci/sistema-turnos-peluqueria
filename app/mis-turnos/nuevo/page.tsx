@@ -7,12 +7,19 @@ import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
 import { Spinner } from '@/components/Spinner/Spinner';
 import { formatDuration, formatPrice } from '@/lib/utils/format';
+import {
+  OPEN_HOUR,
+  CLOSE_HOUR,
+  SLOT_MINUTES,
+} from '@/lib/config/business';
 import type { Service } from '@/lib/types';
 import styles from './NewAppointment.module.css';
 
-const TIME_SLOTS = Array.from({ length: 23 }, (_, i) => {
-  const h = Math.floor((i * 30 + 540) / 60);
-  const m = (i * 30 + 540) % 60;
+const SLOT_COUNT = (CLOSE_HOUR - OPEN_HOUR) * (60 / SLOT_MINUTES);
+const TIME_SLOTS = Array.from({ length: SLOT_COUNT }, (_, i) => {
+  const totalMinutes = OPEN_HOUR * 60 + i * SLOT_MINUTES;
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 });
 
