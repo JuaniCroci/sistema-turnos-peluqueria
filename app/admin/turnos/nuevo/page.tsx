@@ -80,20 +80,25 @@ export default function NewAdminAppointmentPage() {
     }
   };
 
-  const availableSlots = useMemo(() => {
+  const slotStates = useMemo(() => {
     const isToday = date === todayStr;
     const currentMinutes = getCurrentTimeMinutes();
 
-    return TIME_SLOTS.filter((slot) => {
-      if (occupiedSlots.includes(slot)) return false;
+    return TIME_SLOTS.map((slot) => {
+      const isOccupied = occupiedSlots.includes(slot);
+      const isPast =
+        isToday &&
+        (() => {
+          const [hStr, mStr] = slot.split(':');
+          const slotMinutes = Number(hStr) * 60 + Number(mStr);
+          return slotMinutes <= currentMinutes;
+        })();
 
-      if (isToday) {
-        const [hStr, mStr] = slot.split(':');
-        const slotMinutes = Number(hStr) * 60 + Number(mStr);
-        if (slotMinutes <= currentMinutes) return false;
-      }
-
-      return true;
+      return {
+        value: slot,
+        disabled: isOccupied || isPast,
+        isOccupied,
+      };
     });
   }, [date, todayStr, occupiedSlots]);
 
@@ -190,14 +195,14 @@ export default function NewAdminAppointmentPage() {
                     ? 'Seleccionar horario...'
                     : 'Primero seleccioná una fecha'}
                 </option>
-                {availableSlots.length === 0 && date && (
+                {!slotStates.some((s) => !s.disabled) && date && (
                   <option value="" disabled>
                     No hay horarios disponibles para esta fecha
                   </option>
                 )}
-                {availableSlots.map((slot) => (
-                  <option key={slot} value={slot}>
-                    {slot} hs
+                {slotStates.map((s) => (
+                  <option key={s.value} value={s.value} disabled={s.disabled}>
+                    {s.value} hs{s.isOccupied ? ' (ocupado)' : ''}
                   </option>
                 ))}
               </select>

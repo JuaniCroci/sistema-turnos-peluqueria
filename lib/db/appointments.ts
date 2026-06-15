@@ -35,7 +35,7 @@ export interface AppointmentListResult {
 }
 
 const APPOINTMENT_SELECT = `
-  id, user_id, service_id, appointment_at, status, notes, created_at,
+  id, user_id, service_id, appointment_at, status, notes, created_at, client_name,
   service:service_id (
     name, duration_minutes, price_cents,
     category:category_id (name)
@@ -44,7 +44,7 @@ const APPOINTMENT_SELECT = `
 `;
 
 const LIST_APPOINTMENT_SELECT = `
-  id, user_id, service_id, appointment_at, status, notes, created_at,
+  id, user_id, service_id, appointment_at, status, notes, created_at, client_name,
   service:service_id (
     name, duration_minutes, price_cents,
     category:category_id (name)
