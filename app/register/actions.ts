@@ -5,10 +5,19 @@ import { AuthError, CredentialsSignin } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { signIn } from '@/lib/auth';
-import { createUser, findUserByEmail, findUserByUsername, countRecentRegistrationsByIp, MAX_REGISTRATIONS_PER_IP } from '@/lib/auth/users';
+import {
+  createUser,
+  findUserByEmail,
+  findUserByUsername,
+  countRecentRegistrationsByIp,
+  MAX_REGISTRATIONS_PER_IP,
+} from '@/lib/auth/users';
 import { hashPassword } from '@/lib/utils/password';
 import { zodDetails } from '@/lib/utils/api';
-import { verifyRecaptchaToken, RECAPTCHA_THRESHOLD } from '@/lib/utils/recaptcha';
+import {
+  verifyRecaptchaToken,
+  RECAPTCHA_THRESHOLD,
+} from '@/lib/utils/recaptcha';
 
 const registerSchema = z.object({
   email: z.string().email('Email inválido').max(120),
@@ -16,8 +25,14 @@ const registerSchema = z.object({
     .string()
     .min(3, 'El usuario debe tener al menos 3 caracteres')
     .max(40, 'El usuario debe tener como maximo 40 caracteres')
-    .regex(/^[a-zA-Z0-9_.-]+$/, 'Solo letras, numeros, guion, guion bajo y punto'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').max(200),
+    .regex(
+      /^[a-zA-Z0-9_.-]+$/,
+      'Solo letras, numeros, guion, guion bajo y punto',
+    ),
+  password: z
+    .string()
+    .min(6, 'La contraseña debe tener al menos 6 caracteres')
+    .max(200),
 });
 
 const callbackUrlPattern = z.string().startsWith('/').max(500);
@@ -41,7 +56,11 @@ export const registerAction = async (
     const details = zodDetails(parsed.error);
     const fieldErrors: RegisterState['fieldErrors'] = {};
     for (const d of details) {
-      if (d.path === 'email' || d.path === 'username' || d.path === 'password') {
+      if (
+        d.path === 'email' ||
+        d.path === 'username' ||
+        d.path === 'password'
+      ) {
         fieldErrors[d.path] = d.message;
       }
     }
@@ -59,12 +78,18 @@ export const registerAction = async (
   if (recaptchaToken) {
     const result = await verifyRecaptchaToken(recaptchaToken);
     if (!result.success || result.score < RECAPTCHA_THRESHOLD) {
-      return { error: 'No se pudo verificar que seas humano. Intentá de nuevo.', fieldErrors: {} };
+      return {
+        error: 'No se pudo verificar que seas humano. Intentá de nuevo.',
+        fieldErrors: {},
+      };
     }
   }
 
   const headersList = await headers();
-  const ip = headersList.get('x-forwarded-for') ?? headersList.get('x-real-ip') ?? 'unknown';
+  const ip =
+    headersList.get('x-forwarded-for') ??
+    headersList.get('x-real-ip') ??
+    'unknown';
 
   if (await findUserByEmail(email)) {
     return { error: 'El email ya está registrado', fieldErrors: {} };
@@ -75,7 +100,11 @@ export const registerAction = async (
 
   const recentCount = await countRecentRegistrationsByIp(ip);
   if (recentCount >= MAX_REGISTRATIONS_PER_IP) {
-    return { error: 'Demasiadas cuentas creadas desde esta IP. Intentá de nuevo más tarde.', fieldErrors: {} };
+    return {
+      error:
+        'Demasiadas cuentas creadas desde esta IP. Intentá de nuevo más tarde.',
+      fieldErrors: {},
+    };
   }
 
   try {
@@ -87,7 +116,10 @@ export const registerAction = async (
       ip_address: ip,
     });
   } catch {
-    return { error: 'No se pudo crear la cuenta. Intentá de nuevo.', fieldErrors: {} };
+    return {
+      error: 'No se pudo crear la cuenta. Intentá de nuevo.',
+      fieldErrors: {},
+    };
   }
 
   try {
@@ -101,7 +133,8 @@ export const registerAction = async (
   } catch (error) {
     if (error instanceof CredentialsSignin) {
       return {
-        error: 'Cuenta creada, pero no se pudo iniciar sesión. Probá hacer login.',
+        error:
+          'Cuenta creada, pero no se pudo iniciar sesión. Probá hacer login.',
         fieldErrors: {},
       };
     }

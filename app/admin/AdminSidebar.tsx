@@ -29,7 +29,9 @@ export const AdminSidebar = () => {
             <Link
               key={link.href}
               href={link.href}
-              className={[styles.link, isActive ? styles.linkActive : ''].join(' ')}
+              className={[styles.link, isActive ? styles.linkActive : ''].join(
+                ' ',
+              )}
             >
               <Icon size={18} aria-hidden="true" />
               <span>{link.label}</span>

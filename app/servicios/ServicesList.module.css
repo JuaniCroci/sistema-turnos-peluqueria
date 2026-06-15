@@ -135,7 +135,9 @@
   height: 40px;
   display: inline-flex;
   align-items: center;
-  transition: border-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .clearBtn:hover {

@@ -68,6 +68,7 @@ Milestone actual: **Fase 2 (M3 del README original) — Servicios y categorías*
 ## Variables de entorno (api)
 
 `.env` (opcional, defaults razonables):
+
 ```
 PORT=3000
 NEXTAUTH_SECRET=...                # requerido en prod, en dev NextAuth lo autogenera
@@ -82,12 +83,14 @@ Pagos (Stripe/MercadoPago), emails/WhatsApp, upload de imagenes, calendario visu
 ## Anotaciones para extensiones futuras
 
 **MercadoPago / pagos:**
+
 - `appointments.status` tiene `CHECK` fijo a `('pending','confirmed','cancelled','completed')`. Cuando entren pagos va a faltar un estado tipo `pending_payment` o `paid`. Migracion chica cuando llegue el momento.
 - No hay endpoints de webhook en el spec. MercadoPago los necesita para confirmar pagos. Se agregan como rutas nuevas (no rompen nada existente).
 - El token de MP va en `.env` (sumar `MP_ACCESS_TOKEN` cuando se sume).
 - La plata en centavos (`price_cents`) ya esta bien para integrar MP sin conversion extra.
 
 **Notificaciones automaticas (email / WhatsApp):**
+
 - `users` no tiene campo `phone`. Si el canal es WhatsApp, sumar columna con `ALTER TABLE` cuando se sume. Migracion trivial.
 - Email podria sacarse del `email` que ya existe en `users`.
 - El disparador natural es el alta de turno y los cambios de estado. Se engancha en el handler de appointments (`app/api/appointments/route.ts`) despues del INSERT/UPDATE. No requiere refactor.

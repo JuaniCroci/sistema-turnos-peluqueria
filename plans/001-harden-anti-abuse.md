@@ -61,7 +61,7 @@ export async function verifyRecaptchaToken(
   token: string,
 ): Promise<{ success: boolean; score: number }> {
   const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-  if (!secretKey) return { success: true, score: 1.0 };   // <-- fail OPEN
+  if (!secretKey) return { success: true, score: 1.0 }; // <-- fail OPEN
   // ...fetch siteverify, return { success: data.success, score: data.score }
 }
 export const RECAPTCHA_THRESHOLD = 0.5;
@@ -71,14 +71,21 @@ export const RECAPTCHA_THRESHOLD = 0.5;
 
 ```ts
 const recaptchaToken = String(formData.get('g-recaptcha-response') ?? '');
-if (recaptchaToken) {                       // <-- skipped entirely if absent
+if (recaptchaToken) {
+  // <-- skipped entirely if absent
   const result = await verifyRecaptchaToken(recaptchaToken);
   if (!result.success || result.score < RECAPTCHA_THRESHOLD) {
-    return { error: 'No se pudo verificar que seas humano. Intentá de nuevo.', fieldErrors: {} };
+    return {
+      error: 'No se pudo verificar que seas humano. Intentá de nuevo.',
+      fieldErrors: {},
+    };
   }
 }
 const headersList = await headers();
-const ip = headersList.get('x-forwarded-for') ?? headersList.get('x-real-ip') ?? 'unknown';
+const ip =
+  headersList.get('x-forwarded-for') ??
+  headersList.get('x-real-ip') ??
+  'unknown';
 ```
 
 `app/api/auth/register/route.ts:34-41` (same pattern, JSON body, field
@@ -88,13 +95,20 @@ const ip = headersList.get('x-forwarded-for') ?? headersList.get('x-real-ip') ??
 if (parsed.data.recaptcha_token) {
   const result = await verifyRecaptchaToken(parsed.data.recaptcha_token);
   if (!result.success || result.score < RECAPTCHA_THRESHOLD) {
-    return errorResponse('VALIDATION_ERROR', 'No se pudo verificar que seas humano');
+    return errorResponse(
+      'VALIDATION_ERROR',
+      'No se pudo verificar que seas humano',
+    );
   }
 }
-const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown';
+const ip =
+  request.headers.get('x-forwarded-for') ??
+  request.headers.get('x-real-ip') ??
+  'unknown';
 ```
 
 **Conventions to match** (from reading the repo):
+
 - Error responses in route handlers use `errorResponse(code, message, details?)`
   from `lib/utils/api.ts` — never raw `NextResponse.json`. Available codes
   include `'RATE_LIMITED'` (429) and `'VALIDATION_ERROR'` (400).
@@ -106,7 +120,7 @@ const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real
 ## Commands you will need
 
 | Purpose   | Command          | Expected on success |
-|-----------|------------------|---------------------|
+| --------- | ---------------- | ------------------- |
 | Install   | `pnpm install`   | exit 0              |
 | Typecheck | `pnpm typecheck` | exit 0, no errors   |
 | Build     | `pnpm build`     | compiles, exit 0    |
@@ -121,6 +135,7 @@ const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real
 ## Scope
 
 **In scope:**
+
 - `lib/utils/recaptcha.ts`
 - `lib/utils/clientIp.ts` (create)
 - `app/register/actions.ts`
@@ -128,8 +143,9 @@ const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real
 - `lib/auth/config.ts`
 
 **Out of scope (do NOT touch):**
-- `lib/auth/users.ts` query logic — the throttle *query* is fine; only the IP
-  *value* passed into it changes, and that change happens at the call sites above.
+
+- `lib/auth/users.ts` query logic — the throttle _query_ is fine; only the IP
+  _value_ passed into it changes, and that change happens at the call sites above.
 - Deleting `app/api/auth/register/route.ts` — that's plan 008. Here you only
   harden it.
 - The `MAX_REGISTRATIONS_PER_IP` constant / window — tuning is a separate concern.
@@ -192,6 +208,7 @@ Create `lib/utils/clientIp.ts` exporting `getClientIp(headers: Headers): string`
   this value is spoofable and the throttle must move to an authenticated signal).
 
 Replace the three inline IP derivations:
+
 - `app/register/actions.ts:67` → `const ip = getClientIp(await headers());`
 - `app/api/auth/register/route.ts:41` → `const ip = getClientIp(request.headers);`
 - `lib/auth/config.ts:45` → use `getClientIp(headersList)`.

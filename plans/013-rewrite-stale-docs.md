@@ -28,14 +28,15 @@ makes the docs describe the system as it actually is.
 ## Current state — concrete inaccuracies to fix
 
 In `AGENTS.md`:
+
 - `:14` references `scripts/fetch-better-sqlite3-prebuild.mjs` — file does not
   exist.
 - `:15` "data/turnos.db gitignored" — no SQLite DB; storage is Supabase.
 - `:16` "next.config.ts declara serverExternalPackages: ['better-sqlite3']" —
   `next.config.ts` actually contains only `{ reactStrictMode: true }`.
-- `:33` ".env con AUTH_SECRET... DB_PATH" — `DB_PATH` is obsolete; real env is
+- `:33` ".env con AUTH*SECRET... DB_PATH" — `DB_PATH` is obsolete; real env is
   `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`,
-  `GOOGLE_CLIENT_ID/SECRET`, `RECAPTCHA_*`, NextAuth secrets.
+  `GOOGLE_CLIENT_ID/SECRET`, `RECAPTCHA*\*`, NextAuth secrets.
 - `:49` "better-sqlite3 en server: el modulo es nativo..." — gone; DB access is
   the Supabase JS client (`lib/supabase/server.ts`, service-role).
 - `:57` "better-sqlite3@^12.10.0 (sync)" in the stack list — not a dependency.
@@ -50,19 +51,21 @@ Google), `zod`, `bcryptjs`, `lucide-react`, `open-props`. Verification today:
 
 ## Commands you will need
 
-| Purpose   | Command          | Expected |
-|-----------|------------------|----------|
-| Build     | `pnpm build`     | exit 0 (docs don't affect build, sanity) |
+| Purpose | Command      | Expected                                 |
+| ------- | ------------ | ---------------------------------------- |
+| Build   | `pnpm build` | exit 0 (docs don't affect build, sanity) |
 
 ## Scope
 
 **In scope:**
+
 - `AGENTS.md` (rewrite the stale sections)
 - `README.md` (correct SQLite-era references; align env + commands)
 
 **Out of scope:**
-- Inventing process/policy not evidenced in the repo. Document what *is*, not what
-  *should be*.
+
+- Inventing process/policy not evidenced in the repo. Document what _is_, not what
+  _should be_.
 - The `plans/` directory docs — this plan's own index is maintained separately.
 
 ## Steps
@@ -71,6 +74,7 @@ Google), `zod`, `bcryptjs`, `lucide-react`, `open-props`. Verification today:
 
 Replace every `better-sqlite3` / SQLite / `DB_PATH` reference with the Supabase
 reality:
+
 - Data layer: Supabase Postgres via `@supabase/supabase-js`, accessed through the
   **service-role key** in `lib/supabase/server.ts` (bypasses RLS — note that the
   route handlers are the security boundary; cross-reference that RLS is enabled

@@ -2,13 +2,13 @@
 
 ## Stack post-migración
 
-| Capa | Tecnología |
-|---|---|
-| DB | Supabase PostgreSQL (vía `@supabase/supabase-js`) |
-| Auth | NextAuth v5 (JWT, Credentials) — se mantiene |
-| Queries | Supabase JS query builder (`.from().select()`) |
-| JOINs complejos | Query builder + helper `flattenRow()` |
-| Hosting | Vercel (serverless functions) |
+| Capa            | Tecnología                                        |
+| --------------- | ------------------------------------------------- |
+| DB              | Supabase PostgreSQL (vía `@supabase/supabase-js`) |
+| Auth            | NextAuth v5 (JWT, Credentials) — se mantiene      |
+| Queries         | Supabase JS query builder (`.from().select()`)    |
+| JOINs complejos | Query builder + helper `flattenRow()`             |
+| Hosting         | Vercel (serverless functions)                     |
 
 ## Fases
 
@@ -43,6 +43,7 @@
 ### Fase 5 — Migrar DB queries a Supabase JS + async
 
 Todas las funciones en `lib/db/*.ts` y `lib/auth/users.ts`:
+
 - Pasan de sync → async
 - Usan `supabase.from().select()` en vez de `db.prepare('SQL')`
 - Las queries con JOIN usan `flattenRow()`
@@ -63,14 +64,14 @@ Todas las funciones en `lib/db/*.ts` y `lib/auth/users.ts`:
 
 ## Archivos tocados
 
-| Acción | Archivos |
-|---|---|
-| Crear | `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/db/flatten.ts`, `scripts/init.sql` |
-| Eliminar | `scripts/fetch-better-sqlite3-prebuild.mjs` |
-| Reescribir (DB) | `connection.ts`, `migrations.ts`, `seed.ts`, `services.ts`, `categories.ts`, `appointments.ts` |
-| Reescribir (auth) | `users.ts`, `config.ts` |
-| Agregar await (routes) | 9 route handlers |
-| Agregar await (pages) | `servicios/page.tsx`, `servicios/[id]/page.tsx` |
-| Agregar await (actions) | `register/actions.ts` |
-| Modificar (config) | `package.json`, `next.config.ts`, `.env` |
-| Sin cambios | `middleware.ts`, `config.edge.ts`, `mis-turnos/page.tsx`, `admin/turnos/page.tsx` |
+| Acción                  | Archivos                                                                                       |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| Crear                   | `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/db/flatten.ts`, `scripts/init.sql`    |
+| Eliminar                | `scripts/fetch-better-sqlite3-prebuild.mjs`                                                    |
+| Reescribir (DB)         | `connection.ts`, `migrations.ts`, `seed.ts`, `services.ts`, `categories.ts`, `appointments.ts` |
+| Reescribir (auth)       | `users.ts`, `config.ts`                                                                        |
+| Agregar await (routes)  | 9 route handlers                                                                               |
+| Agregar await (pages)   | `servicios/page.tsx`, `servicios/[id]/page.tsx`                                                |
+| Agregar await (actions) | `register/actions.ts`                                                                          |
+| Modificar (config)      | `package.json`, `next.config.ts`, `.env`                                                       |
+| Sin cambios             | `middleware.ts`, `config.edge.ts`, `mis-turnos/page.tsx`, `admin/turnos/page.tsx`              |

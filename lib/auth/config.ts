@@ -42,8 +42,15 @@ export const authConfig: NextAuthConfig = {
       if (account?.provider === 'google') {
         try {
           const headersList = await headers();
-          const ip = headersList.get('x-forwarded-for') ?? headersList.get('x-real-ip') ?? 'unknown';
-          const dbUser = await findOrCreateGoogleUser(user.email ?? '', user.name, ip);
+          const ip =
+            headersList.get('x-forwarded-for') ??
+            headersList.get('x-real-ip') ??
+            'unknown';
+          const dbUser = await findOrCreateGoogleUser(
+            user.email ?? '',
+            user.name,
+            ip,
+          );
           user.id = String(dbUser.id);
           user.name = dbUser.username;
           (user as { role: Role }).role = dbUser.role;

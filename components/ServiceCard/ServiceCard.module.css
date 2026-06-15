@@ -72,9 +72,10 @@
   color: var(--color-fg-muted);
   opacity: 0;
   transform: translateX(-4px);
-  transition: opacity var(--transition-fast),
-              transform var(--transition-fast),
-              color var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast),
+    color var(--transition-fast);
   flex-shrink: 0;
 }
 

@@ -29,7 +29,7 @@ seeded account (`juani`) has the same problem at lower severity (client role).
 **Secret-handling note for the executor**: do NOT copy the hash value anywhere
 (not into commits, not into the PR description). Reference it only by location.
 Because the credential has been in git history, treat it as **burned** — the fix
-is removal *plus* ensuring no live environment still has that account with that
+is removal _plus_ ensuring no live environment still has that account with that
 password.
 
 ## Current state
@@ -46,17 +46,19 @@ credentials.
 ## Commands you will need
 
 | Purpose   | Command          | Expected |
-|-----------|------------------|----------|
+| --------- | ---------------- | -------- |
 | Typecheck | `pnpm typecheck` | exit 0   |
 | Build     | `pnpm build`     | exit 0   |
 
 ## Scope
 
 **In scope:**
+
 - `scripts/init.sql` (remove the user seed; add an admin-bootstrap note)
 - `scripts/create-admin.sql` (create — a parameterized, run-by-hand admin creator)
 
 **Out of scope:**
+
 - App auth code — unchanged.
 - The categories/services demo seed — keep (no credentials).
 - `lib/db/seed.ts` — that's plan 008 (dead code).
@@ -94,6 +96,7 @@ was intentionally removed for security.
 ### Step 3: Rotate / verify the live environment
 
 This step is operational, not code. In the PR description, instruct the owner to:
+
 - check whether `admin@barberia.test` (and `juani`) exist in the production DB;
 - if so, either delete them or reset their passwords to strong unique values;
 - create the real admin via `scripts/create-admin.sql`.

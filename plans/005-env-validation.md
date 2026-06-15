@@ -53,7 +53,7 @@ tool (used in every route handler). Server-only modules live under `lib/`.
 ## Commands you will need
 
 | Purpose   | Command          | Expected |
-|-----------|------------------|----------|
+| --------- | ---------------- | -------- |
 | Typecheck | `pnpm typecheck` | exit 0   |
 | Build     | `pnpm build`     | exit 0   |
 
@@ -66,12 +66,14 @@ tool (used in every route handler). Server-only modules live under `lib/`.
 ## Scope
 
 **In scope:**
+
 - `lib/config/env.ts` (create — zod-validated server env accessor)
 - `.env.example` (create)
 - Refactor the inline reads in `lib/supabase/server.ts`, `lib/supabase/client.ts`,
   `lib/utils/recaptcha.ts`, `lib/auth/config.edge.ts` to consume `lib/config/env.ts`.
 
 **Out of scope:**
+
 - `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` in client components — `NEXT_PUBLIC_*` is
   inlined at build time and validated differently; leave the client read as-is,
   just document it in `.env.example`.

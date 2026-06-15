@@ -57,12 +57,12 @@ Installed: `next@15.5.19` (`pnpm-lock.yaml:380`). `package.json` allows
 
 ## Commands you will need
 
-| Purpose      | Command                                            | Expected |
-|--------------|----------------------------------------------------|----------|
-| Codemod      | `npx @next/codemod@canary middleware-to-proxy .`   | renames file + function |
-| Typecheck    | `pnpm typecheck`                                    | exit 0   |
-| Build        | `pnpm build`                                        | exit 0   |
-| Dev          | `pnpm dev`                                          | :3000    |
+| Purpose   | Command                                          | Expected                |
+| --------- | ------------------------------------------------ | ----------------------- |
+| Codemod   | `npx @next/codemod@canary middleware-to-proxy .` | renames file + function |
+| Typecheck | `pnpm typecheck`                                 | exit 0                  |
+| Build     | `pnpm build`                                     | exit 0                  |
+| Dev       | `pnpm dev`                                       | :3000                   |
 
 ## Suggested executor toolkit
 
@@ -74,9 +74,11 @@ Installed: `next@15.5.19` (`pnpm-lock.yaml:380`). `package.json` allows
 ## Scope
 
 **In scope:**
+
 - Rename `middleware.ts` → `proxy.ts`, export name `middleware` → `proxy`.
 
 **Out of scope:**
+
 - Upgrading Next.js to 16 — that's a separate, larger change. This plan only does
   the file/convention rename, which works on 15.5 too.
 - Changing the `authorized` callback, the matcher, or the auth config split.
@@ -109,6 +111,7 @@ export. `pnpm typecheck` → exit 0.
 ### Step 3: Verify route protection still works
 
 `pnpm build` → exit 0, then `pnpm dev` and confirm:
+
 - visiting `/admin` while logged out → redirected to `/login`;
 - visiting `/mis-turnos` while logged out → redirected to `/login`;
 - an admin can reach `/admin`; a client cannot.

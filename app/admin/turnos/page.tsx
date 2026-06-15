@@ -2,7 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { AlertCircle, Check, X, RotateCcw, Plus, Calendar, Trash2 } from 'lucide-react';
+import {
+  AlertCircle,
+  Check,
+  X,
+  RotateCcw,
+  Plus,
+  Calendar,
+  Trash2,
+} from 'lucide-react';
 import { Badge } from '@/components/Badge/Badge';
 import { Button } from '@/components/Button/Button';
 import { formatPrice } from '@/lib/utils/format';
@@ -10,7 +18,10 @@ import type { AppointmentAdminRow } from '@/lib/db/appointments';
 import type { AppointmentStatus } from '@/lib/types';
 import styles from './AdminAppointments.module.css';
 
-const statusConfig: Record<string, { tone: 'warning' | 'success' | 'neutral' | 'danger' | 'info'; label: string }> = {
+const statusConfig: Record<
+  string,
+  { tone: 'warning' | 'success' | 'neutral' | 'danger' | 'info'; label: string }
+> = {
   pending: { tone: 'warning', label: 'Pendiente' },
   confirmed: { tone: 'success', label: 'Confirmado' },
   cancelled: { tone: 'neutral', label: 'Cancelado' },
@@ -40,7 +51,11 @@ function formatDate(iso: string): string {
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return d.toLocaleTimeString('es-AR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 }
 
 export default function AdminAppointmentsPage() {
@@ -48,7 +63,10 @@ export default function AdminAppointmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [changingStatus, setChangingStatus] = useState<{ id: number; status: AppointmentStatus } | null>(null);
+  const [changingStatus, setChangingStatus] = useState<{
+    id: number;
+    status: AppointmentStatus;
+  } | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const [fromDate, setFromDate] = useState(defaultFrom);
@@ -70,7 +88,8 @@ export default function AdminAppointmentsPage() {
       if (!res.ok) throw new Error('Error al cargar turnos');
       const json = await res.json();
       const sorted = (json.data ?? []).sort(
-        (a: AppointmentAdminRow, b: AppointmentAdminRow) => a.appointment_at.localeCompare(b.appointment_at),
+        (a: AppointmentAdminRow, b: AppointmentAdminRow) =>
+          a.appointment_at.localeCompare(b.appointment_at),
       );
       setAppointments(sorted);
     } catch (e) {
@@ -131,12 +150,12 @@ export default function AdminAppointmentsPage() {
         <div className={styles.header}>
           <div>
             <h1 className={styles.title}>Turnos reservados</h1>
-            <p className={styles.subtitle}>{appointments.length} turnos en el período seleccionado</p>
+            <p className={styles.subtitle}>
+              {appointments.length} turnos en el período seleccionado
+            </p>
           </div>
           <Link href="/admin/turnos/nuevo">
-            <Button iconLeft={<Calendar size={16} />}>
-              Agendar turno
-            </Button>
+            <Button iconLeft={<Calendar size={16} />}>Agendar turno</Button>
           </Link>
         </div>
 
@@ -144,7 +163,11 @@ export default function AdminAppointmentsPage() {
           <div className={styles.errorBox} role="alert">
             <AlertCircle size={16} aria-hidden="true" />
             <span>{actionError}</span>
-            <button className={styles.dismissBtn} onClick={() => setActionError(null)} aria-label="Cerrar">
+            <button
+              className={styles.dismissBtn}
+              onClick={() => setActionError(null)}
+              aria-label="Cerrar"
+            >
               <X size={14} />
             </button>
           </div>
@@ -225,14 +248,25 @@ export default function AdminAppointmentsPage() {
                   const isLoading = changingStatus?.id === apt.id;
                   return (
                     <tr key={apt.id}>
-                      <td className={styles.cellDate}>{formatDate(apt.appointment_at)}</td>
-                      <td className={styles.cellTime}>{formatTime(apt.appointment_at)}</td>
+                      <td className={styles.cellDate}>
+                        {formatDate(apt.appointment_at)}
+                      </td>
+                      <td className={styles.cellTime}>
+                        {formatTime(apt.appointment_at)}
+                      </td>
                       <td className={styles.cellClient}>
-                        {apt.client_name ?? apt.user_username ?? apt.user_email ?? 'Cliente sin cuenta'}
+                        {apt.client_name ??
+                          apt.user_username ??
+                          apt.user_email ??
+                          'Cliente sin cuenta'}
                       </td>
                       <td className={styles.cellService}>{apt.service_name}</td>
-                      <td className={styles.cellDuration}>{apt.service_duration_minutes} min</td>
-                      <td className={styles.cellPrice}>{formatPrice(apt.service_price_cents)}</td>
+                      <td className={styles.cellDuration}>
+                        {apt.service_duration_minutes} min
+                      </td>
+                      <td className={styles.cellPrice}>
+                        {formatPrice(apt.service_price_cents)}
+                      </td>
                       <td>
                         <Badge tone={cfg.tone}>{cfg.label}</Badge>
                       </td>
@@ -242,7 +276,9 @@ export default function AdminAppointmentsPage() {
                             <button
                               className={styles.actionBtn}
                               disabled={!!isLoading}
-                              onClick={() => handleStatusChange(apt.id, 'confirmed')}
+                              onClick={() =>
+                                handleStatusChange(apt.id, 'confirmed')
+                              }
                               title="Confirmar"
                             >
                               <Check size={12} aria-hidden="true" />
@@ -250,7 +286,9 @@ export default function AdminAppointmentsPage() {
                             <button
                               className={styles.actionBtnDanger}
                               disabled={!!isLoading}
-                              onClick={() => handleStatusChange(apt.id, 'cancelled')}
+                              onClick={() =>
+                                handleStatusChange(apt.id, 'cancelled')
+                              }
                               title="Cancelar"
                             >
                               <X size={12} aria-hidden="true" />
@@ -262,7 +300,9 @@ export default function AdminAppointmentsPage() {
                             <button
                               className={styles.actionBtn}
                               disabled={!!isLoading}
-                              onClick={() => handleStatusChange(apt.id, 'completed')}
+                              onClick={() =>
+                                handleStatusChange(apt.id, 'completed')
+                              }
                               title="Completar"
                             >
                               <Check size={12} aria-hidden="true" />
@@ -270,7 +310,9 @@ export default function AdminAppointmentsPage() {
                             <button
                               className={styles.actionBtnDanger}
                               disabled={!!isLoading}
-                              onClick={() => handleStatusChange(apt.id, 'cancelled')}
+                              onClick={() =>
+                                handleStatusChange(apt.id, 'cancelled')
+                              }
                               title="Cancelar"
                             >
                               <X size={12} aria-hidden="true" />
@@ -282,7 +324,9 @@ export default function AdminAppointmentsPage() {
                             <button
                               className={styles.actionBtn}
                               disabled={!!isLoading}
-                              onClick={() => handleStatusChange(apt.id, 'pending')}
+                              onClick={() =>
+                                handleStatusChange(apt.id, 'pending')
+                              }
                               title="Reabrir"
                             >
                               <RotateCcw size={12} aria-hidden="true" />

@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { findAllCategories, createCategory, findCategoryBySlug } from '@/lib/db/categories';
+import {
+  findAllCategories,
+  createCategory,
+  findCategoryBySlug,
+} from '@/lib/db/categories';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 
 const createSchema = z.object({
@@ -42,7 +46,11 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) {
-      return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Datos invalidos',
+        zodDetails(parsed.error),
+      );
     }
 
     const existing = await findCategoryBySlug(parsed.data.slug);

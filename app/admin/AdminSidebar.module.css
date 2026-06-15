@@ -27,7 +27,9 @@
   font-size: var(--font-size-sm);
   font-weight: var(--weight-medium);
   text-decoration: none;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .link:hover {

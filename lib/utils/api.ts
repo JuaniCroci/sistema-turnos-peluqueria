@@ -41,7 +41,9 @@ export const errorResponse = (
   return NextResponse.json(body, { status: statusForCode[code] });
 };
 
-export const zodDetails = (error: ZodError): Array<{ path: string; message: string }> => {
+export const zodDetails = (
+  error: ZodError,
+): Array<{ path: string; message: string }> => {
   return error.issues.map((issue: ZodIssue) => ({
     path: issue.path.join('.'),
     message: issue.message,

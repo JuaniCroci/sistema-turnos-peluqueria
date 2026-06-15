@@ -23,10 +23,20 @@ export default function GlobalError({
       }}
     >
       <Card padding="lg" style={{ maxWidth: 480, textAlign: 'center' }}>
-        <h2 style={{ fontFamily: 'var(--font-display)', marginBottom: 'var(--space-3)' }}>
+        <h2
+          style={{
+            fontFamily: 'var(--font-display)',
+            marginBottom: 'var(--space-3)',
+          }}
+        >
           Algo salió mal
         </h2>
-        <p style={{ color: 'var(--color-fg-muted)', marginBottom: 'var(--space-4)' }}>
+        <p
+          style={{
+            color: 'var(--color-fg-muted)',
+            marginBottom: 'var(--space-4)',
+          }}
+        >
           Ocurrió un error inesperado. Podés intentar de nuevo.
         </p>
         <button

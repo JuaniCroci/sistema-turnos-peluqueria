@@ -20,17 +20,17 @@ Escala definida: `--space-1` (4px) a `--space-16` (96px). Usar siempre tokens, n
 
 ## Paleta
 
-| Token | Light | Dark (preparado) |
-|-------|-------|-------------------|
-| `--color-bg` | `#fbfbf7` | `#1a1612` |
-| `--color-surface` | `#f5f3ee` | `#25201c` |
-| `--color-surface-2` | `#eeebe3` | `#2d2823` |
-| `--color-fg` | `#1a1612` | `#eeebe3` |
-| `--color-fg-muted` | `#6b6152` | `#a09886` |
-| `--color-accent` (bronce) | `#c17f3b` | `#d4955a` |
-| `--color-accent-secondary` (carbón) | `#2c2220` | `#3d302c` |
-| `--color-border` | `rgba(60,45,30,0.08)` | `rgba(255,235,210,0.06)` |
-| `--color-border-strong` | `rgba(60,45,30,0.16)` | `rgba(255,235,210,0.12)` |
+| Token                               | Light                 | Dark (preparado)         |
+| ----------------------------------- | --------------------- | ------------------------ |
+| `--color-bg`                        | `#fbfbf7`             | `#1a1612`                |
+| `--color-surface`                   | `#f5f3ee`             | `#25201c`                |
+| `--color-surface-2`                 | `#eeebe3`             | `#2d2823`                |
+| `--color-fg`                        | `#1a1612`             | `#eeebe3`                |
+| `--color-fg-muted`                  | `#6b6152`             | `#a09886`                |
+| `--color-accent` (bronce)           | `#c17f3b`             | `#d4955a`                |
+| `--color-accent-secondary` (carbón) | `#2c2220`             | `#3d302c`                |
+| `--color-border`                    | `rgba(60,45,30,0.08)` | `rgba(255,235,210,0.06)` |
+| `--color-border-strong`             | `rgba(60,45,30,0.16)` | `rgba(255,235,210,0.12)` |
 
 **Flag:** El dark mode está preparado en tokens.css pero **comentado**. Activarlo requiere descomentar el bloque `@media (prefers-color-scheme: dark)`.
 
@@ -50,6 +50,7 @@ Escala definida: `--space-1` (4px) a `--space-16` (96px). Usar siempre tokens, n
 ## Componentes
 
 ### Button
+
 - `primary`: bronce (`--color-accent`). Usar para CTAs principales.
 - `secondary`: carbón (`--color-accent-secondary`). Usar para acciones secundarias importantes.
 - `danger`: rojo barbería (`--color-danger`). Usar para acciones destructivas.
@@ -57,11 +58,13 @@ Escala definida: `--space-1` (4px) a `--space-16` (96px). Usar siempre tokens, n
 - Sin `variant="secondary"` en uso actual (definido pero disponible para futuro).
 
 ### Card
+
 - `padding`: sm (12px), md (20px), lg (24px), none.
 - `variant`: default (sin esquina), highlight (con esquina de acento).
 - `hoverable`: opcional, cambia fondo a surface-2 en hover.
 
 ### Input
+
 - Fondo: `var(--color-surface)`. Focus: borde `--color-accent` + `--shadow-focus` cálido.
 
 ## Lo que no está en el sistema

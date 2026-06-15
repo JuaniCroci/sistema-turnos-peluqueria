@@ -218,7 +218,10 @@
   background: var(--color-bg);
   color: var(--color-fg-muted);
   cursor: pointer;
-  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .actionBtn:hover {

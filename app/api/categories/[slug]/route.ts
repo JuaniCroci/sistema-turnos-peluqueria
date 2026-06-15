@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { findCategoryBySlug, findCategoryById, categoryHasServices, deleteCategoryById } from '@/lib/db/categories';
+import {
+  findCategoryBySlug,
+  findCategoryById,
+  categoryHasServices,
+  deleteCategoryById,
+} from '@/lib/db/categories';
 import { errorResponse } from '@/lib/utils/api';
 
 export async function GET(
@@ -42,7 +47,10 @@ export async function DELETE(
     }
 
     if (await categoryHasServices(category.id)) {
-      return errorResponse('CONFLICT', 'No se puede eliminar una categoria con servicios asociados');
+      return errorResponse(
+        'CONFLICT',
+        'No se puede eliminar una categoria con servicios asociados',
+      );
     }
 
     await deleteCategoryById(category.id);

@@ -10,7 +10,9 @@ export interface UserRow {
   role: Role;
 }
 
-export const findUserByEmail = async (email: string): Promise<UserRow | undefined> => {
+export const findUserByEmail = async (
+  email: string,
+): Promise<UserRow | undefined> => {
   const db = getDb();
   const { data, error } = await db
     .from('users')
@@ -21,7 +23,9 @@ export const findUserByEmail = async (email: string): Promise<UserRow | undefine
   return (data as UserRow | undefined) ?? undefined;
 };
 
-export const findUserByUsername = async (username: string): Promise<UserRow | undefined> => {
+export const findUserByUsername = async (
+  username: string,
+): Promise<UserRow | undefined> => {
   const db = getDb();
   const { data, error } = await db
     .from('users')
@@ -32,7 +36,9 @@ export const findUserByUsername = async (username: string): Promise<UserRow | un
   return (data as UserRow | undefined) ?? undefined;
 };
 
-export const findUserById = async (id: number): Promise<UserRow | undefined> => {
+export const findUserById = async (
+  id: number,
+): Promise<UserRow | undefined> => {
   const db = getDb();
   const { data, error } = await db
     .from('users')
@@ -92,7 +98,9 @@ export const createUser = async (input: CreateUserInput): Promise<UserRow> => {
 export const RECENT_WINDOW_MS = 24 * 60 * 60 * 1000;
 export const MAX_REGISTRATIONS_PER_IP = 4;
 
-export const countRecentRegistrationsByIp = async (ip: string): Promise<number> => {
+export const countRecentRegistrationsByIp = async (
+  ip: string,
+): Promise<number> => {
   const db = getDb();
   const since = new Date(Date.now() - RECENT_WINDOW_MS).toISOString();
   const { count, error } = await db

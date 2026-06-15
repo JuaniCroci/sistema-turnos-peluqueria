@@ -47,7 +47,7 @@ export const getOccupiedSlots = async (date: string): Promise<string[]> => {
   const { data, error } = await db
     .from('appointments')
     .select(`appointment_at, service:service_id (duration_minutes)`)
-    .gte('appointment_at', `${date}T00:00:00`)     // <-- no timezone offset
+    .gte('appointment_at', `${date}T00:00:00`) // <-- no timezone offset
     .lt('appointment_at', `${date}T23:59:59`)
     .in('status', ['pending', 'confirmed']);
   // ...
@@ -85,13 +85,17 @@ check**:
 if (!isAdmin) {
   const appointmentAt = parsed.data.appointment_at;
   if (new Date(appointmentAt) <= new Date()) {
-    return errorResponse('VALIDATION_ERROR', 'No se puede reservar un turno en el pasado');
+    return errorResponse(
+      'VALIDATION_ERROR',
+      'No se puede reservar un turno en el pasado',
+    );
   }
   // ...activeCount limit, then createAppointment
 }
 ```
 
 **Conventions to match:**
+
 - `appointment_at` is stored as Postgres `TIMESTAMPTZ` (UTC instant). See
   `scripts/init.sql:37`.
 - Money/format helpers live in `lib/utils/format.ts`; new shared helpers follow
@@ -100,12 +104,12 @@ if (!isAdmin) {
 
 ## Commands you will need
 
-| Purpose             | Command                | Expected on success |
-|---------------------|------------------------|---------------------|
-| Install             | `pnpm install`         | exit 0              |
-| Typecheck           | `pnpm typecheck`       | exit 0              |
-| Build               | `pnpm build`           | exit 0              |
-| Run with UTC clock  | `TZ=UTC pnpm dev`      | dev server on :3000 |
+| Purpose            | Command           | Expected on success |
+| ------------------ | ----------------- | ------------------- |
+| Install            | `pnpm install`    | exit 0              |
+| Typecheck          | `pnpm typecheck`  | exit 0              |
+| Build              | `pnpm build`      | exit 0              |
+| Run with UTC clock | `TZ=UTC pnpm dev` | dev server on :3000 |
 
 ## Suggested executor toolkit
 
@@ -116,6 +120,7 @@ if (!isAdmin) {
 ## Scope
 
 **In scope:**
+
 - `lib/config/business.ts` (create — business timezone + open/close hours + slot size)
 - `lib/utils/datetime.ts` (create — timezone-aware helpers)
 - `lib/db/appointments.ts` (`getOccupiedSlots`)
@@ -123,8 +128,9 @@ if (!isAdmin) {
 - `app/mis-turnos/nuevo/page.tsx` (derive `TIME_SLOTS` from the shared config)
 
 **Out of scope (do NOT touch):**
-- The DB unique-slot index or `hasActiveAppointmentAt` — slot *uniqueness* is
-  correct; this plan is about *display* and *validation* of times.
+
+- The DB unique-slot index or `hasActiveAppointmentAt` — slot _uniqueness_ is
+  correct; this plan is about _display_ and _validation_ of times.
 - Admin booking (`skipPastCheck` path) — admins intentionally bypass time rules.
 - Adding a date-picker library — keep the native `<input type="date">` + `<select>`.
 
@@ -138,8 +144,8 @@ Create `lib/config/business.ts`:
 // Zona horaria del negocio. La DB guarda TIMESTAMPTZ (UTC); todo el cálculo
 // de slots se hace contra esta zona, no contra la del servidor.
 export const BUSINESS_TZ = 'America/Argentina/Buenos_Aires';
-export const OPEN_HOUR = 9;    // 09:00 inclusive
-export const CLOSE_HOUR = 20;  // último slot empieza antes de las 20:00
+export const OPEN_HOUR = 9; // 09:00 inclusive
+export const CLOSE_HOUR = 20; // último slot empieza antes de las 20:00
 export const SLOT_MINUTES = 30;
 ```
 
@@ -165,6 +171,7 @@ correct if the owner later changes `BUSINESS_TZ`).
 ### Step 3: Fix `getOccupiedSlots`
 
 In `lib/db/appointments.ts`:
+
 - Replace the `.gte('appointment_at', `${date}T00:00:00`)` / `.lt(... T23:59:59)`
   bounds with `utcRangeForLocalDate(date)` → `.gte(fromIso).lt(toIso)`.
 - Replace `aptDate.getHours()*60 + aptDate.getMinutes()` with

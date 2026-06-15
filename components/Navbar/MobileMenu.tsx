@@ -4,7 +4,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
-import { X, LogIn, UserPlus, Calendar, LayoutDashboard, CalendarPlus } from 'lucide-react';
+import {
+  X,
+  LogIn,
+  UserPlus,
+  Calendar,
+  LayoutDashboard,
+  CalendarPlus,
+} from 'lucide-react';
 import { LogoutButton } from './LogoutButton';
 import type { NavUser } from './Navbar';
 import styles from './MobileMenu.module.css';
@@ -86,7 +93,10 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
         <nav className={styles.nav}>
           <Link
             href="/servicios"
-            className={[styles.link, isActivePath(pathname, '/servicios') ? styles.active : ''].join(' ')}
+            className={[
+              styles.link,
+              isActivePath(pathname, '/servicios') ? styles.active : '',
+            ].join(' ')}
             onClick={onClose}
           >
             <ScissorsIcon /> Servicios
@@ -96,7 +106,12 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
               {isAdmin ? (
                 <Link
                   href="/admin/turnos"
-                  className={[styles.link, isActivePath(pathname, '/admin/turnos') ? styles.active : ''].join(' ')}
+                  className={[
+                    styles.link,
+                    isActivePath(pathname, '/admin/turnos')
+                      ? styles.active
+                      : '',
+                  ].join(' ')}
                   onClick={onClose}
                 >
                   <Calendar /> Turnos agendados
@@ -105,14 +120,24 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
                 <>
                   <Link
                     href="/mis-turnos"
-                    className={[styles.link, isActivePath(pathname, '/mis-turnos') ? styles.active : ''].join(' ')}
+                    className={[
+                      styles.link,
+                      isActivePath(pathname, '/mis-turnos')
+                        ? styles.active
+                        : '',
+                    ].join(' ')}
                     onClick={onClose}
                   >
                     <Calendar /> Mis turnos
                   </Link>
                   <Link
                     href="/mis-turnos/nuevo"
-                    className={[styles.link, isActivePath(pathname, '/mis-turnos/nuevo') ? styles.active : ''].join(' ')}
+                    className={[
+                      styles.link,
+                      isActivePath(pathname, '/mis-turnos/nuevo')
+                        ? styles.active
+                        : '',
+                    ].join(' ')}
                     onClick={onClose}
                   >
                     <CalendarPlus /> Reservar
@@ -125,14 +150,20 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
             <>
               <Link
                 href="/login"
-                className={[styles.link, isActivePath(pathname, '/login') ? styles.active : ''].join(' ')}
+                className={[
+                  styles.link,
+                  isActivePath(pathname, '/login') ? styles.active : '',
+                ].join(' ')}
                 onClick={onClose}
               >
                 <LogIn /> Ingresar
               </Link>
               <Link
                 href="/register"
-                className={[styles.link, isActivePath(pathname, '/register') ? styles.active : ''].join(' ')}
+                className={[
+                  styles.link,
+                  isActivePath(pathname, '/register') ? styles.active : '',
+                ].join(' ')}
                 onClick={onClose}
               >
                 <UserPlus /> Registrarse
@@ -147,7 +178,17 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
 };
 
 const ScissorsIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
     <circle cx="6" cy="6" r="3" />
     <path d="M8.12 8.12 12 12" />
     <path d="M20 4 8.12 15.88" />

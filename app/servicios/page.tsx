@@ -8,26 +8,33 @@ import styles from './ServicesList.module.css';
 
 export const metadata: Metadata = {
   title: 'Servicios · Sistema de Turnos — Peluquería',
-  description: 'Explorá nuestros servicios de peluquería: cortes, barba, coloración y tratamientos.',
+  description:
+    'Explorá nuestros servicios de peluquería: cortes, barba, coloración y tratamientos.',
 };
 
 interface ServicesListPageProps {
   searchParams: Promise<{ q?: string; page?: string }>;
 }
 
-export default async function ServicesListPage({ searchParams }: ServicesListPageProps) {
+export default async function ServicesListPage({
+  searchParams,
+}: ServicesListPageProps) {
   const { q, page: pageStr } = await searchParams;
   const currentPage = Math.max(1, Number(pageStr) || 1);
 
   const result = await findServices({ q, page: currentPage, limit: 10 });
 
   const { data: services, pagination } = result;
-  const totalPages = Math.max(1, Math.ceil(pagination.total / pagination.limit));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(pagination.total / pagination.limit),
+  );
 
   const buildHref = (overrides: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
     const nextQ = overrides.q !== undefined ? overrides.q : q;
-    const nextPage = overrides.page !== undefined ? overrides.page : String(currentPage);
+    const nextPage =
+      overrides.page !== undefined ? overrides.page : String(currentPage);
     if (nextQ) params.set('q', nextQ);
     if (nextPage && nextPage !== '1') params.set('page', nextPage);
     const qs = params.toString();
@@ -44,9 +51,18 @@ export default async function ServicesListPage({ searchParams }: ServicesListPag
           </p>
         </div>
 
-        <form className={styles.filters} method="GET" action="/servicios" role="search">
+        <form
+          className={styles.filters}
+          method="GET"
+          action="/servicios"
+          role="search"
+        >
           <div className={styles.searchWrapper}>
-            <Search size={16} className={styles.searchIcon} aria-hidden="true" />
+            <Search
+              size={16}
+              className={styles.searchIcon}
+              aria-hidden="true"
+            />
             <input
               type="search"
               name="q"
@@ -57,7 +73,9 @@ export default async function ServicesListPage({ searchParams }: ServicesListPag
             />
           </div>
 
-          <button type="submit" className={styles.submitBtn}>Filtrar</button>
+          <button type="submit" className={styles.submitBtn}>
+            Filtrar
+          </button>
 
           {q && (
             <Link href="/servicios" className={styles.clearBtn}>
@@ -70,7 +88,8 @@ export default async function ServicesListPage({ searchParams }: ServicesListPag
           <div className={styles.empty}>
             <p className={styles.emptyTitle}>Sin resultados</p>
             <p className={styles.emptyDesc}>
-              No encontramos servicios con esos filtros. Intenta con otros terminos.
+              No encontramos servicios con esos filtros. Intenta con otros
+              terminos.
             </p>
           </div>
         ) : (

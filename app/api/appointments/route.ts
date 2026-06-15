@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { findAppointments, findAppointmentById, createAppointment, countActiveAppointments } from '@/lib/db/appointments';
+import {
+  findAppointments,
+  findAppointmentById,
+  createAppointment,
+  countActiveAppointments,
+} from '@/lib/db/appointments';
 import { findServiceById } from '@/lib/db/services';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 
@@ -16,7 +21,9 @@ const listQuerySchema = z.object({
 
 const createSchema = z.object({
   service_id: z.number().int().positive('El servicio es requerido'),
-  appointment_at: z.string().datetime({ message: 'Formato de fecha ISO inválido' }),
+  appointment_at: z
+    .string()
+    .datetime({ message: 'Formato de fecha ISO inválido' }),
   user_id: z.coerce.number().int().positive().optional(),
   client_name: z.string().min(1).max(200).optional(),
   notes: z.string().max(500).optional(),
@@ -31,11 +38,17 @@ export async function GET(request: Request): Promise<NextResponse> {
 
     const { searchParams } = new URL(request.url);
     const raw: Record<string, string> = {};
-    searchParams.forEach((value, key) => { raw[key] = value; });
+    searchParams.forEach((value, key) => {
+      raw[key] = value;
+    });
 
     const parsed = listQuerySchema.safeParse(raw);
     if (!parsed.success) {
-      return errorResponse('VALIDATION_ERROR', 'Parametros de busqueda invalidos', zodDetails(parsed.error));
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Parametros de busqueda invalidos',
+        zodDetails(parsed.error),
+      );
     }
 
     const isAdmin = session.user.role === 'admin';
@@ -77,16 +90,26 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) {
-      return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Datos invalidos',
+        zodDetails(parsed.error),
+      );
     }
 
     const service = await findServiceById(parsed.data.service_id);
     if (!service) {
-      return errorResponse('VALIDATION_ERROR', 'El servicio especificado no existe');
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'El servicio especificado no existe',
+      );
     }
 
     if (!service.active) {
-      return errorResponse('VALIDATION_ERROR', 'El servicio no esta disponible');
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'El servicio no esta disponible',
+      );
     }
 
     const isAdmin = session.user.role === 'admin';
@@ -94,12 +117,20 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (!isAdmin) {
       const appointmentAt = parsed.data.appointment_at;
       if (new Date(appointmentAt) <= new Date()) {
-        return errorResponse('VALIDATION_ERROR', 'No se puede reservar un turno en el pasado');
+        return errorResponse(
+          'VALIDATION_ERROR',
+          'No se puede reservar un turno en el pasado',
+        );
       }
 
-      const activeCount = await countActiveAppointments(Number(session.user.id));
+      const activeCount = await countActiveAppointments(
+        Number(session.user.id),
+      );
       if (activeCount >= 2) {
-        return errorResponse('LIMIT_EXCEEDED', 'Ya alcanzaste el límite de 2 turnos activos. Cancelá uno para poder reservar otro.');
+        return errorResponse(
+          'LIMIT_EXCEEDED',
+          'Ya alcanzaste el límite de 2 turnos activos. Cancelá uno para poder reservar otro.',
+        );
       }
 
       try {
@@ -123,11 +154,17 @@ export async function POST(request: Request): Promise<NextResponse> {
     const clientName = parsed.data.client_name;
 
     if (targetUserId !== undefined && clientName) {
-      return errorResponse('VALIDATION_ERROR', 'Elegi cliente registrado O nombre, no ambos');
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Elegi cliente registrado O nombre, no ambos',
+      );
     }
 
     if (targetUserId === undefined && !clientName) {
-      return errorResponse('VALIDATION_ERROR', 'Debes especificar un cliente registrado o un nombre');
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Debes especificar un cliente registrado o un nombre',
+      );
     }
 
     const appointmentAt = parsed.data.appointment_at;

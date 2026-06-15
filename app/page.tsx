@@ -27,12 +27,16 @@ export default async function HomePage() {
               <Link href="/admin/turnos" className={styles.adminCard}>
                 <ListTodo size={24} aria-hidden="true" />
                 <span className={styles.adminCardTitle}>Turnos agendados</span>
-                <span className={styles.adminCardDesc}>Ver y gestionar turnos por día</span>
+                <span className={styles.adminCardDesc}>
+                  Ver y gestionar turnos por día
+                </span>
               </Link>
               <Link href="/admin/servicios" className={styles.adminCard}>
                 <Scissors size={24} aria-hidden="true" />
                 <span className={styles.adminCardTitle}>Servicios</span>
-                <span className={styles.adminCardDesc}>Administrar el catálogo de servicios</span>
+                <span className={styles.adminCardDesc}>
+                  Administrar el catálogo de servicios
+                </span>
               </Link>
             </div>
           </div>
@@ -45,9 +49,7 @@ export default async function HomePage() {
     <main className={styles.root}>
       <section className={styles.hero}>
         <div className={styles.heroInner}>
-          <h1 className={styles.title}>
-            Reservá tu turno en segundos.
-          </h1>
+          <h1 className={styles.title}>Reservá tu turno en segundos.</h1>
           <p className={styles.subtitle}>
             Elegí el servicio, la fecha y listo. Confirmación al instante.
           </p>

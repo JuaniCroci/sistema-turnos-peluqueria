@@ -18,36 +18,48 @@ export interface ServiceListResult {
   };
 }
 
-export const findServices = cache(async (options: ServiceListOptions): Promise<ServiceListResult> => {
-  const db = getDb();
-  let query = db.from('services').select('*', { count: 'exact' });
+export const findServices = cache(
+  async (options: ServiceListOptions): Promise<ServiceListResult> => {
+    const db = getDb();
+    let query = db.from('services').select('*', { count: 'exact' });
 
-  if (!options.includeInactive) {
-    query = query.eq('active', true);
-  }
+    if (!options.includeInactive) {
+      query = query.eq('active', true);
+    }
 
-  if (options.q) {
-    query = query.ilike('name', `%${options.q}%`);
-  }
+    if (options.q) {
+      query = query.ilike('name', `%${options.q}%`);
+    }
 
-  const offset = (options.page - 1) * options.limit;
-  const { data, count, error } = await query
-    .order('name')
-    .range(offset, offset + options.limit - 1);
+    const offset = (options.page - 1) * options.limit;
+    const { data, count, error } = await query
+      .order('name')
+      .range(offset, offset + options.limit - 1);
 
-  if (error) throw error;
-  return {
-    data: (data ?? []) as Service[],
-    pagination: { page: options.page, limit: options.limit, total: count ?? 0 },
-  };
-});
+    if (error) throw error;
+    return {
+      data: (data ?? []) as Service[],
+      pagination: {
+        page: options.page,
+        limit: options.limit,
+        total: count ?? 0,
+      },
+    };
+  },
+);
 
-export const findServiceById = cache(async (id: number): Promise<Service | undefined> => {
-  const db = getDb();
-  const { data, error } = await db.from('services').select('*').eq('id', id).maybeSingle();
-  if (error) throw error;
-  return (data as Service | undefined) ?? undefined;
-});
+export const findServiceById = cache(
+  async (id: number): Promise<Service | undefined> => {
+    const db = getDb();
+    const { data, error } = await db
+      .from('services')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw error;
+    return (data as Service | undefined) ?? undefined;
+  },
+);
 
 export interface CreateServiceInput {
   category_id: number;
@@ -57,7 +69,9 @@ export interface CreateServiceInput {
   price_cents: number;
 }
 
-export const createService = async (input: CreateServiceInput): Promise<Service> => {
+export const createService = async (
+  input: CreateServiceInput,
+): Promise<Service> => {
   const db = getDb();
   const { data, error } = await db
     .from('services')
@@ -84,13 +98,17 @@ export interface UpdateServiceInput {
   price_cents?: number;
 }
 
-export const updateService = async (id: number, input: UpdateServiceInput): Promise<Service> => {
+export const updateService = async (
+  id: number,
+  input: UpdateServiceInput,
+): Promise<Service> => {
   const db = getDb();
   const updates: Record<string, unknown> = {};
   if (input.category_id !== undefined) updates.category_id = input.category_id;
   if (input.name !== undefined) updates.name = input.name;
   if (input.description !== undefined) updates.description = input.description;
-  if (input.duration_minutes !== undefined) updates.duration_minutes = input.duration_minutes;
+  if (input.duration_minutes !== undefined)
+    updates.duration_minutes = input.duration_minutes;
   if (input.price_cents !== undefined) updates.price_cents = input.price_cents;
 
   if (Object.keys(updates).length === 0) {
@@ -112,8 +130,9 @@ export const updateService = async (id: number, input: UpdateServiceInput): Prom
 
 export const softDeleteService = async (id: number): Promise<void> => {
   const db = getDb();
-  const { error } = await db.from('services').update({ active: false }).eq('id', id);
+  const { error } = await db
+    .from('services')
+    .update({ active: false })
+    .eq('id', id);
   if (error) throw error;
 };
-
-

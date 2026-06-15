@@ -16,8 +16,15 @@ const SIZE_MAP: Record<SpinnerSize, number> = {
 
 export const Spinner = ({ size = 'md', label = 'Cargando' }: SpinnerProps) => {
   return (
-    <span className={[styles.spinner, styles[`size-${size}`]].join(' ')} role="status">
-      <Loader size={SIZE_MAP[size]} className={styles.icon} aria-hidden="true" />
+    <span
+      className={[styles.spinner, styles[`size-${size}`]].join(' ')}
+      role="status"
+    >
+      <Loader
+        size={SIZE_MAP[size]}
+        className={styles.icon}
+        aria-hidden="true"
+      />
       <span className={styles.srOnly}>{label}</span>
     </span>
   );

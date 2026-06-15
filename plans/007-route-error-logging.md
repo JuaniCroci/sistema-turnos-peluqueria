@@ -37,6 +37,7 @@ The pattern repeats across all handlers, e.g. `app/api/appointments/route.ts:59-
 ```
 
 Affected files (every `route.ts` under `app/api/`):
+
 - `app/api/appointments/route.ts`, `app/api/appointments/[id]/route.ts`,
   `app/api/appointments/[id]/status/route.ts`, `app/api/appointments/slots/route.ts`
 - `app/api/services/route.ts`, `app/api/services/[id]/route.ts`
@@ -53,18 +54,20 @@ Comments/strings in Spanish. The runtime is Node (App Router handlers), so
 ## Commands you will need
 
 | Purpose   | Command          | Expected |
-|-----------|------------------|----------|
+| --------- | ---------------- | -------- |
 | Typecheck | `pnpm typecheck` | exit 0   |
 | Build     | `pnpm build`     | exit 0   |
 
 ## Scope
 
 **In scope:**
+
 - `lib/utils/logger.ts` (create — minimal structured logger)
 - The ten `route.ts` files listed above (bind the error and log it before
   returning the generic response).
 
 **Out of scope:**
+
 - Adding a logging dependency (pino/winston) — keep it to `console.error` with a
   structured payload; a logging library is a separate decision.
 - Changing any response body or status — clients must still receive the generic

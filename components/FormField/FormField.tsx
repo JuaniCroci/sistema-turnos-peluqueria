@@ -9,7 +9,13 @@ interface FormFieldProps {
   children: ReactNode;
 }
 
-export const FormField = ({ label, htmlFor, hint, error, children }: FormFieldProps) => {
+export const FormField = ({
+  label,
+  htmlFor,
+  hint,
+  error,
+  children,
+}: FormFieldProps) => {
   return (
     <div className={styles.field}>
       <label className={styles.label} htmlFor={htmlFor}>

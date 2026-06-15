@@ -12,7 +12,9 @@ interface RegisterPageProps {
   searchParams: Promise<{ callbackUrl?: string }>;
 }
 
-export default async function RegisterPage({ searchParams }: RegisterPageProps) {
+export default async function RegisterPage({
+  searchParams,
+}: RegisterPageProps) {
   const { callbackUrl } = await searchParams;
   const session = await auth();
   if (session?.user) {
@@ -25,7 +27,8 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
         <header className={styles.header}>
           <h1 className={styles.title}>Crear cuenta</h1>
           <p className={styles.subtitle}>
-            Registrate para reservar turnos y ver tu historial. La cuenta se crea como cliente.
+            Registrate para reservar turnos y ver tu historial. La cuenta se
+            crea como cliente.
           </p>
         </header>
         <RegisterForm callbackUrl={callbackUrl} />

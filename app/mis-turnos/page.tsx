@@ -2,14 +2,24 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, XCircle, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  XCircle,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { Badge } from '@/components/Badge/Badge';
 import { Button } from '@/components/Button/Button';
 import type { AppointmentAdminRow } from '@/lib/db/appointments';
 import { formatLongDate, formatTime, formatPrice } from '@/lib/utils/format';
 import styles from './MyAppointments.module.css';
 
-const statusConfig: Record<string, { tone: 'warning' | 'success' | 'neutral' | 'danger' | 'info'; label: string }> = {
+const statusConfig: Record<
+  string,
+  { tone: 'warning' | 'success' | 'neutral' | 'danger' | 'info'; label: string }
+> = {
   pending: { tone: 'warning', label: 'Pendiente' },
   confirmed: { tone: 'success', label: 'Confirmado' },
   cancelled: { tone: 'neutral', label: 'Cancelado' },
@@ -37,7 +47,14 @@ export default function MyAppointmentsPage() {
       if (!res.ok) throw new Error('Error al cargar turnos');
       const json = await res.json();
       setAppointments(json.data ?? []);
-      setTotalPages(Math.max(1, Math.ceil((json.pagination?.total ?? 0) / (json.pagination?.limit ?? 20))));
+      setTotalPages(
+        Math.max(
+          1,
+          Math.ceil(
+            (json.pagination?.total ?? 0) / (json.pagination?.limit ?? 20),
+          ),
+        ),
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error desconocido');
     } finally {
@@ -98,9 +115,15 @@ export default function MyAppointmentsPage() {
           </div>
         ) : appointments.length === 0 ? (
           <div className={styles.empty}>
-            <Calendar size={48} className={styles.emptyIcon} aria-hidden="true" />
+            <Calendar
+              size={48}
+              className={styles.emptyIcon}
+              aria-hidden="true"
+            />
             <p className={styles.emptyTitle}>Sin turnos</p>
-            <p className={styles.emptyDesc}>Todavia no reservaste ningun turno.</p>
+            <p className={styles.emptyDesc}>
+              Todavia no reservaste ningun turno.
+            </p>
             <Button onClick={() => router.push('/mis-turnos/nuevo')}>
               Reservar turno
             </Button>
@@ -110,14 +133,22 @@ export default function MyAppointmentsPage() {
             <div className={styles.list}>
               {appointments.map((apt) => {
                 const cfg = getStatusConfig(apt.status);
-                const canCancel = apt.status === 'pending' || apt.status === 'confirmed';
+                const canCancel =
+                  apt.status === 'pending' || apt.status === 'confirmed';
                 return (
-                  <div key={apt.id} className={`${styles.card} ${apt.status === 'cancelled' ? styles.cancelledCard : ''}`}>
+                  <div
+                    key={apt.id}
+                    className={`${styles.card} ${apt.status === 'cancelled' ? styles.cancelledCard : ''}`}
+                  >
                     <div className={styles.cardHeader}>
                       <div className={styles.serviceInfo}>
-                        <h3 className={styles.serviceName}>{apt.service_name}</h3>
+                        <h3 className={styles.serviceName}>
+                          {apt.service_name}
+                        </h3>
                         {apt.category_name && (
-                          <span className={styles.categoryName}>{apt.category_name}</span>
+                          <span className={styles.categoryName}>
+                            {apt.category_name}
+                          </span>
                         )}
                       </div>
                       <Badge tone={cfg.tone}>{cfg.label}</Badge>
@@ -137,9 +168,7 @@ export default function MyAppointmentsPage() {
                       </span>
                     </div>
 
-                    {apt.notes && (
-                      <p className={styles.notes}>{apt.notes}</p>
-                    )}
+                    {apt.notes && <p className={styles.notes}>{apt.notes}</p>}
 
                     {canCancel && (
                       <div className={styles.cardActions}>

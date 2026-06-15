@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { findAppointmentById, updateAppointmentStatus, hasActiveAppointmentAt } from '@/lib/db/appointments';
+import {
+  findAppointmentById,
+  updateAppointmentStatus,
+  hasActiveAppointmentAt,
+} from '@/lib/db/appointments';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 import type { AppointmentStatus } from '@/lib/types';
 
@@ -54,7 +58,11 @@ export async function PATCH(
 
     const parsed = patchSchema.safeParse(body);
     if (!parsed.success) {
-      return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Datos invalidos',
+        zodDetails(parsed.error),
+      );
     }
 
     const newStatus = parsed.data.status;
@@ -73,9 +81,15 @@ export async function PATCH(
 
     // Al reabrir un turno cancelado, verificar que el slot siga disponible
     if (newStatus === 'pending' && appointment.status === 'cancelled') {
-      const slotTaken = await hasActiveAppointmentAt(appointment.appointment_at, id);
+      const slotTaken = await hasActiveAppointmentAt(
+        appointment.appointment_at,
+        id,
+      );
       if (slotTaken) {
-        return errorResponse('CONFLICT', 'El horario ya fue ocupado por otro turno');
+        return errorResponse(
+          'CONFLICT',
+          'El horario ya fue ocupado por otro turno',
+        );
       }
     }
 

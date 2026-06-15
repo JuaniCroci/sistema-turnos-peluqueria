@@ -60,8 +60,9 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-strong);
   background: transparent;
-  transition: background var(--transition-fast),
-              border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .homeLink:hover {

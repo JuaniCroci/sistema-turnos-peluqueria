@@ -24,11 +24,17 @@ export async function GET(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const raw: Record<string, string> = {};
-    searchParams.forEach((value, key) => { raw[key] = value; });
+    searchParams.forEach((value, key) => {
+      raw[key] = value;
+    });
 
     const parsed = listQuerySchema.safeParse(raw);
     if (!parsed.success) {
-      return errorResponse('VALIDATION_ERROR', 'Parametros de busqueda invalidos', zodDetails(parsed.error));
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Parametros de busqueda invalidos',
+        zodDetails(parsed.error),
+      );
     }
 
     const session = await auth();
@@ -67,12 +73,19 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) {
-      return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Datos invalidos',
+        zodDetails(parsed.error),
+      );
     }
 
     const category = await findCategoryById(parsed.data.category_id);
     if (!category) {
-      return errorResponse('VALIDATION_ERROR', 'La categoria especificada no existe');
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'La categoria especificada no existe',
+      );
     }
 
     const service = await createService(parsed.data);

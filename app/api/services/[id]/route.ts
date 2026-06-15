@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { findServiceById, updateService, softDeleteService } from '@/lib/db/services';
+import {
+  findServiceById,
+  updateService,
+  softDeleteService,
+} from '@/lib/db/services';
 import { findCategoryById } from '@/lib/db/categories';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 
@@ -9,8 +13,16 @@ const updateSchema = z.object({
   category_id: z.number().int().positive().optional(),
   name: z.string().min(1, 'El nombre es requerido').max(200).optional(),
   description: z.string().max(1000).nullable().optional(),
-  duration_minutes: z.number().int().positive('La duracion debe ser mayor a 0').optional(),
-  price_cents: z.number().int().min(0, 'El precio no puede ser negativo').optional(),
+  duration_minutes: z
+    .number()
+    .int()
+    .positive('La duracion debe ser mayor a 0')
+    .optional(),
+  price_cents: z
+    .number()
+    .int()
+    .min(0, 'El precio no puede ser negativo')
+    .optional(),
 });
 
 export async function GET(
@@ -68,13 +80,20 @@ export async function PUT(
 
     const parsed = updateSchema.safeParse(body);
     if (!parsed.success) {
-      return errorResponse('VALIDATION_ERROR', 'Datos invalidos', zodDetails(parsed.error));
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Datos invalidos',
+        zodDetails(parsed.error),
+      );
     }
 
     if (parsed.data.category_id !== undefined) {
       const category = await findCategoryById(parsed.data.category_id);
       if (!category) {
-        return errorResponse('VALIDATION_ERROR', 'La categoria especificada no existe');
+        return errorResponse(
+          'VALIDATION_ERROR',
+          'La categoria especificada no existe',
+        );
       }
     }
 

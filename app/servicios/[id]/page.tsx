@@ -8,7 +8,9 @@ import { formatDuration, formatPrice } from '@/lib/utils/format';
 import { auth } from '@/lib/auth';
 import styles from './ServiceDetail.module.css';
 
-export async function generateMetadata({ params }: ServiceDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: ServiceDetailPageProps): Promise<Metadata> {
   const { id: idStr } = await params;
   const id = Number(idStr);
   if (!Number.isFinite(id)) return { title: 'Servicio no encontrado' };
@@ -18,7 +20,9 @@ export async function generateMetadata({ params }: ServiceDetailPageProps): Prom
 
   return {
     title: `${service.name} · Sistema de Turnos — Peluquería`,
-    description: service.description ?? `Servicio de ${service.name} en nuestra peluquería.`,
+    description:
+      service.description ??
+      `Servicio de ${service.name} en nuestra peluquería.`,
   };
 }
 
@@ -26,7 +30,9 @@ interface ServiceDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function ServiceDetailPage({ params }: ServiceDetailPageProps) {
+export default async function ServiceDetailPage({
+  params,
+}: ServiceDetailPageProps) {
   const { id: idStr } = await params;
   const id = Number(idStr);
   if (!Number.isFinite(id)) {
@@ -78,7 +84,9 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               <Clock size={18} aria-hidden="true" />
               <div>
                 <span className={styles.metaLabel}>Duracion</span>
-                <span className={styles.metaValue}>{formatDuration(service.duration_minutes)}</span>
+                <span className={styles.metaValue}>
+                  {formatDuration(service.duration_minutes)}
+                </span>
               </div>
             </div>
 
@@ -86,7 +94,9 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               <Tag size={18} aria-hidden="true" />
               <div>
                 <span className={styles.metaLabel}>Precio</span>
-                <span className={styles.metaValuePrice}>{formatPrice(service.price_cents)}</span>
+                <span className={styles.metaValuePrice}>
+                  {formatPrice(service.price_cents)}
+                </span>
               </div>
             </div>
           </div>

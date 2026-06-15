@@ -29,37 +29,39 @@ or agent:
    imported**. As a latent security footgun (see plan 003) it's better gone.
 3. `app/api/auth/register/route.ts` is a REST registration endpoint that **nothing
    in the app calls** — the registration form uses the Server Action
-   (`app/register/actions.ts`). It re-implements registration with a *different*
+   (`app/register/actions.ts`). It re-implements registration with a _different_
    reCAPTCHA field name and is a second, easy-to-forget bypass surface.
 
 ## Current state
 
-- `lib/db/migrations.ts:1-7` — header comment: *"Este archivo se mantiene como
-  referencia pero no se importa en runtime"*; exports `MIGRATIONS_SQL` (a copy of
+- `lib/db/migrations.ts:1-7` — header comment: _"Este archivo se mantiene como
+  referencia pero no se importa en runtime"_; exports `MIGRATIONS_SQL` (a copy of
   the `CREATE TABLE`s in `scripts/init.sql`).
-- `lib/db/seed.ts:1-7` — comment-only file: *"Se mantiene como referencia"*.
+- `lib/db/seed.ts:1-7` — comment-only file: _"Se mantiene como referencia"_.
 - `lib/supabase/client.ts` — exports `supabaseClient` (anon). `grep -rn
-  "supabase/client\|supabaseClient" app lib` → only the file itself.
+"supabase/client\|supabaseClient" app lib` → only the file itself.
 - `app/api/auth/register/route.ts` — POST handler; `grep -rn "api/auth/register"
-  app components lib` (excluding the route file) → no callers.
+app components lib` (excluding the route file) → no callers.
 
 ## Commands you will need
 
-| Purpose            | Command                                              | Expected |
-|--------------------|-----------------------------------------------------|----------|
-| Find importers     | `grep -rn "<symbol/path>" app lib components`        | see steps |
-| Typecheck          | `pnpm typecheck`                                     | exit 0   |
-| Build              | `pnpm build`                                         | exit 0   |
+| Purpose        | Command                                       | Expected  |
+| -------------- | --------------------------------------------- | --------- |
+| Find importers | `grep -rn "<symbol/path>" app lib components` | see steps |
+| Typecheck      | `pnpm typecheck`                              | exit 0    |
+| Build          | `pnpm build`                                  | exit 0    |
 
 ## Scope
 
 **In scope (delete):**
+
 - `lib/db/migrations.ts`
 - `lib/db/seed.ts`
 - `lib/supabase/client.ts`
 - `app/api/auth/register/route.ts`
 
 **Out of scope (keep):**
+
 - `lib/db/connection.ts`, `lib/db/flatten.ts` — both **used** (`getDb`,
   `flattenRow`). Do NOT delete.
 - `lib/supabase/server.ts` — the service-role client; used everywhere. Keep.

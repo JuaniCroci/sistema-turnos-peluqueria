@@ -1,7 +1,7 @@
 # Plan 010: Establish an automated test baseline with Vitest
 
 > **⚠️ This plan intentionally OVERRIDES `AGENTS.md`.** `AGENTS.md:37` says
-> *"No hay tests... No agregarlos a menos que el usuario lo pida explícitamente."*
+> _"No hay tests... No agregarlos a menos que el usuario lo pida explícitamente."_
 > The project **owner has explicitly requested** a test baseline and instructed us
 > to ignore `AGENTS.md`. Plan 013 updates `AGENTS.md` to match.
 >
@@ -48,11 +48,11 @@ to get wrong. It deliberately does **not** attempt full integration/E2E coverage
 
 ## Commands you will need
 
-| Purpose          | Command                       | Expected |
-|------------------|-------------------------------|----------|
-| Install dev deps | `pnpm add -D vitest`          | exit 0   |
-| Run tests        | `pnpm test`                   | all pass |
-| Typecheck        | `pnpm typecheck`              | exit 0   |
+| Purpose          | Command              | Expected |
+| ---------------- | -------------------- | -------- |
+| Install dev deps | `pnpm add -D vitest` | exit 0   |
+| Run tests        | `pnpm test`          | all pass |
+| Typecheck        | `pnpm typecheck`     | exit 0   |
 
 ## Suggested executor toolkit
 
@@ -63,6 +63,7 @@ to get wrong. It deliberately does **not** attempt full integration/E2E coverage
 ## Scope
 
 **In scope:**
+
 - `package.json` (add `vitest`, `vite-tsconfig-paths`; add `test` + `test:watch`
   scripts)
 - `vitest.config.ts` (create)
@@ -70,6 +71,7 @@ to get wrong. It deliberately does **not** attempt full integration/E2E coverage
   `lib/db/flatten.test.ts` (create — the seed tests)
 
 **Out of scope:**
+
 - Integration tests that hit Supabase or NextAuth — needs a test DB/mocks; a
   separate, larger plan.
 - Component/DOM tests (`@testing-library/react`) — separate follow-up.
@@ -112,7 +114,7 @@ In `package.json`: `"test": "vitest run"`, `"test:watch": "vitest"`.
 
 ## Test plan
 
-The deliverable *is* the test suite. Success = `pnpm test` green with the three
+The deliverable _is_ the test suite. Success = `pnpm test` green with the three
 seed files. These also become the **pattern** that every later plan references
 for "model your new test after `lib/utils/format.test.ts`".
 

@@ -8,9 +8,12 @@ import { Menu } from 'lucide-react';
 import { LogoutButton } from './LogoutButton';
 import styles from './Navbar.module.css';
 
-const MobileMenu = dynamic(() => import('./MobileMenu').then((m) => m.MobileMenu), {
-  ssr: false,
-});
+const MobileMenu = dynamic(
+  () => import('./MobileMenu').then((m) => m.MobileMenu),
+  {
+    ssr: false,
+  },
+);
 
 export type NavRole = 'client' | 'admin';
 
@@ -60,7 +63,9 @@ export const Navbar = ({ user }: NavbarProps) => {
                   href="/admin/turnos"
                   className={[
                     styles.navLink,
-                    isActivePath(pathname, '/admin/turnos') ? styles.navLinkActive : '',
+                    isActivePath(pathname, '/admin/turnos')
+                      ? styles.navLinkActive
+                      : '',
                   ].join(' ')}
                 >
                   Ver turnos
@@ -71,7 +76,9 @@ export const Navbar = ({ user }: NavbarProps) => {
                     href="/mis-turnos"
                     className={[
                       styles.navLink,
-                      isActivePath(pathname, '/mis-turnos') ? styles.navLinkActive : '',
+                      isActivePath(pathname, '/mis-turnos')
+                        ? styles.navLinkActive
+                        : '',
                     ].join(' ')}
                   >
                     Mis turnos
@@ -80,7 +87,9 @@ export const Navbar = ({ user }: NavbarProps) => {
                     href="/mis-turnos/nuevo"
                     className={[
                       styles.navLink,
-                      isActivePath(pathname, '/mis-turnos/nuevo') ? styles.navLinkActive : '',
+                      isActivePath(pathname, '/mis-turnos/nuevo')
+                        ? styles.navLinkActive
+                        : '',
                     ].join(' ')}
                   >
                     Reservar

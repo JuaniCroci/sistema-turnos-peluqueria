@@ -152,7 +152,9 @@ export default function NewAdminAppointmentPage() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>Agendar turno</h1>
-          <p className={styles.subtitle}>Registrá un turno manual para un cliente sin cuenta</p>
+          <p className={styles.subtitle}>
+            Registrá un turno manual para un cliente sin cuenta
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -171,7 +173,9 @@ export default function NewAdminAppointmentPage() {
           <div className={styles.field}>
             <label htmlFor="time">Horario</label>
             {loadingSlots ? (
-              <p className={styles.fieldHint}>Consultando horarios disponibles...</p>
+              <p className={styles.fieldHint}>
+                Consultando horarios disponibles...
+              </p>
             ) : (
               <select
                 id="time"
@@ -181,7 +185,9 @@ export default function NewAdminAppointmentPage() {
                 disabled={!date}
               >
                 <option value="">
-                  {date ? 'Seleccionar horario...' : 'Primero seleccioná una fecha'}
+                  {date
+                    ? 'Seleccionar horario...'
+                    : 'Primero seleccioná una fecha'}
                 </option>
                 {availableSlots.length === 0 && date && (
                   <option value="" disabled>
@@ -209,20 +215,29 @@ export default function NewAdminAppointmentPage() {
                 className={styles.select}
               >
                 <option value="">Seleccionar servicio...</option>
-                {services.filter(s => s.active).map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} - {formatPrice(s.price_cents)} ({formatDuration(s.duration_minutes)})
-                  </option>
-                ))}
+                {services
+                  .filter((s) => s.active)
+                  .map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} - {formatPrice(s.price_cents)} (
+                      {formatDuration(s.duration_minutes)})
+                    </option>
+                  ))}
               </select>
             )}
           </div>
 
           {selectedService && (
             <div className={styles.serviceDetail}>
-              <Clock size={16} className={styles.serviceDetailIcon} aria-hidden="true" />
+              <Clock
+                size={16}
+                className={styles.serviceDetailIcon}
+                aria-hidden="true"
+              />
               <span>{formatDuration(selectedService.duration_minutes)}</span>
-              <span className={styles.serviceDetailPrice}>{formatPrice(selectedService.price_cents)}</span>
+              <span className={styles.serviceDetailPrice}>
+                {formatPrice(selectedService.price_cents)}
+              </span>
             </div>
           )}
 
@@ -261,10 +276,18 @@ export default function NewAdminAppointmentPage() {
           )}
 
           <div className={styles.formActions}>
-            <Button type="submit" loading={saving} iconLeft={<Calendar size={16} />}>
+            <Button
+              type="submit"
+              loading={saving}
+              iconLeft={<Calendar size={16} />}
+            >
               Guardar turno
             </Button>
-            <Button variant="ghost" type="button" onClick={() => router.push('/admin/turnos')}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => router.push('/admin/turnos')}
+            >
               Cancelar
             </Button>
           </div>

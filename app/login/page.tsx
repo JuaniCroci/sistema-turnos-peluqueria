@@ -28,7 +28,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <header className={styles.header}>
           <h1 className={styles.title}>Iniciar sesión</h1>
           <p className={styles.subtitle}>
-            Ingresá con tu email y contraseña para reservar turnos y ver tu historial.
+            Ingresá con tu email y contraseña para reservar turnos y ver tu
+            historial.
           </p>
         </header>
         <Suspense fallback={<Spinner />}>

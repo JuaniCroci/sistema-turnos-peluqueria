@@ -1,7 +1,7 @@
 # Plan 014: Design spike — evaluate adopting Tailwind CSS (decision, not a rewrite)
 
 > **⚠️ This plan revisits an `AGENTS.md` rule by owner request.** `AGENTS.md:38`
-> says *"Sin Tailwind ni UI libs."* The owner flagged this as worth reconsidering.
+> says _"Sin Tailwind ni UI libs."_ The owner flagged this as worth reconsidering.
 > **This is a spike/decision plan, not a build-everything plan.** Its deliverable
 > is a recommendation + a small proof-of-concept, so the owner can make an informed
 > call. **Do not migrate the whole app's styling in this plan.**
@@ -25,14 +25,15 @@
 Not using Tailwind is **not a defect**. The current approach — CSS Modules +
 `open-props` design tokens (`styles/tokens.css`) + `next/font` — is a legitimate,
 maintainable, zero-runtime styling system with good encapsulation. Tailwind is a
-*different* set of trade-offs, not a strict upgrade. The point of this plan is to
+_different_ set of trade-offs, not a strict upgrade. The point of this plan is to
 let the owner decide with evidence, not to assume Tailwind wins. Be even-handed.
 
 **Trade-offs to weigh:**
-- *For Tailwind*: faster iteration once learned, utility ergonomics, huge ecosystem
+
+- _For Tailwind_: faster iteration once learned, utility ergonomics, huge ecosystem
   (incl. shadcn/ui), colocation of styles with markup, easy responsive variants.
   First-class on Next.js/Vercel.
-- *Against / cost*: a second styling paradigm alongside ~25 existing
+- _Against / cost_: a second styling paradigm alongside ~25 existing
   `*.module.css` files (migration is all-or-nothing-ish to avoid a split-brain
   codebase), `open-props` tokens would need mapping into the Tailwind theme,
   verbose className soup, and the current system already works. The repo's
@@ -50,6 +51,7 @@ let the owner decide with evidence, not to assume Tailwind wins. Be even-handed.
 ## Scope
 
 **In scope (the spike):**
+
 - A written recommendation (in `plans/014-tailwind-decision.md` or the PR body)
   covering: effort to migrate, token-mapping strategy, whether to go incremental
   or big-bang, and a clear recommend / don't-recommend with reasons.
@@ -58,6 +60,7 @@ let the owner decide with evidence, not to assume Tailwind wins. Be even-handed.
   measure real ergonomics and bundle impact. Not merged.
 
 **Out of scope:**
+
 - Migrating more than one component.
 - Removing any existing `.module.css`.
 - Adding a UI kit (shadcn/etc.) — that's a separate decision even if Tailwind is
@@ -116,4 +119,4 @@ comparison. No production tests — nothing ships from this plan except a decisi
 - If "don't adopt": record the decision and the reasons in `AGENTS.md` (plan 013)
   so it isn't re-litigated every few months.
 - The current CSS-Modules + open-props system is a fine default; the burden of
-  proof is on Tailwind to be *worth the switch*, not merely viable.
+  proof is on Tailwind to be _worth the switch_, not merely viable.

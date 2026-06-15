@@ -18,7 +18,9 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
             <Clock size={14} aria-hidden="true" />
             {formatDuration(service.duration_minutes)}
           </span>
-          <span className={styles.price}>{formatPrice(service.price_cents)}</span>
+          <span className={styles.price}>
+            {formatPrice(service.price_cents)}
+          </span>
         </div>
       </div>
       <span className={styles.cta} aria-hidden="true">

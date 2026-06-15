@@ -50,80 +50,97 @@ const LIST_APPOINTMENT_SELECT = `
   )
 `;
 
-export const findAppointments = cache(async (options: AppointmentListOptions): Promise<AppointmentListResult> => {
-  const db = getDb();
+export const findAppointments = cache(
+  async (options: AppointmentListOptions): Promise<AppointmentListResult> => {
+    const db = getDb();
 
-  let countQuery = db.from('appointments').select('*', { count: 'exact', head: true });
-  let dataQuery = db.from('appointments').select(LIST_APPOINTMENT_SELECT, { count: 'exact' });
+    let countQuery = db
+      .from('appointments')
+      .select('*', { count: 'exact', head: true });
+    let dataQuery = db
+      .from('appointments')
+      .select(LIST_APPOINTMENT_SELECT, { count: 'exact' });
 
-  if (options.userId !== undefined) {
-    countQuery = countQuery.eq('user_id', options.userId);
-    dataQuery = dataQuery.eq('user_id', options.userId);
-  }
-
-  if (options.status) {
-    countQuery = countQuery.eq('status', options.status);
-    dataQuery = dataQuery.eq('status', options.status);
-  }
-
-  if (options.from) {
-    countQuery = countQuery.gte('appointment_at', options.from);
-    dataQuery = dataQuery.gte('appointment_at', options.from);
-  }
-
-  if (options.to) {
-    countQuery = countQuery.lte('appointment_at', options.to);
-    dataQuery = dataQuery.lte('appointment_at', options.to);
-  }
-
-  const { count, error: countErr } = await countQuery;
-  if (countErr) throw countErr;
-
-  const total = count ?? 0;
-  const offset = (options.page - 1) * options.limit;
-
-  const { data, error } = await dataQuery
-    .order('appointment_at', { ascending: false })
-    .range(offset, offset + options.limit - 1);
-
-  if (error) throw error;
-
-  const rows = (data ?? []).map((row) => flattenRow<AppointmentRow>(row as Record<string, unknown>));
-
-  const userIds = [...new Set(rows.map(a => a.user_id).filter((id): id is number => id !== null))];
-  const userMap = new Map<number, { email: string; username: string }>();
-
-  if (userIds.length > 0) {
-    const { data: users } = await db.from('users').select('id, email, username').in('id', userIds);
-    for (const u of (users ?? [])) {
-      userMap.set(u.id, u);
+    if (options.userId !== undefined) {
+      countQuery = countQuery.eq('user_id', options.userId);
+      dataQuery = dataQuery.eq('user_id', options.userId);
     }
-  }
 
-  const result = rows.map(a => ({
-    ...a,
-    user_email: a.user_id ? userMap.get(a.user_id)?.email ?? '' : '',
-    user_username: a.user_id ? userMap.get(a.user_id)?.username ?? '' : '',
-  }));
+    if (options.status) {
+      countQuery = countQuery.eq('status', options.status);
+      dataQuery = dataQuery.eq('status', options.status);
+    }
 
-  return {
-    data: result as AppointmentAdminRow[],
-    pagination: { page: options.page, limit: options.limit, total },
-  };
-});
+    if (options.from) {
+      countQuery = countQuery.gte('appointment_at', options.from);
+      dataQuery = dataQuery.gte('appointment_at', options.from);
+    }
 
-export const findAppointmentById = cache(async (id: number): Promise<AppointmentAdminRow | undefined> => {
-  const db = getDb();
-  const { data, error } = await db
-    .from('appointments')
-    .select(APPOINTMENT_SELECT)
-    .eq('id', id)
-    .maybeSingle();
+    if (options.to) {
+      countQuery = countQuery.lte('appointment_at', options.to);
+      dataQuery = dataQuery.lte('appointment_at', options.to);
+    }
 
-  if (error) throw error;
-  if (!data) return undefined;
-  return flattenRow<AppointmentAdminRow>(data as Record<string, unknown>);
-});
+    const { count, error: countErr } = await countQuery;
+    if (countErr) throw countErr;
+
+    const total = count ?? 0;
+    const offset = (options.page - 1) * options.limit;
+
+    const { data, error } = await dataQuery
+      .order('appointment_at', { ascending: false })
+      .range(offset, offset + options.limit - 1);
+
+    if (error) throw error;
+
+    const rows = (data ?? []).map((row) =>
+      flattenRow<AppointmentRow>(row as Record<string, unknown>),
+    );
+
+    const userIds = [
+      ...new Set(
+        rows.map((a) => a.user_id).filter((id): id is number => id !== null),
+      ),
+    ];
+    const userMap = new Map<number, { email: string; username: string }>();
+
+    if (userIds.length > 0) {
+      const { data: users } = await db
+        .from('users')
+        .select('id, email, username')
+        .in('id', userIds);
+      for (const u of users ?? []) {
+        userMap.set(u.id, u);
+      }
+    }
+
+    const result = rows.map((a) => ({
+      ...a,
+      user_email: a.user_id ? (userMap.get(a.user_id)?.email ?? '') : '',
+      user_username: a.user_id ? (userMap.get(a.user_id)?.username ?? '') : '',
+    }));
+
+    return {
+      data: result as AppointmentAdminRow[],
+      pagination: { page: options.page, limit: options.limit, total },
+    };
+  },
+);
+
+export const findAppointmentById = cache(
+  async (id: number): Promise<AppointmentAdminRow | undefined> => {
+    const db = getDb();
+    const { data, error } = await db
+      .from('appointments')
+      .select(APPOINTMENT_SELECT)
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return undefined;
+    return flattenRow<AppointmentAdminRow>(data as Record<string, unknown>);
+  },
+);
 
 export interface CreateAppointmentInput {
   user_id: number | null;
@@ -134,7 +151,10 @@ export interface CreateAppointmentInput {
   skipPastCheck?: boolean;
 }
 
-export const hasActiveAppointmentAt = async (appointmentAt: string, excludeId?: number): Promise<boolean> => {
+export const hasActiveAppointmentAt = async (
+  appointmentAt: string,
+  excludeId?: number,
+): Promise<boolean> => {
   const db = getDb();
   let query = db
     .from('appointments')
@@ -151,7 +171,9 @@ export const hasActiveAppointmentAt = async (appointmentAt: string, excludeId?: 
   return (count ?? 0) > 0;
 };
 
-export const createAppointment = async (input: CreateAppointmentInput): Promise<Appointment> => {
+export const createAppointment = async (
+  input: CreateAppointmentInput,
+): Promise<Appointment> => {
   const appointmentAt = input.appointment_at;
   if (!input.skipPastCheck && new Date(appointmentAt) <= new Date()) {
     throw new Error('No se puede reservar un turno en el pasado');
@@ -189,10 +211,12 @@ export const getOccupiedSlots = async (date: string): Promise<string[]> => {
 
   const { data, error } = await db
     .from('appointments')
-    .select(`
+    .select(
+      `
       appointment_at,
       service:service_id (duration_minutes)
-    `)
+    `,
+    )
     .gte('appointment_at', `${date}T00:00:00`)
     .lt('appointment_at', `${date}T23:59:59`)
     .in('status', ['pending', 'confirmed']);
@@ -214,20 +238,30 @@ export const getOccupiedSlots = async (date: string): Promise<string[]> => {
     for (let m = startMinutes; m < endMinutes; m += 30) {
       const h = Math.floor(m / 60);
       const min = m % 60;
-      occupied.add(`${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+      occupied.add(
+        `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`,
+      );
     }
   }
 
   return [...occupied].sort();
 };
 
-export const updateAppointmentStatus = async (id: number, status: AppointmentStatus): Promise<void> => {
+export const updateAppointmentStatus = async (
+  id: number,
+  status: AppointmentStatus,
+): Promise<void> => {
   const db = getDb();
-  const { error } = await db.from('appointments').update({ status }).eq('id', id);
+  const { error } = await db
+    .from('appointments')
+    .update({ status })
+    .eq('id', id);
   if (error) throw error;
 };
 
-export const countActiveAppointments = async (userId: number): Promise<number> => {
+export const countActiveAppointments = async (
+  userId: number,
+): Promise<number> => {
   const db = getDb();
   const now = new Date().toISOString();
   const { count, error } = await db

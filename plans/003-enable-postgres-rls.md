@@ -66,16 +66,17 @@ mirrored into `scripts/init.sql` (see the comments in `lib/db/migrations.ts`).
 
 ## Commands you will need
 
-| Purpose            | Command / Action                         | Expected |
-|--------------------|------------------------------------------|----------|
-| Typecheck          | `pnpm typecheck`                         | exit 0   |
-| Build              | `pnpm build`                             | exit 0   |
-| Confirm anon unused| `grep -rn "supabase/client" app lib`     | only `lib/supabase/client.ts` |
-| Apply SQL          | Supabase Dashboard → SQL Editor (manual) | success  |
+| Purpose             | Command / Action                         | Expected                      |
+| ------------------- | ---------------------------------------- | ----------------------------- |
+| Typecheck           | `pnpm typecheck`                         | exit 0                        |
+| Build               | `pnpm build`                             | exit 0                        |
+| Confirm anon unused | `grep -rn "supabase/client" app lib`     | only `lib/supabase/client.ts` |
+| Apply SQL           | Supabase Dashboard → SQL Editor (manual) | success                       |
 
 ## Scope
 
 **In scope:**
+
 - `scripts/init.sql` (append RLS statements so a fresh bootstrap is secure)
 - `scripts/enable-rls.sql` (create — the idempotent script to run against the
   existing DB)
@@ -83,7 +84,8 @@ mirrored into `scripts/init.sql` (see the comments in `lib/db/migrations.ts`).
   the service role.
 
 **Out of scope:**
-- Removing the unused anon client — that's plan 008. (This plan only *verifies*
+
+- Removing the unused anon client — that's plan 008. (This plan only _verifies_
   it's unused so enabling RLS is safe.)
 - Writing fine-grained per-user RLS policies that the app would depend on — the
   app's security model is app-layer + service-role; adding policies the app needs

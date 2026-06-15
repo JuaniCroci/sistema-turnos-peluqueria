@@ -12,37 +12,43 @@ export const findAllCategories = cache(async (): Promise<Category[]> => {
   return (data ?? []) as Category[];
 });
 
-export const findCategoryBySlug = cache(async (slug: string): Promise<Category | undefined> => {
-  const db = getDb();
-  const { data, error } = await db
-    .from('categories')
-    .select('id, name, slug, description')
-    .eq('slug', slug)
-    .maybeSingle();
-  if (error) throw error;
-  return (data as Category | undefined) ?? undefined;
-});
+export const findCategoryBySlug = cache(
+  async (slug: string): Promise<Category | undefined> => {
+    const db = getDb();
+    const { data, error } = await db
+      .from('categories')
+      .select('id, name, slug, description')
+      .eq('slug', slug)
+      .maybeSingle();
+    if (error) throw error;
+    return (data as Category | undefined) ?? undefined;
+  },
+);
 
-export const findCategoryById = cache(async (id: number): Promise<Category | undefined> => {
-  const db = getDb();
-  const { data, error } = await db
-    .from('categories')
-    .select('id, name, slug, description')
-    .eq('id', id)
-    .maybeSingle();
-  if (error) throw error;
-  return (data as Category | undefined) ?? undefined;
-});
+export const findCategoryById = cache(
+  async (id: number): Promise<Category | undefined> => {
+    const db = getDb();
+    const { data, error } = await db
+      .from('categories')
+      .select('id, name, slug, description')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw error;
+    return (data as Category | undefined) ?? undefined;
+  },
+);
 
-export const categoryHasServices = cache(async (id: number): Promise<boolean> => {
-  const db = getDb();
-  const { count, error } = await db
-    .from('services')
-    .select('*', { count: 'exact', head: true })
-    .eq('category_id', id);
-  if (error) throw error;
-  return (count ?? 0) > 0;
-});
+export const categoryHasServices = cache(
+  async (id: number): Promise<boolean> => {
+    const db = getDb();
+    const { count, error } = await db
+      .from('services')
+      .select('*', { count: 'exact', head: true })
+      .eq('category_id', id);
+    if (error) throw error;
+    return (count ?? 0) > 0;
+  },
+);
 
 export interface CreateCategoryInput {
   name: string;
@@ -50,7 +56,9 @@ export interface CreateCategoryInput {
   description?: string;
 }
 
-export const createCategory = async (input: CreateCategoryInput): Promise<Category> => {
+export const createCategory = async (
+  input: CreateCategoryInput,
+): Promise<Category> => {
   const db = getDb();
   const { data, error } = await db
     .from('categories')

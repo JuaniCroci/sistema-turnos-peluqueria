@@ -56,7 +56,10 @@ export async function DELETE(
       return errorResponse('NOT_FOUND', 'Turno no encontrado');
     }
     if (appointment.status !== 'cancelled') {
-      return errorResponse('VALIDATION_ERROR', 'Solo se pueden eliminar turnos cancelados');
+      return errorResponse(
+        'VALIDATION_ERROR',
+        'Solo se pueden eliminar turnos cancelados',
+      );
     }
 
     await deleteAppointment(id);

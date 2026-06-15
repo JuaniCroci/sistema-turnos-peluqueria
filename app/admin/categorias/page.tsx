@@ -45,7 +45,13 @@ export default function AdminCategoriesPage() {
   };
 
   const handleSlugChange = (value: string) => {
-    setSlug(value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, ''));
+    setSlug(
+      value
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, ''),
+    );
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -66,7 +72,11 @@ export default function AdminCategoriesPage() {
       const res = await fetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), slug: slug.trim(), description: description.trim() || undefined }),
+        body: JSON.stringify({
+          name: name.trim(),
+          slug: slug.trim(),
+          description: description.trim() || undefined,
+        }),
       });
       if (!res.ok) {
         const json = await res.json();
@@ -123,9 +133,17 @@ export default function AdminCategoriesPage() {
         <div className={styles.header}>
           <div>
             <h1 className={styles.title}>Categorias</h1>
-            <p className={styles.subtitle}>Gestion de categorias de servicios</p>
+            <p className={styles.subtitle}>
+              Gestion de categorias de servicios
+            </p>
           </div>
-          <Button onClick={() => { resetForm(); setShowForm(true); }} iconLeft={<Plus size={16} />}>
+          <Button
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
+            iconLeft={<Plus size={16} />}
+          >
             Nueva categoria
           </Button>
         </div>
@@ -139,7 +157,9 @@ export default function AdminCategoriesPage() {
                   <input
                     id="cat-name"
                     value={name}
-                    onChange={(e) => { setName(e.target.value); }}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                    }}
                     className={styles.input}
                     placeholder="Ej: Cabello"
                   />
@@ -192,7 +212,11 @@ export default function AdminCategoriesPage() {
           <div className={styles.errorBox}>
             <AlertCircle size={16} aria-hidden="true" />
             {deleteError}
-            <button className={styles.dismissBtn} onClick={() => setDeleteError(null)} aria-label="Cerrar">
+            <button
+              className={styles.dismissBtn}
+              onClick={() => setDeleteError(null)}
+              aria-label="Cerrar"
+            >
               <X size={14} />
             </button>
           </div>
@@ -216,18 +240,26 @@ export default function AdminCategoriesPage() {
                       No hay categorias. Crea la primera.
                     </td>
                   </tr>
-                ) : categories.map((cat) => (
-                  <tr key={cat.id}>
-                    <td className={styles.nameCell}>{cat.name}</td>
-                    <td className={styles.slugCell}>{cat.slug}</td>
-                    <td className={styles.descCell}>{cat.description ?? '-'}</td>
-                    <td className={styles.actionsCol}>
-                      <button className={styles.iconBtnDanger} onClick={() => handleDelete(cat.id)} title="Eliminar">
-                        <Trash2 size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                ) : (
+                  categories.map((cat) => (
+                    <tr key={cat.id}>
+                      <td className={styles.nameCell}>{cat.name}</td>
+                      <td className={styles.slugCell}>{cat.slug}</td>
+                      <td className={styles.descCell}>
+                        {cat.description ?? '-'}
+                      </td>
+                      <td className={styles.actionsCol}>
+                        <button
+                          className={styles.iconBtnDanger}
+                          onClick={() => handleDelete(cat.id)}
+                          title="Eliminar"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

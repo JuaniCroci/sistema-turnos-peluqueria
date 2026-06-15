@@ -58,8 +58,12 @@ object (it has a `.code === '23505'`), not an `Error` whose message contains
 if (await hasActiveAppointmentAt(appointmentAt)) {
   throw new Error('Ya existe un turno confirmado o pendiente en ese horario');
 }
-const { data, error } = await db.from('appointments').insert(insertData).select('*').single();
-if (error) throw error;   // <-- on a race, error.code === '23505'
+const { data, error } = await db
+  .from('appointments')
+  .insert(insertData)
+  .select('*')
+  .single();
+if (error) throw error; // <-- on a race, error.code === '23505'
 ```
 
 `lib/db/appointments.ts:230-242` — `countActiveAppointments` (used by the
@@ -71,17 +75,19 @@ non-atomic limit check at `route.ts:100-103`).
 ## Commands you will need
 
 | Purpose   | Command          | Expected |
-|-----------|------------------|----------|
+| --------- | ---------------- | -------- |
 | Typecheck | `pnpm typecheck` | exit 0   |
 | Build     | `pnpm build`     | exit 0   |
 
 ## Scope
 
 **In scope:**
+
 - `lib/db/appointments.ts` (`createAppointment` — normalize the unique violation)
 - `app/api/appointments/route.ts` (both conflict catches)
 
 **Out of scope:**
+
 - The partial unique index itself — it's correct; don't touch the SQL.
 - Converting the limit check to a DB constraint/transaction beyond what Step 2
   describes — a full transactional rewrite is a larger change; this plan only
@@ -126,6 +132,7 @@ one-line comment pointing at the maintenance note.
 ## Test plan
 
 Manual until plan 010:
+
 - Simulate the race by booking the same slot from two terminals near-simultaneously
   (or temporarily comment the pre-check locally to force the DB path) → the losing
   request must return **409**, not 500.

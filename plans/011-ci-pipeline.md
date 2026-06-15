@@ -38,17 +38,19 @@ referencing.
 
 ## Commands you will need
 
-| Purpose            | Command                          | Expected |
-|--------------------|----------------------------------|----------|
-| Verify scripts exist | `cat package.json` (check scripts) | typecheck/lint/test/build present |
-| Local dry run      | `pnpm install && pnpm typecheck && pnpm lint && pnpm test && pnpm build` | all exit 0 |
+| Purpose              | Command                                                                  | Expected                          |
+| -------------------- | ------------------------------------------------------------------------ | --------------------------------- |
+| Verify scripts exist | `cat package.json` (check scripts)                                       | typecheck/lint/test/build present |
+| Local dry run        | `pnpm install && pnpm typecheck && pnpm lint && pnpm test && pnpm build` | all exit 0                        |
 
 ## Scope
 
 **In scope:**
+
 - `.github/workflows/ci.yml` (create)
 
 **Out of scope:**
+
 - Deployment in CI — Vercel's Git integration already handles deploys; CI here is
   verification only. Do not add a deploy job.
 - Caching beyond pnpm's built-in `actions/setup-node` cache — keep it simple.
@@ -68,6 +70,7 @@ landed — **STOP** and do those first.
 ### Step 2: Write the workflow
 
 Create `.github/workflows/ci.yml` triggered on `push` and `pull_request`:
+
 - `runs-on: ubuntu-latest`
 - `pnpm/action-setup@v4` with version from `packageManager` (10.33.0)
 - `actions/setup-node@v4` with `node-version-file: .nvmrc` and `cache: pnpm`
@@ -85,7 +88,7 @@ per operator policy, note in the PR that CI must be confirmed green before merge
 
 ## Test plan
 
-CI *is* the test infrastructure. Success = the workflow runs all five steps green
+CI _is_ the test infrastructure. Success = the workflow runs all five steps green
 on a pushed branch. No app code changes.
 
 ## Done criteria

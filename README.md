@@ -27,13 +27,13 @@ Admin gestiona el catálogo completo y los turnos.
 Campo de entrenamiento para el **trabajo final de la facultad** (e-commerce en grupo).  
 Los patrones se reusan:
 
-| Peluquería | E-commerce |
-|---|---|
-| Servicio | Producto |
-| Categoría | Categoría |
-| Reservar turno | Checkout / orden |
-| "Mis turnos" | "Mis órdenes" |
-| Panel admin | Panel admin |
+| Peluquería     | E-commerce         |
+| -------------- | ------------------ |
+| Servicio       | Producto           |
+| Categoría      | Categoría          |
+| Reservar turno | Checkout / orden   |
+| "Mis turnos"   | "Mis órdenes"      |
+| Panel admin    | Panel admin        |
 | Disponibilidad | Stock / inventario |
 
 Lo que **sí** vas a tener que sumar en el e-commerce: integración de pagos (Stripe / MercadoPago), gestión de stock y envíos.
@@ -42,18 +42,18 @@ Lo que **sí** vas a tener que sumar en el e-commerce: integración de pagos (St
 
 ## 🧱 Stack
 
-| Capa | Tecnología |
-|---|---|
-| **Runtime** | Node 24.14.1 (`.nvmrc`) |
-| **Lenguaje** | TypeScript 5.7, `strict: true`, cero `any` |
-| **Framework** | Next.js 15.5+ (App Router, route.ts, Server Components) |
-| **Base de datos** | `better-sqlite3` v12 — sincrónico, cero config |
-| **Autenticación** | NextAuth v5 beta (Auth.js) — CredentialsProvider + JWT |
-| **Validación** | Zod en todos los endpoints |
-| **CSS** | `open-props` + CSS Modules planos (sin Tailwind) |
-| **Iconos** | `lucide-react` |
-| **Fonts** | `next/font/google` (Inter + Fraunces) |
-| **Package manager** | pnpm 10.x |
+| Capa                | Tecnología                                              |
+| ------------------- | ------------------------------------------------------- |
+| **Runtime**         | Node 24.14.1 (`.nvmrc`)                                 |
+| **Lenguaje**        | TypeScript 5.7, `strict: true`, cero `any`              |
+| **Framework**       | Next.js 15.5+ (App Router, route.ts, Server Components) |
+| **Base de datos**   | `better-sqlite3` v12 — sincrónico, cero config          |
+| **Autenticación**   | NextAuth v5 beta (Auth.js) — CredentialsProvider + JWT  |
+| **Validación**      | Zod en todos los endpoints                              |
+| **CSS**             | `open-props` + CSS Modules planos (sin Tailwind)        |
+| **Iconos**          | `lucide-react`                                          |
+| **Fonts**           | `next/font/google` (Inter + Fraunces)                   |
+| **Package manager** | pnpm 10.x                                               |
 
 ---
 
@@ -179,58 +179,58 @@ Formato uniforme de errores:
 }
 ```
 
-| Recurso | Endpoints públicos | Endpoints protegidos |
-|---|---|---|
-| **Auth** | `POST /api/auth/register`, `POST /api/auth/login` | `GET /api/auth/me` |
-| **Categories** | `GET /api/categories`, `GET /api/categories/:slug` | `POST`, `DELETE` (admin) |
-| **Services** | `GET /api/services`, `GET /api/services/:id` | `POST`, `PUT`, `DELETE` (admin) |
-| **Appointments** | — | `GET`, `POST`, `PATCH /:id/status` |
-| **Users** | — | `GET` (admin) |
+| Recurso          | Endpoints públicos                                 | Endpoints protegidos               |
+| ---------------- | -------------------------------------------------- | ---------------------------------- |
+| **Auth**         | `POST /api/auth/register`, `POST /api/auth/login`  | `GET /api/auth/me`                 |
+| **Categories**   | `GET /api/categories`, `GET /api/categories/:slug` | `POST`, `DELETE` (admin)           |
+| **Services**     | `GET /api/services`, `GET /api/services/:id`       | `POST`, `PUT`, `DELETE` (admin)    |
+| **Appointments** | —                                                  | `GET`, `POST`, `PATCH /:id/status` |
+| **Users**        | —                                                  | `GET` (admin)                      |
 
 <details>
 <summary>Ver detalles de cada endpoint</summary>
 
 ### Auth
 
-| Método | Ruta | Auth | Body / Query | Respuesta |
-|---|---|---|---|---|
-| POST | `/api/auth/register` | público | `{ email, username, password }` | `201 { data }` |
-| POST | `/api/auth/login` | público | `{ email, password }` | (NextAuth credentials) |
-| GET | `/api/auth/me` | cliente | — | `200 { data }` |
+| Método | Ruta                 | Auth    | Body / Query                    | Respuesta              |
+| ------ | -------------------- | ------- | ------------------------------- | ---------------------- |
+| POST   | `/api/auth/register` | público | `{ email, username, password }` | `201 { data }`         |
+| POST   | `/api/auth/login`    | público | `{ email, password }`           | (NextAuth credentials) |
+| GET    | `/api/auth/me`       | cliente | —                               | `200 { data }`         |
 
 ### Categories
 
-| Método | Ruta | Auth | Body / Query | Notas |
-|---|---|---|---|---|
-| GET | `/api/categories` | público | — | `{ data: [...] }` |
-| GET | `/api/categories/:slug` | público | — | Una por slug |
-| POST | `/api/categories` | admin | `{ name, slug, description? }` | — |
-| DELETE | `/api/categories/:id` | admin | — | Solo si sin servicios asociados |
+| Método | Ruta                    | Auth    | Body / Query                   | Notas                           |
+| ------ | ----------------------- | ------- | ------------------------------ | ------------------------------- |
+| GET    | `/api/categories`       | público | —                              | `{ data: [...] }`               |
+| GET    | `/api/categories/:slug` | público | —                              | Una por slug                    |
+| POST   | `/api/categories`       | admin   | `{ name, slug, description? }` | —                               |
+| DELETE | `/api/categories/:id`   | admin   | —                              | Solo si sin servicios asociados |
 
 ### Services
 
-| Método | Ruta | Auth | Body / Query | Notas |
-|---|---|---|---|---|
-| GET | `/api/services` | público | `?category=<slug>&q=<texto>&page=1&limit=10&includeInactive=1` (admin) | Paginado. Admin ve inactivos |
-| GET | `/api/services/:id` | público | — | — |
-| POST | `/api/services` | admin | `{ category_id, name, description?, duration_minutes, price_cents }` | — |
-| PUT | `/api/services/:id` | admin | `{ category_id?, name?, description?, duration_minutes?, price_cents? }` | Edición parcial |
-| DELETE | `/api/services/:id` | admin | — | Soft delete (`active = 0`) |
+| Método | Ruta                | Auth    | Body / Query                                                             | Notas                        |
+| ------ | ------------------- | ------- | ------------------------------------------------------------------------ | ---------------------------- |
+| GET    | `/api/services`     | público | `?category=<slug>&q=<texto>&page=1&limit=10&includeInactive=1` (admin)   | Paginado. Admin ve inactivos |
+| GET    | `/api/services/:id` | público | —                                                                        | —                            |
+| POST   | `/api/services`     | admin   | `{ category_id, name, description?, duration_minutes, price_cents }`     | —                            |
+| PUT    | `/api/services/:id` | admin   | `{ category_id?, name?, description?, duration_minutes?, price_cents? }` | Edición parcial              |
+| DELETE | `/api/services/:id` | admin   | —                                                                        | Soft delete (`active = 0`)   |
 
 ### Appointments
 
-| Método | Ruta | Auth | Body / Query | Notas |
-|---|---|---|---|---|
-| GET | `/api/appointments` | cliente | `?status=pending&from=...&to=...&user_id=...` (admin) &page=1&limit=20 | Cliente ve los suyos. Admin filtra |
-| GET | `/api/appointments/:id` | cliente | — | Cliente solo si es suyo |
-| POST | `/api/appointments` | cliente | `{ service_id, appointment_at, notes? }` | Valida futuro, activo, sin solapamiento |
-| PATCH | `/api/appointments/:id/status` | cliente/admin | `{ status }` | Cliente solo `cancelled` |
+| Método | Ruta                           | Auth          | Body / Query                                                           | Notas                                   |
+| ------ | ------------------------------ | ------------- | ---------------------------------------------------------------------- | --------------------------------------- |
+| GET    | `/api/appointments`            | cliente       | `?status=pending&from=...&to=...&user_id=...` (admin) &page=1&limit=20 | Cliente ve los suyos. Admin filtra      |
+| GET    | `/api/appointments/:id`        | cliente       | —                                                                      | Cliente solo si es suyo                 |
+| POST   | `/api/appointments`            | cliente       | `{ service_id, appointment_at, notes? }`                               | Valida futuro, activo, sin solapamiento |
+| PATCH  | `/api/appointments/:id/status` | cliente/admin | `{ status }`                                                           | Cliente solo `cancelled`                |
 
 ### Users
 
-| Método | Ruta | Auth | Notas |
-|---|---|---|---|
-| GET | `/api/users` | admin | Lista todos los usuarios |
+| Método | Ruta         | Auth  | Notas                    |
+| ------ | ------------ | ----- | ------------------------ |
+| GET    | `/api/users` | admin | Lista todos los usuarios |
 
 </details>
 
@@ -238,19 +238,19 @@ Formato uniforme de errores:
 
 ## 🖥️ Frontend — Rutas
 
-| Ruta | Página | Acceso |
-|---|---|---|
-| `/` | Home (hero + cómo funciona) | público |
-| `/servicios` | Listado con búsqueda, filtro por categoría, paginación | público |
-| `/servicios/:id` | Detalle + botón "Reservar" | público |
-| `/login` | Login | público |
-| `/register` | Registro | público |
-| `/mis-turnos` | Lista de turnos del usuario | cliente |
-| `/mis-turnos/nuevo` | Formulario de reserva | cliente |
-| `/admin` | Redirige a `/admin/servicios` | admin |
-| `/admin/servicios` | Tabla CRUD de servicios | admin |
-| `/admin/categorias` | Tabla CRUD de categorías | admin |
-| `/admin/turnos` | Todos los turnos, filtros y cambio de estado | admin |
+| Ruta                | Página                                                 | Acceso  |
+| ------------------- | ------------------------------------------------------ | ------- |
+| `/`                 | Home (hero + cómo funciona)                            | público |
+| `/servicios`        | Listado con búsqueda, filtro por categoría, paginación | público |
+| `/servicios/:id`    | Detalle + botón "Reservar"                             | público |
+| `/login`            | Login                                                  | público |
+| `/register`         | Registro                                               | público |
+| `/mis-turnos`       | Lista de turnos del usuario                            | cliente |
+| `/mis-turnos/nuevo` | Formulario de reserva                                  | cliente |
+| `/admin`            | Redirige a `/admin/servicios`                          | admin   |
+| `/admin/servicios`  | Tabla CRUD de servicios                                | admin   |
+| `/admin/categorias` | Tabla CRUD de categorías                               | admin   |
+| `/admin/turnos`     | Todos los turnos, filtros y cambio de estado           | admin   |
 
 ---
 
@@ -260,24 +260,24 @@ Se ejecuta automáticamente al levantar si la tabla `users` está vacía.
 
 **Usuarios:**
 
-| Rol | Email | Password |
-|---|---|---|
-| Admin | `admin@barberia.test` | `admin123` |
-| Cliente | `juani@test.com` | `1234` |
+| Rol     | Email                 | Password   |
+| ------- | --------------------- | ---------- |
+| Admin   | `admin@barberia.test` | `admin123` |
+| Cliente | `juani@test.com`      | `1234`     |
 
 **Servicios:**
 
-| Categoría | Nombre | Duración | Precio |
-|---|---|---|---|
-| Cabello | Corte caballero | 30 min | $3.000 |
-| Cabello | Corte dama | 45 min | $5.000 |
-| Cabello | Corte niño | 20 min | $2.000 |
-| Barba | Perfilado de barba | 20 min | $2.000 |
-| Barba | Barba completa | 30 min | $3.500 |
-| Coloración | Tinte de raíces | 60 min | $8.000 |
-| Coloración | Color completo | 90 min | $12.000 |
-| Tratamientos | Hidratación | 40 min | $6.000 |
-| Tratamientos | Keratina | 120 min | $18.000 |
+| Categoría    | Nombre             | Duración | Precio  |
+| ------------ | ------------------ | -------- | ------- |
+| Cabello      | Corte caballero    | 30 min   | $3.000  |
+| Cabello      | Corte dama         | 45 min   | $5.000  |
+| Cabello      | Corte niño         | 20 min   | $2.000  |
+| Barba        | Perfilado de barba | 20 min   | $2.000  |
+| Barba        | Barba completa     | 30 min   | $3.500  |
+| Coloración   | Tinte de raíces    | 60 min   | $8.000  |
+| Coloración   | Color completo     | 90 min   | $12.000 |
+| Tratamientos | Hidratación        | 40 min   | $6.000  |
+| Tratamientos | Keratina           | 120 min  | $18.000 |
 
 ---
 
@@ -329,11 +329,11 @@ DB_PATH=./data/turnos.db
 
 ## 📜 Scripts
 
-| Comando | Descripción |
-|---|---|
-| `pnpm dev` | `next dev` |
-| `pnpm build` | `next build` |
-| `pnpm start` | `next start` |
+| Comando          | Descripción                   |
+| ---------------- | ----------------------------- |
+| `pnpm dev`       | `next dev`                    |
+| `pnpm build`     | `next build`                  |
+| `pnpm start`     | `next start`                  |
 | `pnpm typecheck` | `tsc --noEmit` (verificación) |
 
 > No hay scripts de test, lint ni format. No se configuran a menos que se pidan explícitamente.
@@ -386,12 +386,12 @@ curl -i http://localhost:3000/api/categories
 
 ## 🔮 Próximos pasos (fuera de alcance por ahora)
 
-| Funcionalidad | ¿Por qué después? |
-|---|---|
-| Pagos (MercadoPago / Stripe) | Se acopla al final |
-| Notificaciones (email / WhatsApp) | Depende de pagos |
-| Imágenes de servicios | Sin CDN ni storage definido |
-| Múltiples peluqueros | Modelo actual es un solo barbero |
-| WebSockets / tiempo real | Sin necesidad detectada |
-| Tests E2E (Playwright) | Se agregan cuando la app se estabilice |
-| Docker | Corre nativo, sin necesidad |
+| Funcionalidad                     | ¿Por qué después?                      |
+| --------------------------------- | -------------------------------------- |
+| Pagos (MercadoPago / Stripe)      | Se acopla al final                     |
+| Notificaciones (email / WhatsApp) | Depende de pagos                       |
+| Imágenes de servicios             | Sin CDN ni storage definido            |
+| Múltiples peluqueros              | Modelo actual es un solo barbero       |
+| WebSockets / tiempo real          | Sin necesidad detectada                |
+| Tests E2E (Playwright)            | Se agregan cuando la app se estabilice |
+| Docker                            | Corre nativo, sin necesidad            |

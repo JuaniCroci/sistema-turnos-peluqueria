@@ -2,7 +2,13 @@
 
 import { Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Calendar, Clock, CheckCircle, AlertCircle, Scissors } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Scissors,
+} from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
 import { Spinner } from '@/components/Spinner/Spinner';
@@ -152,16 +158,30 @@ function NewAppointmentForm() {
         <div className={styles.container}>
           <Card padding="lg" variant="highlight">
             <div className={styles.successBox}>
-              <CheckCircle size={48} color="var(--color-success)" aria-hidden="true" />
+              <CheckCircle
+                size={48}
+                color="var(--color-success)"
+                aria-hidden="true"
+              />
               <p className={styles.successTitle}>Turno reservado</p>
               <p className={styles.successDesc}>
-                Tu turno fue registrado. Podes verlo y gestionarlo desde &quot;Mis turnos&quot;.
+                Tu turno fue registrado. Podes verlo y gestionarlo desde
+                &quot;Mis turnos&quot;.
               </p>
               <div className={styles.successActions}>
                 <Button onClick={() => router.push('/mis-turnos')}>
                   Ver mis turnos
                 </Button>
-                <Button variant="ghost" onClick={() => { setSuccess(false); setServiceId(''); setDate(''); setTime(''); setNotes(''); }}>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setSuccess(false);
+                    setServiceId('');
+                    setDate('');
+                    setTime('');
+                    setNotes('');
+                  }}
+                >
                   Reservar otro
                 </Button>
               </div>
@@ -196,7 +216,8 @@ function NewAppointmentForm() {
                   <option value="">Seleccionar servicio...</option>
                   {services.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.name} - {formatPrice(s.price_cents)} ({formatDuration(s.duration_minutes)})
+                      {s.name} - {formatPrice(s.price_cents)} (
+                      {formatDuration(s.duration_minutes)})
                     </option>
                   ))}
                 </select>
@@ -205,11 +226,18 @@ function NewAppointmentForm() {
 
             {selectedService && (
               <div className={styles.serviceDetail}>
-                <Scissors size={20} className={styles.serviceDetailIcon} aria-hidden="true" />
+                <Scissors
+                  size={20}
+                  className={styles.serviceDetailIcon}
+                  aria-hidden="true"
+                />
                 <div className={styles.serviceDetailInfo}>
-                  <span className={styles.serviceDetailName}>{selectedService.name}</span>
+                  <span className={styles.serviceDetailName}>
+                    {selectedService.name}
+                  </span>
                   <span className={styles.serviceDetailMeta}>
-                    {formatDuration(selectedService.duration_minutes)} &middot; {formatPrice(selectedService.price_cents)}
+                    {formatDuration(selectedService.duration_minutes)} &middot;{' '}
+                    {formatPrice(selectedService.price_cents)}
                   </span>
                 </div>
               </div>
@@ -230,7 +258,9 @@ function NewAppointmentForm() {
             <div className={styles.field}>
               <label htmlFor="time">Horario</label>
               {loadingSlots ? (
-                <p className={styles.fieldHint}>Consultando horarios disponibles...</p>
+                <p className={styles.fieldHint}>
+                  Consultando horarios disponibles...
+                </p>
               ) : (
                 <select
                   id="time"
@@ -240,7 +270,9 @@ function NewAppointmentForm() {
                   disabled={!date}
                 >
                   <option value="">
-                    {date ? 'Seleccionar horario...' : 'Primero seleccioná una fecha'}
+                    {date
+                      ? 'Seleccionar horario...'
+                      : 'Primero seleccioná una fecha'}
                   </option>
                   {availableSlots.length === 0 && date && (
                     <option value="" disabled>
@@ -256,7 +288,8 @@ function NewAppointmentForm() {
               )}
               {date && availableSlots.length > 0 && (
                 <span className={styles.fieldHint}>
-                  Se muestran solo los horarios libres. {date === todayStr ? 'Hoy solo horarios futuros.' : ''}
+                  Se muestran solo los horarios libres.{' '}
+                  {date === todayStr ? 'Hoy solo horarios futuros.' : ''}
                 </span>
               )}
             </div>
@@ -281,10 +314,18 @@ function NewAppointmentForm() {
             )}
 
             <div className={styles.formActions}>
-              <Button type="submit" loading={saving} iconLeft={<Calendar size={16} />}>
+              <Button
+                type="submit"
+                loading={saving}
+                iconLeft={<Calendar size={16} />}
+              >
                 Reservar turno
               </Button>
-              <Button variant="ghost" type="button" onClick={() => router.back()}>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => router.back()}
+              >
                 Cancelar
               </Button>
             </div>
@@ -297,17 +338,19 @@ function NewAppointmentForm() {
 
 export default function NewAppointmentPage() {
   return (
-    <Suspense fallback={
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <div className={styles.header}>
-            <h1 className={styles.title}>Reservar turno</h1>
-            <p className={styles.subtitle}>Cargando...</p>
+    <Suspense
+      fallback={
+        <div className={styles.page}>
+          <div className={styles.container}>
+            <div className={styles.header}>
+              <h1 className={styles.title}>Reservar turno</h1>
+              <p className={styles.subtitle}>Cargando...</p>
+            </div>
+            <Spinner />
           </div>
-          <Spinner />
         </div>
-      </div>
-    }>
+      }
+    >
       <NewAppointmentForm />
     </Suspense>
   );
