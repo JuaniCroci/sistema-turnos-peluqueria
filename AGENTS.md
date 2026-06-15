@@ -34,7 +34,7 @@ Milestone actual: **Fase 2 (M3 del README original) — Servicios y categorías*
 
 ## Convenciones no obvias
 
-- **No hay tests, lint ni formatter configurados.** No ejecutar `pnpm test`, `pnpm lint`, `eslint`, `prettier` — no existen y daran error. La verificacion oficial es `pnpm typecheck` (corre `tsc --noEmit`) + `pnpm build` (corre `next build`) + curl manual. No agregarlos a menos que el usuario lo pida explicitamente.
+- **Verificacion al terminar una implementacion**: correr siempre `pnpm typecheck` + `pnpm lint` + `pnpm format:check`. Los tres deben pasar en verde antes de dar por terminado el trabajo. `pnpm typecheck` corre `tsc --noEmit`; `pnpm lint` corre ESLint con la config en `eslint.config.mjs`; `pnpm format:check` verifica formato con Prettier. Si `pnpm lint` falla con errores nuevos, corregirlos antes de commitear.
 - **Sin Tailwind ni UI libs.** Estilos en CSS plano o CSS Modules. No proponer MUI/Chakra/shadcn/etc.
 - **TypeScript `strict: true`, cero `any`.** Aplica a la app entera.
 - **Comentarios y mensajes de UI en espanol.** Mantener el estilo del repo.
