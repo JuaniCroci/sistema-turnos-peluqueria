@@ -1,8 +1,10 @@
+import { env } from '@/lib/config/env';
+
 export async function verifyRecaptchaToken(
   token: string,
 ): Promise<{ success: boolean; score: number }> {
-  const required = process.env.RECAPTCHA_REQUIRED === 'true';
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  const required = env.RECAPTCHA_REQUIRED === 'true';
+  const secretKey = env.RECAPTCHA_SECRET_KEY;
 
   if (!secretKey) {
     if (required) {

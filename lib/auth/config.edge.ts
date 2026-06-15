@@ -1,6 +1,7 @@
 import Google from 'next-auth/providers/google';
 import type { NextAuthConfig } from 'next-auth';
 import type { Role } from '@/lib/types';
+import { env } from '@/lib/config/env';
 
 export const authEdgeConfig: NextAuthConfig = {
   trustHost: true,
@@ -10,8 +11,8 @@ export const authEdgeConfig: NextAuthConfig = {
   },
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
   ],
   callbacks: {
