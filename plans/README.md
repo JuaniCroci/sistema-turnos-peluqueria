@@ -40,7 +40,7 @@ match reality. Where a plan overrides an `AGENTS.md` rule it says so explicitly.
 | 007  | Add structured error logging to API route handlers                                    | P2       | S      | —          | DONE        |
 | 008  | Remove dead / duplicate code                                                          | P2       | S      | —          | DONE        |
 | 009  | ESLint + Prettier baseline (overrides AGENTS.md)                                      | P2       | M      | —          | DONE        |
-| 010  | Automated test baseline with Vitest (overrides AGENTS.md)                             | P1       | M      | —          | TODO        |
+| 010  | Automated test baseline with Vitest (overrides AGENTS.md)                             | P1       | M      | —          | DONE        |
 | 011  | CI pipeline on GitHub Actions (overrides AGENTS.md)                                   | P3       | S      | 009, 010   | TODO        |
 | 012  | Migrate `middleware.ts` → `proxy.ts` (Next 16 readiness)                              | P3       | S      | —          | TODO        |
 | 013  | Rewrite stale `AGENTS.md` + `README.md` to match Supabase reality                     | P2       | S      | —          | TODO        |
