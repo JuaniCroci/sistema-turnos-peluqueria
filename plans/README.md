@@ -42,7 +42,7 @@ match reality. Where a plan overrides an `AGENTS.md` rule it says so explicitly.
 | 009  | ESLint + Prettier baseline (overrides AGENTS.md)                                      | P2       | M      | —          | DONE   |
 | 010  | Automated test baseline with Vitest (overrides AGENTS.md)                             | P1       | M      | —          | DONE   |
 | 011  | CI pipeline on GitHub Actions (overrides AGENTS.md)                                   | P3       | S      | 009, 010   | DONE   |
-| 012  | Migrate `middleware.ts` → `proxy.ts` (Next 16 readiness)                              | P3       | S      | —          | TODO   |
+| 012  | Migrate `middleware.ts` → `proxy.ts` (Next 16 readiness)                              | P3       | S      | —          | DONE   |
 | 013  | Rewrite stale `AGENTS.md` + `README.md` to match Supabase reality                     | P2       | S      | —          | TODO   |
 | 014  | Evaluate Tailwind CSS adoption (design spike)                                         | P3       | L      | —          | TODO   |
 
