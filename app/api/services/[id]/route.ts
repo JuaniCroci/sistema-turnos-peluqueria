@@ -8,6 +8,7 @@ import {
 } from '@/lib/db/services';
 import { findCategoryById } from '@/lib/db/categories';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
+import { logError } from '@/lib/utils/logger';
 
 const updateSchema = z.object({
   category_id: z.number().int().positive().optional(),
@@ -42,7 +43,8 @@ export async function GET(
     }
 
     return NextResponse.json({ data: service });
-  } catch {
+  } catch (err) {
+    logError('GET /api/services/[id]', err);
     return errorResponse('INTERNAL_ERROR', 'Error al obtener servicio');
   }
 }
@@ -99,7 +101,8 @@ export async function PUT(
 
     const service = await updateService(id, parsed.data);
     return NextResponse.json({ data: service });
-  } catch {
+  } catch (err) {
+    logError('PUT /api/services/[id]', err);
     return errorResponse('INTERNAL_ERROR', 'Error al actualizar servicio');
   }
 }
@@ -130,7 +133,8 @@ export async function DELETE(
 
     await softDeleteService(id);
     return NextResponse.json({}, { status: 200 });
-  } catch {
+  } catch (err) {
+    logError('DELETE /api/services/[id]', err);
     return errorResponse('INTERNAL_ERROR', 'Error al eliminar servicio');
   }
 }

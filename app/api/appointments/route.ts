@@ -5,9 +5,11 @@ import {
   findAppointments,
   createAppointment,
   countActiveAppointments,
+  updateAppointmentStatus,
 } from '@/lib/db/appointments';
 import { findServiceById } from '@/lib/db/services';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
+import { logError } from '@/lib/utils/logger';
 import { getLocalHourMinute } from '@/lib/utils/datetime';
 import {
   OPEN_HOUR,
@@ -74,7 +76,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     });
 
     return NextResponse.json(result);
-  } catch {
+  } catch (err) {
+    logError('GET /api/appointments', err);
     return errorResponse('INTERNAL_ERROR', 'Error al obtener turnos');
   }
 }
@@ -159,6 +162,17 @@ export async function POST(request: Request): Promise<NextResponse> {
           appointment_at: appointmentAt,
           notes: parsed.data.notes,
         });
+
+        // Compensar race del límite activo: re-contar y si excede, cancelar el recién creado
+        const newCount = await countActiveAppointments(Number(session.user.id));
+        if (newCount > 2) {
+          await updateAppointmentStatus(appointment.id, 'cancelled');
+          return errorResponse(
+            'LIMIT_EXCEEDED',
+            'Ya alcanzaste el límite de 2 turnos activos. Cancelá uno para poder reservar otro.',
+          );
+        }
+
         return NextResponse.json({ data: appointment }, { status: 201 });
       } catch (e) {
         if (e instanceof Error && e.message.includes('Ya existe un turno')) {
@@ -208,6 +222,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (e instanceof Error && e.message.includes('Ya existe un turno')) {
       return errorResponse('CONFLICT', 'Ya existe un turno en ese horario');
     }
+    logError('POST /api/appointments', e);
     return errorResponse('INTERNAL_ERROR', 'Error al crear turno');
   }
 }

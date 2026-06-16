@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { getOccupiedSlots } from '@/lib/db/appointments';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
+import { logError } from '@/lib/utils/logger';
 
 const querySchema = z.object({
   date: z
@@ -35,7 +36,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     const slots = await getOccupiedSlots(parsed.data.date);
 
     return NextResponse.json({ slots });
-  } catch {
+  } catch (err) {
+    logError('GET /api/appointments/slots', err);
     return errorResponse(
       'INTERNAL_ERROR',
       'Error al obtener horarios ocupados',

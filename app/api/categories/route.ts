@@ -7,6 +7,7 @@ import {
   findCategoryBySlug,
 } from '@/lib/db/categories';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
+import { logError } from '@/lib/utils/logger';
 
 const createSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100),
@@ -22,7 +23,8 @@ export async function GET(): Promise<NextResponse> {
   try {
     const categories = await findAllCategories();
     return NextResponse.json({ data: categories });
-  } catch {
+  } catch (err) {
+    logError('GET /api/categories', err);
     return errorResponse('INTERNAL_ERROR', 'Error al obtener categorias');
   }
 }
@@ -60,7 +62,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const category = await createCategory(parsed.data);
     return NextResponse.json({ data: category }, { status: 201 });
-  } catch {
+  } catch (err) {
+    logError('POST /api/categories', err);
     return errorResponse('INTERNAL_ERROR', 'Error al crear categoria');
   }
 }

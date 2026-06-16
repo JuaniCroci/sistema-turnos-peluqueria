@@ -7,6 +7,7 @@ import {
   deleteCategoryById,
 } from '@/lib/db/categories';
 import { errorResponse } from '@/lib/utils/api';
+import { logError } from '@/lib/utils/logger';
 
 export async function GET(
   _request: Request,
@@ -19,7 +20,8 @@ export async function GET(
       return errorResponse('NOT_FOUND', 'Categoria no encontrada');
     }
     return NextResponse.json({ data: category });
-  } catch {
+  } catch (err) {
+    logError('GET /api/categories/[slug]', err);
     return errorResponse('INTERNAL_ERROR', 'Error al obtener categoria');
   }
 }
@@ -55,7 +57,8 @@ export async function DELETE(
 
     await deleteCategoryById(category.id);
     return NextResponse.json({}, { status: 200 });
-  } catch {
+  } catch (err) {
+    logError('DELETE /api/categories/[slug]', err);
     return errorResponse('INTERNAL_ERROR', 'Error al eliminar categoria');
   }
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { listAllUsers } from '@/lib/auth/users';
 import { errorResponse } from '@/lib/utils/api';
+import { logError } from '@/lib/utils/logger';
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -15,7 +16,8 @@ export async function GET(): Promise<NextResponse> {
 
     const users = await listAllUsers();
     return NextResponse.json({ data: users });
-  } catch {
+  } catch (err) {
+    logError('GET /api/users', err);
     return errorResponse('INTERNAL_ERROR', 'Error al obtener usuarios');
   }
 }

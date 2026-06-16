@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { findServices, createService } from '@/lib/db/services';
 import { findCategoryById } from '@/lib/db/categories';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
+import { logError } from '@/lib/utils/logger';
 
 const listQuerySchema = z.object({
   q: z.string().optional(),
@@ -49,7 +50,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     });
 
     return NextResponse.json(result);
-  } catch {
+  } catch (err) {
+    logError('GET /api/services', err);
     return errorResponse('INTERNAL_ERROR', 'Error al obtener servicios');
   }
 }
@@ -90,7 +92,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const service = await createService(parsed.data);
     return NextResponse.json({ data: service }, { status: 201 });
-  } catch {
+  } catch (err) {
+    logError('POST /api/services', err);
     return errorResponse('INTERNAL_ERROR', 'Error al crear servicio');
   }
 }

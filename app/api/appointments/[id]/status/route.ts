@@ -7,6 +7,7 @@ import {
   hasActiveAppointmentAt,
 } from '@/lib/db/appointments';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
+import { logError } from '@/lib/utils/logger';
 import type { AppointmentStatus } from '@/lib/types';
 
 const patchSchema = z.object({
@@ -99,7 +100,8 @@ export async function PATCH(
     const updated = { ...appointment, status: newStatus };
 
     return NextResponse.json({ data: updated });
-  } catch {
+  } catch (err) {
+    logError('PATCH /api/appointments/[id]/status', err);
     return errorResponse('INTERNAL_ERROR', 'Error al actualizar turno');
   }
 }

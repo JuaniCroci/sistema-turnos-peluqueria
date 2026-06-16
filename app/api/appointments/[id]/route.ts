@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { findAppointmentById, deleteAppointment } from '@/lib/db/appointments';
 import { errorResponse } from '@/lib/utils/api';
+import { logError } from '@/lib/utils/logger';
 
 export async function GET(
   _request: Request,
@@ -30,7 +31,8 @@ export async function GET(
     }
 
     return NextResponse.json({ data: appointment });
-  } catch {
+  } catch (err) {
+    logError('GET /api/appointments/[id]', err);
     return errorResponse('INTERNAL_ERROR', 'Error al obtener turno');
   }
 }
@@ -64,7 +66,8 @@ export async function DELETE(
 
     await deleteAppointment(id);
     return NextResponse.json({}, { status: 200 });
-  } catch {
+  } catch (err) {
+    logError('DELETE /api/appointments/[id]', err);
     return errorResponse('INTERNAL_ERROR', 'Error al eliminar turno');
   }
 }

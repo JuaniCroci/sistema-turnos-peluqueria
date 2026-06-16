@@ -203,7 +203,12 @@ export const createAppointment = async (
     .select('*')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    if ((error as { code?: string }).code === '23505') {
+      throw new Error('Ya existe un turno confirmado o pendiente en ese horario');
+    }
+    throw error;
+  }
   return data as Appointment;
 };
 
