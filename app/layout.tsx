@@ -21,6 +21,10 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: 'Sistema de Turnos — The Bunker',
   description: 'Reservá tu turno en The Bunker en segundos.',
+  manifest: '/manifest.json',
+  icons: {
+    apple: '/icon.png',
+  },
 };
 
 export const viewport: Viewport = {
