@@ -5,7 +5,11 @@ describe('flattenRow', () => {
   it('flattens nested objects with underscore prefix', () => {
     const row = {
       id: 1,
-      service: { name: 'Corte caballero', duration_minutes: 30, category: { name: 'Cabello' } },
+      service: {
+        name: 'Corte caballero',
+        duration_minutes: 30,
+        category: { name: 'Cabello' },
+      },
     };
     const result = flattenRow<Record<string, unknown>>(row);
     expect(result).toEqual({

@@ -11,11 +11,7 @@ import { findServiceById } from '@/lib/db/services';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 import { logError } from '@/lib/utils/logger';
 import { getLocalHourMinute } from '@/lib/utils/datetime';
-import {
-  OPEN_HOUR,
-  CLOSE_HOUR,
-  SLOT_MINUTES,
-} from '@/lib/config/business';
+import { OPEN_HOUR, CLOSE_HOUR, SLOT_MINUTES } from '@/lib/config/business';
 
 const listQuerySchema = z.object({
   status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),

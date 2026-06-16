@@ -2,7 +2,9 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   SUPABASE_URL: z.string().min(1, 'SUPABASE_URL es requerida'),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY es requerida'),
+  SUPABASE_SERVICE_ROLE_KEY: z
+    .string()
+    .min(1, 'SUPABASE_SERVICE_ROLE_KEY es requerida'),
   SUPABASE_ANON_KEY: z.string().optional().default(''),
   RECAPTCHA_SECRET_KEY: z.string().optional().default(''),
   RECAPTCHA_REQUIRED: z.string().optional().default('false'),

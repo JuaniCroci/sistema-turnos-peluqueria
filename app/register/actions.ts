@@ -80,7 +80,8 @@ export const registerAction = async (
 
   if (isRecaptchaRequired && !recaptchaToken) {
     return {
-      error: 'No se pudo verificar que seas humano. Recargá la página e intentá de nuevo.',
+      error:
+        'No se pudo verificar que seas humano. Recargá la página e intentá de nuevo.',
       fieldErrors: {},
     };
   }
