@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f0f12"/>
+      <stop offset="100%" stop-color="#1a1a24"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e87945"/>
+      <stop offset="100%" stop-color="#d4593a"/>
+    </linearGradient>
+    <linearGradient id="rowAlt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e1e2a"/>
+      <stop offset="100%" stop-color="#1a1a26"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+
+  <!-- Top accent line -->
+  <rect width="1080" height="6" fill="url(#accent)"/>
+
+  <!-- Logo / Brand -->
+  <circle cx="540" cy="160" r="48" fill="none" stroke="url(#accent)" stroke-width="3"/>
+  <text x="540" y="172" text-anchor="middle" fill="#e87945" font-family="Georgia, serif" font-size="36" font-weight="bold">P</text>
+
+  <!-- Business Name -->
+  <text x="540" y="260" text-anchor="middle" fill="#f0ece4" font-family="Georgia, serif" font-size="52" font-weight="bold">Peluquería</text>
+  <text x="540" y="300" text-anchor="middle" fill="#e87945" font-family="Georgia, serif" font-size="28" letter-spacing="6">RESUMEN DIARIO</text>
+
+  <!-- Date -->
+  <rect x="340" y="340" width="400" height="54" rx="27" fill="#1e1e2a" stroke="#2a2a3a" stroke-width="1"/>
+  <text x="540" y="375" text-anchor="middle" fill="#c8c4bc" font-family="system-ui, sans-serif" font-size="22">LUNES 15 DE JUNIO DE 2026</text>
+
+  <!-- Separator -->
+  <line x1="200" y1="430" x2="880" y2="430" stroke="#2a2a3a" stroke-width="1"/>
+
+  <!-- Table Header -->
+  <g transform="translate(80, 470)">
+    <text x="0" y="28" fill="#e87945" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" letter-spacing="2">HORA</text>
+    <text x="180" y="28" fill="#e87945" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" letter-spacing="2">SERVICIO</text>
+    <text x="550" y="28" fill="#e87945" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" letter-spacing="2">CLIENTE</text>
+    <text x="820" y="28" fill="#e87945" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" letter-spacing="2" text-anchor="end">PRECIO</text>
+  </g>
+  <line x1="80" y1="510" x2="1000" y2="510" stroke="#2a2a3a" stroke-width="1"/>
+
+  <!-- Table Rows -->
+  <g transform="translate(80, 540)" font-family="system-ui, sans-serif" font-size="24" fill="#f0ece4">
+    <!-- Row 1 -->
+    <rect x="-20" y="0" width="960" height="64" rx="8" fill="#1a1a26" opacity="0.6"/>
+    <text x="0" y="38" fill="#c8c4bc">09:00</text>
+    <text x="180" y="38">Corte caballero</text>
+    <text x="550" y="38" fill="#a09890">Juan Pérez</text>
+    <text x="820" y="38" text-anchor="end" fill="#e87945">$3.000</text>
+
+    <!-- Row 2 -->
+    <rect x="-20" y="72" width="960" height="64" rx="8" fill="#1e1e2a"/>
+    <text x="0" y="110" fill="#c8c4bc">09:40</text>
+    <text x="180" y="110">Perfilado de barba</text>
+    <text x="550" y="110" fill="#a09890">Carlos López</text>
+    <text x="820" y="110" text-anchor="end" fill="#e87945">$2.000</text>
+
+    <!-- Row 3 -->
+    <rect x="-20" y="144" width="960" height="64" rx="8" fill="#1a1a26" opacity="0.6"/>
+    <text x="0" y="182" fill="#c8c4bc">10:20</text>
+    <text x="180" y="182">Hidratación</text>
+    <text x="550" y="182" fill="#a09890">María García</text>
+    <text x="820" y="182" text-anchor="end" fill="#e87945">$6.000</text>
+
+    <!-- Row 4 -->
+    <rect x="-20" y="216" width="960" height="64" rx="8" fill="#1e1e2a"/>
+    <text x="0" y="254" fill="#c8c4bc">11:00</text>
+    <text x="180" y="254">Corte dama</text>
+    <text x="550" y="254" fill="#a09890">Ana Martínez</text>
+    <text x="820" y="254" text-anchor="end" fill="#e87945">$5.000</text>
+
+    <!-- Row 5 -->
+    <rect x="-20" y="288" width="960" height="64" rx="8" fill="#1a1a26" opacity="0.6"/>
+    <text x="0" y="326" fill="#c8c4bc">11:40</text>
+    <text x="180" y="326">Tinte de raíces</text>
+    <text x="550" y="326" fill="#a09890">Laura Rodríguez</text>
+    <text x="820" y="326" text-anchor="end" fill="#e87945">$8.000</text>
+
+    <!-- Row 6 -->
+    <rect x="-20" y="360" width="960" height="64" rx="8" fill="#1e1e2a"/>
+    <text x="0" y="398" fill="#c8c4bc">12:20</text>
+    <text x="180" y="398">Corte caballero</text>
+    <text x="550" y="398" fill="#a09890">Miguel Díaz</text>
+    <text x="820" y="398" text-anchor="end" fill="#e87945">$3.000</text>
+
+    <!-- Row 7 -->
+    <rect x="-20" y="432" width="960" height="64" rx="8" fill="#1a1a26" opacity="0.6"/>
+    <text x="0" y="470" fill="#c8c4bc">13:00</text>
+    <text x="180" y="470">Barba completa</text>
+    <text x="550" y="470" fill="#a09890">Pedro Sánchez</text>
+    <text x="820" y="470" text-anchor="end" fill="#e87945">$3.500</text>
+  </g>
+
+  <!-- Break indicator -->
+  <g transform="translate(80, 1080)">
+    <rect x="-16" y="0" width="952" height="48" rx="24" fill="#2a1a1a" stroke="#4a2a2a" stroke-width="1"/>
+    <text x="460" y="30" text-anchor="middle" fill="#e04040" font-family="system-ui, sans-serif" font-size="18" letter-spacing="2">DESCANSO — 14:00 a 16:00</text>
+  </g>
+
+  <!-- Afternoon rows -->
+  <g transform="translate(80, 1160)" font-family="system-ui, sans-serif" font-size="24" fill="#f0ece4">
+    <rect x="-20" y="0" width="960" height="64" rx="8" fill="#1e1e2a"/>
+    <text x="0" y="38" fill="#c8c4bc">16:00</text>
+    <text x="180" y="38">Corte caballero</text>
+    <text x="550" y="38" fill="#a09890">Roberto Fernández</text>
+    <text x="820" y="38" text-anchor="end" fill="#e87945">$3.000</text>
+
+    <rect x="-20" y="72" width="960" height="64" rx="8" fill="#1a1a26" opacity="0.6"/>
+    <text x="0" y="110" fill="#c8c4bc">16:40</text>
+    <text x="180" y="110">Keratina</text>
+    <text x="550" y="110" fill="#a09890">Sofía López</text>
+    <text x="820" y="110" text-anchor="end" fill="#e87945">$18.000</text>
+
+    <rect x="-20" y="144" width="960" height="64" rx="8" fill="#1e1e2a"/>
+    <text x="0" y="182" fill="#c8c4bc">17:20</text>
+    <text x="180" y="182">Corte niño</text>
+    <text x="550" y="182" fill="#a09890">Lautaro Gómez</text>
+    <text x="820" y="182" text-anchor="end" fill="#e87945">$2.000</text>
+
+    <rect x="-20" y="216" width="960" height="64" rx="8" fill="#1a1a26" opacity="0.6"/>
+    <text x="0" y="254" fill="#c8c4bc">18:00</text>
+    <text x="180" y="254">Perfilado de barba</text>
+    <text x="550" y="254" fill="#a09890">Diego Ruiz</text>
+    <text x="820" y="254" text-anchor="end" fill="#e87945">$2.000</text>
+
+    <rect x="-20" y="288" width="960" height="64" rx="8" fill="#1e1e2a"/>
+    <text x="0" y="326" fill="#c8c4bc">19:20</text>
+    <text x="180" y="326">Corte caballero</text>
+    <text x="550" y="326" fill="#a09890">Jorge Álvarez</text>
+    <text x="820" y="326" text-anchor="end" fill="#e87945">$3.000</text>
+  </g>
+
+  <!-- Separator before totals -->
+  <line x1="200" y1="1550" x2="880" y2="1550" stroke="#2a2a3a" stroke-width="2"/>
+
+  <!-- Totals Section -->
+  <g transform="translate(80, 1580)">
+    <text x="0" y="0" fill="#c8c4bc" font-family="system-ui, sans-serif" font-size="20" letter-spacing="2">RESUMEN</text>
+
+    <!-- Total appointments -->
+    <g transform="translate(0, 40)">
+      <text x="0" y="30" fill="#a09890" font-family="system-ui, sans-serif" font-size="22">Turnos del día</text>
+      <text x="880" y="30" text-anchor="end" fill="#f0ece4" font-family="system-ui, sans-serif" font-size="32" font-weight="bold">12</text>
+    </g>
+
+    <line x1="0" y1="60" x2="920" y2="60" stroke="#2a2a3a" stroke-width="1"/>
+
+    <!-- Total duration -->
+    <g transform="translate(0, 80)">
+      <text x="0" y="30" fill="#a09890" font-family="system-ui, sans-serif" font-size="22">Duración total</text>
+      <text x="880" y="30" text-anchor="end" fill="#f0ece4" font-family="system-ui, sans-serif" font-size="32" font-weight="bold">7h 20min</text>
+    </g>
+
+    <line x1="0" y1="60" x2="920" y2="60" stroke="#2a2a3a" stroke-width="1"/>
+
+    <!-- Total revenue -->
+    <g transform="translate(0, 120)">
+      <text x="0" y="30" fill="#a09890" font-family="system-ui, sans-serif" font-size="22">Ingreso total</text>
+      <text x="880" y="30" text-anchor="end" fill="#e87945" font-family="system-ui, sans-serif" font-size="40" font-weight="bold">$59.500</text>
+    </g>
+  </g>
+
+  <!-- Footer -->
+  <g transform="translate(0, 1820)">
+    <line x1="200" y1="0" x2="880" y2="0" stroke="#2a2a3a" stroke-width="1"/>
+    <text x="540" y="36" text-anchor="middle" fill="#5a5a6a" font-family="system-ui, sans-serif" font-size="16">
+      Atención: Lunes a Sábado 9:00–14:00 · 16:00–20:00 | Peluquería · 2026
+    </text>
+    <text x="540" y="60" text-anchor="middle" fill="#4a4a5a" font-family="system-ui, sans-serif" font-size="14">
+      Generado el 15/06/2026 · Sistema de Turnos
+    </text>
+  </g>
+</svg>
