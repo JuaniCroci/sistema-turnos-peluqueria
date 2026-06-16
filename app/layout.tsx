@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   description: 'Reservá tu turno en The Bunker en segundos.',
   manifest: '/manifest.json',
   icons: {
-    apple: '/icon.svg',
+    apple: '/apple-icon.png',
   },
   other: {
     'apple-mobile-web-app-capable': 'yes',
