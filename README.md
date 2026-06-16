@@ -11,7 +11,7 @@ Admin gestiona el catálogo completo y los turnos.
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=next.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57?logo=sqlite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase&logoColor=white)
 ![Auth.js](https://img.shields.io/badge/Auth.js-v5-EF4444?logo=next.js&logoColor=white)
 ![Zod](https://img.shields.io/badge/Zod-✓-3068B7?logo=zod&logoColor=white)
 ![Node](https://img.shields.io/badge/Node-24.14.1-339933?logo=node.js&logoColor=white)
@@ -42,18 +42,18 @@ Lo que **sí** vas a tener que sumar en el e-commerce: integración de pagos (St
 
 ## 🧱 Stack
 
-| Capa                | Tecnología                                              |
-| ------------------- | ------------------------------------------------------- |
-| **Runtime**         | Node 24.14.1 (`.nvmrc`)                                 |
-| **Lenguaje**        | TypeScript 5.7, `strict: true`, cero `any`              |
-| **Framework**       | Next.js 15.5+ (App Router, route.ts, Server Components) |
-| **Base de datos**   | `better-sqlite3` v12 — sincrónico, cero config          |
-| **Autenticación**   | NextAuth v5 beta (Auth.js) — CredentialsProvider + JWT  |
-| **Validación**      | Zod en todos los endpoints                              |
-| **CSS**             | `open-props` + CSS Modules planos (sin Tailwind)        |
-| **Iconos**          | `lucide-react`                                          |
-| **Fonts**           | `next/font/google` (Inter + Fraunces)                   |
-| **Package manager** | pnpm 10.x                                               |
+| Capa                | Tecnología                                                       |
+| ------------------- | ---------------------------------------------------------------- |
+| **Runtime**         | Node 24.14.1 (`.nvmrc`)                                          |
+| **Lenguaje**        | TypeScript 5.7, `strict: true`, cero `any`                       |
+| **Framework**       | Next.js 15.5+ (App Router, route.ts, Server Components)          |
+| **Base de datos**   | Supabase Postgres via `@supabase/supabase-js` (service-role key) |
+| **Autenticación**   | NextAuth v5 beta (Auth.js) — Credentials + Google, JWT           |
+| **Validación**      | Zod en todos los endpoints                                       |
+| **CSS**             | `open-props` + CSS Modules planos (sin Tailwind)                 |
+| **Iconos**          | `lucide-react`                                                   |
+| **Fonts**           | `next/font/google` (Inter + Fraunces)                            |
+| **Package manager** | pnpm 10.x                                                        |
 
 ---
 
@@ -89,15 +89,16 @@ sistema-turnos-peluqueria/
 │
 ├── lib/
 │   ├── auth/                     # Config, queries, re-exports
-│   ├── db/                       # Connection, migrations, seed, queries
-│   ├── utils/                    # api helpers, format, password
+│   ├── config/                   # Env validation, business rules
+│   ├── db/                       # Queries de appointments, categories, services
+│   ├── supabase/                 # Cliente Supabase (service-role)
+│   ├── utils/                    # api helpers, format, password, datetime, recaptcha, logger
 │   └── types.ts                  # Tipos compartidos
 │
-├── middleware.ts                 # Route protection (NextAuth edge)
+├── proxy.ts                      # Route protection (NextAuth edge)
 ├── styles/                       # tokens.css + reset.css
 ├── types/                        # next-auth.d.ts
-├── data/turnos.db                # SQLite (gitignored, se regenera)
-└── scripts/                      # Helper Windows para prebuilds
+└── scripts/                      # init.sql, enable-rls.sql, create-admin.sql
 ```
 
 ---
@@ -117,40 +118,40 @@ sistema-turnos-peluqueria/
 
 ```sql
 CREATE TABLE users (
-  id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  email         TEXT    UNIQUE NOT NULL,
-  username      TEXT    UNIQUE NOT NULL,
-  password_hash TEXT    NOT NULL,
-  role          TEXT    NOT NULL CHECK(role IN ('client', 'admin')) DEFAULT 'client',
-  created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+  id            SERIAL PRIMARY KEY,
+  email         TEXT UNIQUE NOT NULL,
+  username      TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role          TEXT NOT NULL CHECK(role IN ('client', 'admin')) DEFAULT 'client',
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE categories (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  name        TEXT    NOT NULL,
-  slug        TEXT    UNIQUE NOT NULL,
+  id          SERIAL PRIMARY KEY,
+  name        TEXT NOT NULL,
+  slug        TEXT UNIQUE NOT NULL,
   description TEXT
 );
 
 CREATE TABLE services (
-  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+  id               SERIAL PRIMARY KEY,
   category_id      INTEGER NOT NULL REFERENCES categories(id),
-  name             TEXT    NOT NULL,
+  name             TEXT NOT NULL,
   description      TEXT,
   duration_minutes INTEGER NOT NULL CHECK(duration_minutes > 0),
   price_cents      INTEGER NOT NULL CHECK(price_cents >= 0),
   active           INTEGER NOT NULL DEFAULT 1,
-  created_at       TEXT    NOT NULL DEFAULT (datetime('now'))
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE appointments (
-  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  id             SERIAL PRIMARY KEY,
   user_id        INTEGER NOT NULL REFERENCES users(id),
   service_id     INTEGER NOT NULL REFERENCES services(id),
-  appointment_at TEXT    NOT NULL,
-  status         TEXT    NOT NULL CHECK(status IN ('pending','confirmed','cancelled','completed')) DEFAULT 'pending',
+  appointment_at TIMESTAMPTZ NOT NULL,
+  status         TEXT NOT NULL CHECK(status IN ('pending','confirmed','cancelled','completed')) DEFAULT 'pending',
   notes          TEXT,
-  created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_services_category  ON services(category_id);
@@ -325,6 +326,7 @@ Los seed users con contraseñas hardcodeadas fueron eliminados del repositorio p
 
 - Node `24.14.1` (`nvm use`)
 - pnpm `10.x` (`npm i -g pnpm`)
+- Proyecto Supabase (gratuito) con las credenciales en `.env`
 
 ### Instalación y desarrollo
 
@@ -340,14 +342,38 @@ pnpm build         # next build
 pnpm start         # next start en :3000
 ```
 
+### Verificación
+
+```bash
+pnpm typecheck     # tsc --noEmit
+pnpm lint          # ESLint
+pnpm format:check  # Prettier
+pnpm test          # Vitest
+```
+
 ### Variables de entorno (`.env`)
 
+Ver `.env.example` para valores de referencia:
+
 ```
-AUTH_SECRET=cambiame-en-prod
-AUTH_URL=http://localhost:3000
+# Supabase
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=sk_xxxx
+SUPABASE_ANON_KEY=eyJxxxx
+
+# NextAuth v5
+AUTH_SECRET=...
 NEXTAUTH_URL=http://localhost:3000
-RECAPTCHA_REQUIRED=false   # false en dev; poner true en produccion para exigir reCAPTCHA
-DB_PATH=./data/turnos.db
+
+# Google OAuth 2.0
+GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-xxxx
+
+# reCAPTCHA v3
+RECAPTCHA_SITE_KEY=6Lfxxxx
+RECAPTCHA_SECRET_KEY=6Lfxxxx
+RECAPTCHA_REQUIRED=false
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6Lfxxxx
 ```
 
 > **Seguridad**: Toda la interacción con la DB usa la **service-role key** de Supabase
@@ -358,14 +384,20 @@ DB_PATH=./data/turnos.db
 
 ## 📜 Scripts
 
-| Comando          | Descripción                   |
-| ---------------- | ----------------------------- |
-| `pnpm dev`       | `next dev`                    |
-| `pnpm build`     | `next build`                  |
-| `pnpm start`     | `next start`                  |
-| `pnpm typecheck` | `tsc --noEmit` (verificación) |
+| Comando             | Descripción          |
+| ------------------- | -------------------- |
+| `pnpm dev`          | `next dev`           |
+| `pnpm build`        | `next build`         |
+| `pnpm start`        | `next start`         |
+| `pnpm typecheck`    | `tsc --noEmit`       |
+| `pnpm lint`         | `eslint .`           |
+| `pnpm lint:fix`     | `eslint . --fix`     |
+| `pnpm format`       | `prettier --write .` |
+| `pnpm format:check` | `prettier --check .` |
+| `pnpm test`         | `vitest run`         |
+| `pnpm test:watch`   | `vitest`             |
 
-> No hay scripts de test, lint ni format. No se configuran a menos que se pidan explícitamente.
+CI automático via GitHub Actions (`.github/workflows/ci.yml`) en cada push/PR.
 
 ---
 
