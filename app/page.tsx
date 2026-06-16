@@ -5,8 +5,8 @@ import { auth } from '@/lib/auth';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: 'Inicio · Sistema de Turnos — Peluquería',
-  description: 'Reservá tu turno en la peluquería en segundos.',
+  title: 'Inicio · Sistema de Turnos — The Bunker',
+  description: 'Reservá tu turno en The Bunker en segundos.',
 };
 
 export default async function HomePage() {

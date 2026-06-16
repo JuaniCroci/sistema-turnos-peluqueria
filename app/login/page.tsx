@@ -7,7 +7,7 @@ import { LoginForm } from './LoginForm';
 import styles from '../auth.module.css';
 
 export const metadata = {
-  title: 'Ingresar · Peluquería',
+  title: 'Ingresar · The Bunker',
 };
 
 interface LoginPageProps {

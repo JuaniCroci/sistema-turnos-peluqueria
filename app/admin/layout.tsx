@@ -4,7 +4,7 @@ import { AdminSidebar } from './AdminSidebar';
 import styles from './AdminLayout.module.css';
 
 export const metadata: Metadata = {
-  title: 'Admin · Sistema de Turnos — Peluquería',
+  title: 'Admin · Sistema de Turnos — The Bunker',
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

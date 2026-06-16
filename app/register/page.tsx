@@ -5,7 +5,7 @@ import { RegisterForm } from './RegisterForm';
 import styles from '../auth.module.css';
 
 export const metadata = {
-  title: 'Crear cuenta · Peluquería',
+  title: 'Crear cuenta · The Bunker',
 };
 
 interface RegisterPageProps {

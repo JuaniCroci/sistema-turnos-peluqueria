@@ -7,9 +7,9 @@ import type { Service } from '@/lib/types';
 import styles from './ServicesList.module.css';
 
 export const metadata: Metadata = {
-  title: 'Servicios · Sistema de Turnos — Peluquería',
+  title: 'Servicios · Sistema de Turnos — The Bunker',
   description:
-    'Explorá nuestros servicios de peluquería: cortes, barba, coloración y tratamientos.',
+    'Explorá nuestros servicios en The Bunker: cortes, barba, coloración y tratamientos.',
 };
 
 interface ServicesListPageProps {

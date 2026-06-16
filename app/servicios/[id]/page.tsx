@@ -19,10 +19,9 @@ export async function generateMetadata({
   if (!service || !service.active) return { title: 'Servicio no encontrado' };
 
   return {
-    title: `${service.name} · Sistema de Turnos — Peluquería`,
+    title: `${service.name} · Sistema de Turnos — The Bunker`,
     description:
-      service.description ??
-      `Servicio de ${service.name} en nuestra peluquería.`,
+      service.description ?? `Servicio de ${service.name} en The Bunker.`,
   };
 }
 

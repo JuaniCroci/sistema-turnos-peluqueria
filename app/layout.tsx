@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Fraunces } from 'next/font/google';
+import { MapPin } from 'lucide-react';
 import { Navbar, type NavUser } from '@/components/Navbar/Navbar';
 import { auth } from '@/lib/auth';
 import styles from './layout.module.css';
@@ -18,8 +19,8 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: 'Sistema de Turnos — Peluquería',
-  description: 'Reservá tu turno en la peluquería en segundos.',
+  title: 'Sistema de Turnos — The Bunker',
+  description: 'Reservá tu turno en The Bunker en segundos.',
 };
 
 export const viewport: Viewport = {
@@ -44,9 +45,9 @@ export default async function RootLayout({
           <main className={styles.main}>{children}</main>
           <footer className={styles.footer}>
             <div className={styles.footerInner}>
-              <p className={styles.brand}>Peluquería · Sistema de Turnos</p>
+              <p className={styles.brand}>The Bunker · Sistema de Turnos</p>
               <p className={styles.contact}>
-                Av. Siempre Viva 742 · Lunes a sábados de 9 a 20 hs
+                <MapPin size={14} aria-hidden="true" /> Díaz, Santa Fe
               </p>
             </div>
           </footer>

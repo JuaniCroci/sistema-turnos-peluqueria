@@ -42,7 +42,7 @@ longer apply.
 | 012  | Migrate `middleware.ts` → `proxy.ts` (Next 16 readiness)                              | P3       | S      | —          | DONE                                                                                |
 | 013  | Rewrite stale `AGENTS.md` + `README.md` to match Supabase reality                     | P2       | S      | —          | DONE                                                                                |
 | 014  | Evaluate Tailwind CSS adoption (design spike)                                         | P3       | L      | —          | REJECTED — app pequena, 25 CSS modules, el costo de split-brain supera el beneficio |
-| 015  | Exportar turnos a imagen Stories-style                                                | P2       | L      | —          | TODO — ver `exportar-turnos/`                                                        |
+| 015  | Exportar turnos a imagen Stories-style                                                | P2       | L      | —          | TODO — ver `exportar-turnos/`                                                       |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 

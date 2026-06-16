@@ -13,6 +13,7 @@ El mockup de la Stories esta en [`mockup.svg`](./mockup.svg).
 ### A1. Eliminar sistema de categorias
 
 **DB (`scripts/init.sql`)**
+
 - Lines 15-20: eliminar `CREATE TABLE IF NOT EXISTS categories (…)`
 - Line 24: `category_id` debe pasar a ser nullable (`INTEGER REFERENCES categories(id)` → `INTEGER`), o eliminar la columna
 - Eliminar FK constraint `REFERENCES categories(id)` (no existe mas la tabla categories)
@@ -21,47 +22,57 @@ El mockup de la Stories esta en [`mockup.svg`](./mockup.svg).
 - Line 45: eliminar `idx_services_category`
 
 **`scripts/enable-rls.sql`**
+
 - Line 10: eliminar `ALTER TABLE categories ENABLE ROW LEVEL SECURITY;`
 
 **`lib/types.ts`**
+
 - Lines 11-16: eliminar `Category` interface
 - Line 20: `category_id: number` → eliminar del `Service` type (o hacerlo opcional)
 
 **`lib/db/categories.ts`** — ELIMINAR archivo completo
 
 **`lib/db/services.ts`**
+
 - Lines 64-70: `CreateServiceInput` — eliminar `category_id`
 - Lines 72-91: `createService` — eliminar `category_id` del insert
 - Lines 93-99: `UpdateServiceInput` — eliminar `category_id`
 - Lines 101-129: `updateService` — eliminar la logica de category_id
 
 **`lib/db/appointments.ts`**
+
 - Line 11: `AppointmentRow` — eliminar `category_name`
 - Lines 14-17: `AppointmentAdminRow` se mantiene igual
 - Lines 37-44 y 46-52: `APPOINTMENT_SELECT` y `LIST_APPOINTMENT_SELECT` — eliminar el nested join `category:category_id (name)`
 
 **`lib/db/flatten.test.ts`**
+
 - Lines 11, 19, 26, 29: eliminar referencias a `service_category_name` y `service_category`
 
 **API routes a ELIMINAR:**
+
 - `app/api/categories/route.ts`
 - `app/api/categories/[slug]/route.ts`
 
 **`app/api/services/route.ts`**
+
 - Line 5: eliminar `import { findCategoryById }`
 - Line 17: eliminar `category_id` del `createSchema`
 - Lines 85-91: eliminar validacion `findCategoryById(parsed.data.category_id)`
 
 **`app/api/services/[id]/route.ts`**
+
 - Line 9: eliminar `import { findCategoryById }`
 - Line 14: eliminar `category_id` del `updateSchema`
 - Lines 92-100: eliminar validacion de categoria
 
 **Frontend pages a ELIMINAR:**
+
 - `app/admin/categorias/page.tsx`
 - `app/admin/categorias/AdminCategories.module.css`
 
 **`app/admin/servicios/page.tsx`**
+
 - Line 9: eliminar `Category` de import
 - Line 13: eliminar `category_id` de `FormData`
 - Line 21: eliminar `category_id` de `emptyForm`
@@ -76,11 +87,13 @@ El mockup de la Stories esta en [`mockup.svg`](./mockup.svg).
 - Line 346: eliminar celda de categoria de la tabla
 
 **`app/servicios/[id]/page.tsx`**
+
 - Line 6: eliminar `import { findCategoryById }`
 - Line 48: eliminar `findCategoryById(service.category_id)`
 - Lines 68-73: eliminar conditional category badge
 
 **`app/mis-turnos/page.tsx`**
+
 - Lines 149-153: eliminar `apt.category_name` conditional rendering
 
 ---
@@ -94,6 +107,7 @@ Post-eliminacion de categorias, servicios son una flat list. No cambia la funcio
 ### A3. Redisenar AdminSidebar
 
 **`app/admin/AdminSidebar.tsx`**
+
 - Agregar icono `FileDown` (de lucide-react) para "Exportar Turnos"
 - Agregar ruta `{ href: '/admin/exportar', label: 'Exportar Turnos', icon: FileDown }`
 - La seccion de servicios queda como `{ href: '/admin/servicios', label: 'Servicios', icon: Scissors }`
@@ -103,10 +117,12 @@ Post-eliminacion de categorias, servicios son una flat list. No cambia la funcio
 ### A4. Slot duration 40 min + midday break
 
 **`lib/config/business.ts`** — cambiar constantes:
+
 - `SLOT_MINUTES = 40` (antes 30)
 - Agregar `BREAK_START = 14`, `BREAK_END = 16` (pausa de 14 a 16 hs)
 
 **`app/mis-turnos/nuevo/page.tsx`** — slot generation:
+
 - Importar `BREAK_START`, `BREAK_END`
 - En `TIME_SLOTS`, filtrar slots que caen dentro del break (14:00 a 15:20 inclusive, ya que con slots de 40 min los que caen en break son: 14:00, 14:40, 15:20 → el de 15:20 termina a las 16:00, que es justo la reapertura... hmm)
   - Regla: un slot esta en break si `startMinutes >= breakStartMinutes && startMinutes < breakEndMinutes`
@@ -115,9 +131,11 @@ Post-eliminacion de categorias, servicios son una flat list. No cambia la funcio
 - `SLOT_COUNT` se calcula dinamicamente en base a los slots disponibles (mañana + tarde, excluyendo break)
 
 **`app/api/appointments/route.ts`** (POST para clients, lines 130-141):
+
 - Agregar validacion de break: si la hora esta entre `BREAK_START` y `BREAK_END`, rechazar con mensaje "Horario de descanso (14:00 a 16:00)"
 
 **`app/api/appointments/slots/route.ts`** (GET):
+
 - `getOccupiedSlots` en `lib/db/appointments.ts` itera con `m += 30` hardcoded. Deberia usar `SLOT_MINUTES` en vez de 30 (line 248). However, this is only for the occupied set building — if we change the iteration step to 40, it changes which occupied slots are reported. Let's think...
   - If a 40-min service starts at 09:00, it occupies 09:00-09:40. With 30-min step: marks 09:00 and 09:30. With 40-min step: marks only 09:00.
   - But the client now generates 40-min slots (09:00, 09:40, 10:20...). So if 09:00 is occupied, both 09:00 and 09:30 should NOT appear in the slot list (since 09:30 is not even a valid slot anymore).
@@ -143,6 +161,7 @@ Post-eliminacion de categorias, servicios son una flat list. No cambia la funcio
 Ver [`mockup.svg`](./mockup.svg) — diseno Stories-style (1080x1920, formato 9:16 para Instagram).
 
 La imagen generada incluye:
+
 - Header con nombre de la peluqueria y fecha
 - Tabla de turnos: hora, servicio, cliente, precio
 - Totales: cantidad de turnos, ingreso total, duracion total
@@ -181,6 +200,7 @@ Necesitamos pasar `from` y `to` como ISO strings del dia en cuestion. Podemos us
 ### B4. Admin UI
 
 **`app/admin/exportar/page.tsx`** — client component
+
 - Date picker (input type date)
 - Boton "Generar resumen"
 - Muestra la imagen generada en un contenedor con scroll
@@ -189,6 +209,7 @@ Necesitamos pasar `from` y `to` como ISO strings del dia en cuestion. Podemos us
 **`app/admin/exportar/Exportar.module.css`** — estilos
 
 La imagen se obtiene asi:
+
 ```ts
 const res = await fetch(`/api/admin/export/turnos?fecha=${fecha}`);
 const blob = await res.blob();
@@ -207,43 +228,43 @@ En `AdminSidebar.tsx`, link a `/admin/exportar` con icono `FileDown`.
 
 ## Archivos a crear
 
-| Archivo | Proposito |
-|---|---|
-| `plans/exportar-turnos/mockup.svg` | Mockup visual de la Stories |
-| `app/api/admin/export/turnos/route.ts` | Endpoint que genera PNG |
-| `app/admin/exportar/page.tsx` | UI de exportacion |
-| `app/admin/exportar/Exportar.module.css` | Estilos de la UI |
+| Archivo                                  | Proposito                   |
+| ---------------------------------------- | --------------------------- |
+| `plans/exportar-turnos/mockup.svg`       | Mockup visual de la Stories |
+| `app/api/admin/export/turnos/route.ts`   | Endpoint que genera PNG     |
+| `app/admin/exportar/page.tsx`            | UI de exportacion           |
+| `app/admin/exportar/Exportar.module.css` | Estilos de la UI            |
 
 ## Archivos a modificar
 
-| Archivo | Cambio |
-|---|---|
-| `scripts/init.sql` | Eliminar tabla categories, actualizar services |
-| `scripts/enable-rls.sql` | Eliminar categories RLS |
-| `lib/types.ts` | Eliminar Category, category_id de Service |
-| `lib/db/services.ts` | Eliminar category_id de inputs/queries |
-| `lib/db/appointments.ts` | Eliminar category_name, SLOT_MINUTES en getOccupiedSlots |
-| `lib/db/flatten.test.ts` | Eliminar tests de category |
-| `lib/config/business.ts` | SLOT_MINUTES=40, agregar BREAK_START/BREAK_END |
-| `app/mis-turnos/nuevo/page.tsx` | Slot generation con break y 40 min |
-| `app/api/appointments/route.ts` | Validacion de break |
-| `app/api/appointments/slots/route.ts` | Sin cambios (getOccupiedSlots usa SLOT_MINUTES) |
-| `app/api/services/route.ts` | Eliminar category_id de schema y validacion |
-| `app/api/services/[id]/route.ts` | Eliminar category_id de schema y validacion |
-| `app/admin/AdminSidebar.tsx` | Agregar Exportar link |
-| `app/admin/servicios/page.tsx` | Eliminar categoria del form y tabla |
-| `app/servicios/[id]/page.tsx` | Eliminar category badge |
-| `app/mis-turnos/page.tsx` | Eliminar category_name display |
-| `package.json` | Agregar @vercel/og |
+| Archivo                               | Cambio                                                   |
+| ------------------------------------- | -------------------------------------------------------- |
+| `scripts/init.sql`                    | Eliminar tabla categories, actualizar services           |
+| `scripts/enable-rls.sql`              | Eliminar categories RLS                                  |
+| `lib/types.ts`                        | Eliminar Category, category_id de Service                |
+| `lib/db/services.ts`                  | Eliminar category_id de inputs/queries                   |
+| `lib/db/appointments.ts`              | Eliminar category_name, SLOT_MINUTES en getOccupiedSlots |
+| `lib/db/flatten.test.ts`              | Eliminar tests de category                               |
+| `lib/config/business.ts`              | SLOT_MINUTES=40, agregar BREAK_START/BREAK_END           |
+| `app/mis-turnos/nuevo/page.tsx`       | Slot generation con break y 40 min                       |
+| `app/api/appointments/route.ts`       | Validacion de break                                      |
+| `app/api/appointments/slots/route.ts` | Sin cambios (getOccupiedSlots usa SLOT_MINUTES)          |
+| `app/api/services/route.ts`           | Eliminar category_id de schema y validacion              |
+| `app/api/services/[id]/route.ts`      | Eliminar category_id de schema y validacion              |
+| `app/admin/AdminSidebar.tsx`          | Agregar Exportar link                                    |
+| `app/admin/servicios/page.tsx`        | Eliminar categoria del form y tabla                      |
+| `app/servicios/[id]/page.tsx`         | Eliminar category badge                                  |
+| `app/mis-turnos/page.tsx`             | Eliminar category_name display                           |
+| `package.json`                        | Agregar @vercel/og                                       |
 
 ## Archivos a eliminar
 
-| Archivo |
-|---|
-| `lib/db/categories.ts` |
-| `app/api/categories/route.ts` |
-| `app/api/categories/[slug]/route.ts` |
-| `app/admin/categorias/page.tsx` |
+| Archivo                                           |
+| ------------------------------------------------- |
+| `lib/db/categories.ts`                            |
+| `app/api/categories/route.ts`                     |
+| `app/api/categories/[slug]/route.ts`              |
+| `app/admin/categorias/page.tsx`                   |
 | `app/admin/categorias/AdminCategories.module.css` |
 
 ## Diferimiento

@@ -43,7 +43,7 @@ export const Navbar = ({ user }: NavbarProps) => {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
-          <span className={styles.brandText}>Peluquería</span>
+          <span className={styles.brandText}>The Bunker</span>
         </Link>
 
         <nav className={styles.desktopNav} aria-label="Navegación principal">
