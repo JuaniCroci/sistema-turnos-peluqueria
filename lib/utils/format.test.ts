@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { formatPrice, formatDuration, formatLongDate, formatTime } from './format';
+import {
+  formatPrice,
+  formatDuration,
+  formatLongDate,
+  formatTime,
+} from './format';
 
 describe('formatPrice', () => {
   it('formats 300000 cents as $3.000', () => {

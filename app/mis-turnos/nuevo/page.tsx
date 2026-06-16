@@ -7,11 +7,7 @@ import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
 import { Spinner } from '@/components/Spinner/Spinner';
 import { formatDuration, formatPrice } from '@/lib/utils/format';
-import {
-  OPEN_HOUR,
-  CLOSE_HOUR,
-  SLOT_MINUTES,
-} from '@/lib/config/business';
+import { OPEN_HOUR, CLOSE_HOUR, SLOT_MINUTES } from '@/lib/config/business';
 import type { Service } from '@/lib/types';
 import styles from './NewAppointment.module.css';
 

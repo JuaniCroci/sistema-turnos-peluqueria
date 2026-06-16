@@ -205,7 +205,9 @@ export const createAppointment = async (
 
   if (error) {
     if ((error as { code?: string }).code === '23505') {
-      throw new Error('Ya existe un turno confirmado o pendiente en ese horario');
+      throw new Error(
+        'Ya existe un turno confirmado o pendiente en ese horario',
+      );
     }
     throw error;
   }

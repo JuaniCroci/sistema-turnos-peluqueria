@@ -18,22 +18,22 @@ qué horarios libres tiene en la semana. Desde el panel admin puede:
 
 ## Stack
 
-| Herramienta | Uso |
-|---|---|
-| `@vercel/og` (Satori + Resvg) | Generar PNG 1080x1920 server-side, JSX → SVG → PNG |
-| CSS nativo (`@keyframes`) | Animaciones en la preview del browser (Satori no soporta animación) |
-| Sin librerías externas nuevas | Consistente con el stack actual (CSS plano, sin Tailwind) |
+| Herramienta                   | Uso                                                                 |
+| ----------------------------- | ------------------------------------------------------------------- |
+| `@vercel/og` (Satori + Resvg) | Generar PNG 1080x1920 server-side, JSX → SVG → PNG                  |
+| CSS nativo (`@keyframes`)     | Animaciones en la preview del browser (Satori no soporta animación) |
+| Sin librerías externas nuevas | Consistente con el stack actual (CSS plano, sin Tailwind)           |
 
 ## Datos de identidad (The Bunker)
 
-| Campo | Valor |
-|---|---|
-| Nombre | The Bunker |
-| Teléfono | 3424 77-2489 |
-| Instagram | @the.bunker1 / @tincholakd_ |
-| Timezone | `America/Argentina/Buenos_Aires` (ya en `business.ts`) |
-| Horarios | Seleccionables por el admin en la UI (lun-vie / sáb), con defaults en config |
-| Slots | 30 min (default, se revisa cuando se definan servicios reales de 40 min) |
+| Campo     | Valor                                                                        |
+| --------- | ---------------------------------------------------------------------------- |
+| Nombre    | The Bunker                                                                   |
+| Teléfono  | 3424 77-2489                                                                 |
+| Instagram | @the.bunker1 / @tincholakd\_                                                 |
+| Timezone  | `America/Argentina/Buenos_Aires` (ya en `business.ts`)                       |
+| Horarios  | Seleccionables por el admin en la UI (lun-vie / sáb), con defaults en config |
+| Slots     | 30 min (default, se revisa cuando se definan servicios reales de 40 min)     |
 
 ## Endpoints nuevos
 
@@ -58,6 +58,7 @@ Devuelve JSON con los horarios libres de lun-sáb.
 ```
 
 Lógica:
+
 - Generar todos los slots de 30 min entre apertura y cierre para cada día
 - Llamar `getOccupiedSlots(fecha)` que ya existe para restar ocupados
 - Devolver solo los libres
@@ -70,7 +71,7 @@ Usa `ImageResponse` de `@vercel/og`. Renderizado:
 - **Overlay**: degradé semitransparente (`#00000066` → `#000000cc`)
 - **Header**: logo/ícono + "THE BUNKER — Turnos disponibles"
 - **Cards por día**: lun-sáb, con horarios libres en badges verdes
-- **Footer**: WhatsApp 3424 77-2489 + @the.bunker1 / @tincholakd_
+- **Footer**: WhatsApp 3424 77-2489 + @the.bunker1 / @tincholakd\_
 
 Estructura del directorio:
 
@@ -88,11 +89,11 @@ app/export/
 
 ### Archivos
 
-| Archivo | Rol |
-|---|---|
-| `page.tsx` | Server Component, layout, metadata |
-| `ExportClient.tsx` | `"use client"` — selector de semana, horarios editable, fondo, preview, descarga |
-| `ExportClient.module.css` | Animaciones (fade-in cards, parallax leve, skeleton loading) |
+| Archivo                   | Rol                                                                              |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| `page.tsx`                | Server Component, layout, metadata                                               |
+| `ExportClient.tsx`        | `"use client"` — selector de semana, horarios editable, fondo, preview, descarga |
+| `ExportClient.module.css` | Animaciones (fade-in cards, parallax leve, skeleton loading)                     |
 
 ### Flujo
 
