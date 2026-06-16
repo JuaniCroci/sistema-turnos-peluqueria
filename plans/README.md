@@ -17,34 +17,31 @@ row when done.
 > manual `curl`. There is **no** `pnpm test` / `pnpm lint` yet — plans 009 and
 > 010 introduce them. Do not invent test commands before those plans land.
 
-## A note on AGENTS.md (read this)
+## Note on AGENTS.md
 
-The repo's `AGENTS.md` is **out of date and authored by a third party**. The
-project owner has explicitly instructed us to **ignore it** for this round of
-work. Several plans here (009 ESLint/Prettier, 010 tests, 011 CI, 014 Tailwind)
-directly contradict rules written in `AGENTS.md` (e.g. "no tests, lint ni
-formatter", "sin Tailwind", "CI/CD fuera de alcance"). Those overrides are
-**intentional and authorized by the owner**. Plan 013 rewrites `AGENTS.md` to
-match reality. Where a plan overrides an `AGENTS.md` rule it says so explicitly.
+`AGENTS.md` was rewritten in Plan 013 to match the Supabase reality. It is now
+the source of truth for agent conventions. The old prohibitions (no tests/lint,
+no CI/CD, no Tailwind) that some plans override have been removed — they no
+longer apply.
 
 ## Execution order & status
 
-| Plan | Title                                                                                 | Priority | Effort | Depends on | Status |
-| ---- | ------------------------------------------------------------------------------------- | -------- | ------ | ---------- | ------ |
-| 001  | Harden anti-abuse: mandatory + fail-closed reCAPTCHA, trusted client IP               | P1       | M      | —          | DONE   |
-| 002  | Appointment time integrity: timezone-correct slots + server business-hours validation | P1       | M      | —          | DONE   |
-| 003  | Enable Postgres Row Level Security on all tables                                      | P1       | M      | —          | DONE   |
-| 004  | Remove the committed seed admin; secure DB bootstrap                                  | P2       | S      | —          | DONE   |
-| 005  | Centralized env-var validation (zod) + `.env.example`                                 | P2       | S      | —          | DONE   |
-| 006  | Map unique-slot violation (23505) → 409; tighten active-limit race                    | P2       | S      | —          | DONE   |
-| 007  | Add structured error logging to API route handlers                                    | P2       | S      | —          | DONE   |
-| 008  | Remove dead / duplicate code                                                          | P2       | S      | —          | DONE   |
-| 009  | ESLint + Prettier baseline (overrides AGENTS.md)                                      | P2       | M      | —          | DONE   |
-| 010  | Automated test baseline with Vitest (overrides AGENTS.md)                             | P1       | M      | —          | DONE   |
-| 011  | CI pipeline on GitHub Actions (overrides AGENTS.md)                                   | P3       | S      | 009, 010   | DONE   |
-| 012  | Migrate `middleware.ts` → `proxy.ts` (Next 16 readiness)                              | P3       | S      | —          | DONE   |
-| 013  | Rewrite stale `AGENTS.md` + `README.md` to match Supabase reality                     | P2       | S      | —          | DONE   |
-| 014  | Evaluate Tailwind CSS adoption (design spike)                                         | P3       | L      | —          | TODO   |
+| Plan | Title                                                                                 | Priority | Effort | Depends on | Status                                                                              |
+| ---- | ------------------------------------------------------------------------------------- | -------- | ------ | ---------- | ----------------------------------------------------------------------------------- |
+| 001  | Harden anti-abuse: mandatory + fail-closed reCAPTCHA, trusted client IP               | P1       | M      | —          | DONE                                                                                |
+| 002  | Appointment time integrity: timezone-correct slots + server business-hours validation | P1       | M      | —          | DONE                                                                                |
+| 003  | Enable Postgres Row Level Security on all tables                                      | P1       | M      | —          | DONE                                                                                |
+| 004  | Remove the committed seed admin; secure DB bootstrap                                  | P2       | S      | —          | DONE                                                                                |
+| 005  | Centralized env-var validation (zod) + `.env.example`                                 | P2       | S      | —          | DONE                                                                                |
+| 006  | Map unique-slot violation (23505) → 409; tighten active-limit race                    | P2       | S      | —          | DONE                                                                                |
+| 007  | Add structured error logging to API route handlers                                    | P2       | S      | —          | DONE                                                                                |
+| 008  | Remove dead / duplicate code                                                          | P2       | S      | —          | DONE                                                                                |
+| 009  | ESLint + Prettier baseline (overrides AGENTS.md)                                      | P2       | M      | —          | DONE                                                                                |
+| 010  | Automated test baseline with Vitest (overrides AGENTS.md)                             | P1       | M      | —          | DONE                                                                                |
+| 011  | CI pipeline on GitHub Actions (overrides AGENTS.md)                                   | P3       | S      | 009, 010   | DONE                                                                                |
+| 012  | Migrate `middleware.ts` → `proxy.ts` (Next 16 readiness)                              | P3       | S      | —          | DONE                                                                                |
+| 013  | Rewrite stale `AGENTS.md` + `README.md` to match Supabase reality                     | P2       | S      | —          | DONE                                                                                |
+| 014  | Evaluate Tailwind CSS adoption (design spike)                                         | P3       | L      | —          | REJECTED — app pequena, 25 CSS modules, el costo de split-brain supera el beneficio |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
