@@ -11,7 +11,7 @@ import { findServiceById } from '@/lib/db/services';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 import { logError } from '@/lib/utils/logger';
 import { getLocalHourMinute } from '@/lib/utils/datetime';
-import { OPEN_HOUR, CLOSE_HOUR, SLOT_MINUTES } from '@/lib/config/business';
+import { isWithinBusinessHours, SLOT_MINUTES } from '@/lib/config/business';
 
 const listQuerySchema = z.object({
   status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),
@@ -128,16 +128,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
 
       const { hour, minute } = getLocalHourMinute(appointmentAt);
-      if (hour < OPEN_HOUR || hour >= CLOSE_HOUR) {
+      if (!isWithinBusinessHours(hour, minute)) {
         return errorResponse(
           'VALIDATION_ERROR',
-          'Horario fuera del horario de atención (09:00 a 20:00)',
-        );
-      }
-      if (minute % SLOT_MINUTES !== 0) {
-        return errorResponse(
-          'VALIDATION_ERROR',
-          'El turno debe empezar en punto o media hora',
+          'Horario fuera del horario de atención',
         );
       }
 

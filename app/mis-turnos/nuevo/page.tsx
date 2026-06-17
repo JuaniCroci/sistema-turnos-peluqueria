@@ -7,17 +7,11 @@ import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
 import { Spinner } from '@/components/Spinner/Spinner';
 import { formatDuration, formatPrice } from '@/lib/utils/format';
-import { OPEN_HOUR, CLOSE_HOUR, SLOT_MINUTES } from '@/lib/config/business';
+import { generateTimeSlots } from '@/lib/config/business';
 import type { Service } from '@/lib/types';
 import styles from './NewAppointment.module.css';
 
-const SLOT_COUNT = (CLOSE_HOUR - OPEN_HOUR) * (60 / SLOT_MINUTES);
-const TIME_SLOTS = Array.from({ length: SLOT_COUNT }, (_, i) => {
-  const totalMinutes = OPEN_HOUR * 60 + i * SLOT_MINUTES;
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-});
+const TIME_SLOTS = generateTimeSlots();
 
 function getTodayStr(): string {
   return new Date().toISOString().slice(0, 10);
