@@ -7,11 +7,12 @@ import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
 import { Spinner } from '@/components/Spinner/Spinner';
 import { formatDuration, formatPrice } from '@/lib/utils/format';
-import { generateTimeSlots } from '@/lib/config/business';
+import {
+  generateTimeSlots,
+  getBlocksForDay,
+} from '@/lib/config/business';
 import type { Service } from '@/lib/types';
 import styles from './NewAppointment.module.css';
-
-const TIME_SLOTS = generateTimeSlots();
 
 function getTodayStr(): string {
   return new Date().toISOString().slice(0, 10);
@@ -83,6 +84,12 @@ function NewAppointmentForm() {
 
   const selectedService = services.find((s) => String(s.id) === serviceId);
 
+  const TIME_SLOTS = useMemo(() => {
+    if (!date) return [];
+    const day = new Date(date + 'T12:00:00').getDay();
+    return generateTimeSlots(getBlocksForDay(day));
+  }, [date]);
+
   const slotStates = useMemo(() => {
     const isToday = date === todayStr;
     const currentMinutes = getCurrentTimeMinutes();
@@ -95,7 +102,7 @@ function NewAppointmentForm() {
 
       return { value: slot, disabled: isOccupied || isPast, isOccupied };
     });
-  }, [date, todayStr, occupiedSlots]);
+  }, [date, todayStr, occupiedSlots, TIME_SLOTS]);
 
   const hasAvailableSlots = useMemo(
     () => slotStates.some((s) => !s.disabled),

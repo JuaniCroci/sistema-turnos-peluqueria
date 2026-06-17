@@ -5,14 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Calendar, AlertCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { formatDuration, formatPrice } from '@/lib/utils/format';
+import {
+  generateTimeSlots,
+  getBlocksForDay,
+} from '@/lib/config/business';
 import type { Service } from '@/lib/types';
 import styles from './NewAdminAppointment.module.css';
-
-const TIME_SLOTS = Array.from({ length: 23 }, (_, i) => {
-  const h = Math.floor((i * 30 + 540) / 60);
-  const m = (i * 30 + 540) % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-});
 
 function getTodayStr(): string {
   return new Date().toISOString().slice(0, 10);
@@ -80,6 +78,12 @@ export default function NewAdminAppointmentPage() {
     }
   };
 
+  const TIME_SLOTS = useMemo(() => {
+    if (!date) return [];
+    const day = new Date(date + 'T12:00:00').getDay();
+    return generateTimeSlots(getBlocksForDay(day));
+  }, [date]);
+
   const slotStates = useMemo(() => {
     const isToday = date === todayStr;
     const currentMinutes = getCurrentTimeMinutes();
@@ -100,7 +104,7 @@ export default function NewAdminAppointmentPage() {
         isOccupied,
       };
     });
-  }, [date, todayStr, occupiedSlots]);
+  }, [date, todayStr, occupiedSlots, TIME_SLOTS]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
