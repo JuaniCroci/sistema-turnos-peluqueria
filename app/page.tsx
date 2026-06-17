@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Calendar, Clock, UserCheck, Scissors, ListTodo } from 'lucide-react';
+import { Calendar, CalendarPlus, Share2, Clock, UserCheck } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import styles from './page.module.css';
 
@@ -25,17 +25,24 @@ export default async function HomePage() {
             </p>
             <div className={styles.adminGrid}>
               <Link href="/admin/turnos" className={styles.adminCard}>
-                <ListTodo size={24} aria-hidden="true" />
+                <Calendar size={24} aria-hidden="true" />
                 <span className={styles.adminCardTitle}>Turnos agendados</span>
                 <span className={styles.adminCardDesc}>
-                  Ver y gestionar turnos por día
+                  Ver y gestionar turnos
                 </span>
               </Link>
-              <Link href="/admin/servicios" className={styles.adminCard}>
-                <Scissors size={24} aria-hidden="true" />
-                <span className={styles.adminCardTitle}>Servicios</span>
+              <Link href="/admin/turnos/nuevo" className={styles.adminCard}>
+                <CalendarPlus size={24} aria-hidden="true" />
+                <span className={styles.adminCardTitle}>Agendar turno</span>
                 <span className={styles.adminCardDesc}>
-                  Administrar el catálogo de servicios
+                  Registrar turno manual
+                </span>
+              </Link>
+              <Link href="/admin/exportar" className={styles.adminCard}>
+                <Share2 size={24} aria-hidden="true" />
+                <span className={styles.adminCardTitle}>Exportar turnos</span>
+                <span className={styles.adminCardDesc}>
+                  Generar PNG semanal para Stories
                 </span>
               </Link>
             </div>
@@ -59,14 +66,21 @@ export default async function HomePage() {
                 Reservar turno
               </Link>
             ) : (
-              <Link href="/register" className={styles.primaryAction}>
-                Crear cuenta
-              </Link>
+              <>
+                <Link href="/login" className={styles.primaryAction}>
+                  Iniciar sesión
+                </Link>
+                <Link href="/register" className={styles.ghostAction}>
+                  Crear cuenta
+                </Link>
+              </>
             )}
-            <Link href="/servicios" className={styles.ghostAction}>
+          </div>
+          {!isLoggedIn && (
+            <Link href="/servicios" className={styles.secondaryLink}>
               Ver servicios
             </Link>
-          </div>
+          )}
         </div>
       </section>
 

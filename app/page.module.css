@@ -81,11 +81,26 @@
   border: 1px solid var(--color-border-strong);
 }
 
-.ghostAction:hover {
-  background: var(--color-surface-2);
-}
+  .ghostAction:hover {
+    background: var(--color-surface-2);
+  }
 
-/* ----- Cómo funciona ----- */
+  .secondaryLink {
+    display: inline-block;
+    margin-top: var(--space-3);
+    font-size: var(--font-size-sm);
+    color: var(--color-fg-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--color-border-strong);
+    transition: color var(--transition-fast);
+  }
+
+  .secondaryLink:hover {
+    color: var(--color-fg);
+  }
+
+  /* ----- Cómo funciona ----- */
 .howItWorks {
   background: var(--color-surface);
   padding: var(--space-12) var(--space-4);
@@ -214,6 +229,11 @@
 
   .primaryAction,
   .ghostAction {
+    width: 100%;
+  }
+
+  .secondaryLink {
+    text-align: center;
     width: 100%;
   }
 
