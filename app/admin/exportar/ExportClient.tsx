@@ -117,6 +117,9 @@ export const ExportClient = () => {
           for (const slot of dia.libres) {
             day[slot] = 'libre';
           }
+          for (const slot of dia.ocupados) {
+            day[slot] = 'ocupado';
+          }
           newSlotStates[dia.fecha] = day;
         }
         setSlotStates(newSlotStates);
@@ -362,6 +365,41 @@ export const ExportClient = () => {
               La imagen se descarga en 1080×1920 px, optimizada para Stories.
               Los estados (OCUPADO/SEMANAL) los editás vos desde la preview.
             </p>
+
+            {data.reservados.length > 0 && (
+              <details className={styles.reservadosDetails}>
+                <summary className={styles.reservadosSummary}>
+                  Turnos reservados esta semana ({data.reservados.length})
+                </summary>
+                <div className={styles.reservadosList}>
+                  {data.reservados.map((r, i) => {
+                    const d = new Date(r.appointment_at);
+                    const fecha = d.toLocaleDateString('es-AR', {
+                      weekday: 'short',
+                      day: '2-digit',
+                      month: '2-digit',
+                    });
+                    const hora = d.toLocaleTimeString('es-AR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    });
+                    return (
+                      <div key={i} className={styles.reservadoRow}>
+                        <span className={styles.reservadoFecha}>{fecha}</span>
+                        <span className={styles.reservadoHora}>{hora}</span>
+                        <span className={styles.reservadoCliente}>
+                          {r.client_name ?? 'Anonimo'}
+                        </span>
+                        <span className={styles.reservadoServicio}>
+                          {r.service_name}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+            )}
           </div>
         </div>
       ) : null}

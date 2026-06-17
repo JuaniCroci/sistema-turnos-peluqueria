@@ -302,10 +302,17 @@ export const deleteAppointment = async (id: number): Promise<void> => {
   if (error) throw error;
 };
 
+export interface OcupadoDetalle {
+  appointment_at: string;
+  client_name: string | null;
+  service_name: string;
+}
+
 export interface DiaDisponible {
   nombre: string;
   fecha: string;
   libres: string[];
+  ocupados: string[];
 }
 
 export interface DisponibilidadResult {
@@ -315,6 +322,7 @@ export interface DisponibilidadResult {
     sabado: { apertura: string; cierre: string };
   };
   dias: DiaDisponible[];
+  reservados: OcupadoDetalle[];
   negocio?: {
     nombre: string;
     telefono: string;
@@ -335,20 +343,34 @@ const DIAS_NOMBRE = [
 async function getOccupiedForRange(
   fromIso: string,
   toIso: string,
-): Promise<Array<{ appointment_at: string; duration_minutes: number }>> {
+): Promise<
+  Array<{
+    appointment_at: string;
+    duration_minutes: number;
+    client_name: string | null;
+    service_name: string;
+  }>
+> {
   const db = getDb();
   const { data, error } = await db
     .from('appointments')
-    .select('appointment_at, service:service_id (duration_minutes)')
+    .select(
+      'appointment_at, client_name, service:service_id (name, duration_minutes)',
+    )
     .gte('appointment_at', fromIso)
     .lt('appointment_at', toIso)
     .in('status', ['pending', 'confirmed']);
   if (error) throw error;
   return (data ?? []).map((r) => {
     const row = r as Record<string, unknown>;
-    const svc = row.service as { duration_minutes: number } | null;
+    const svc = row.service as {
+      name: string;
+      duration_minutes: number;
+    } | null;
     return {
       appointment_at: row.appointment_at as string,
+      client_name: (row.client_name as string) ?? null,
+      service_name: svc?.name ?? 'Sin servicio',
       duration_minutes: svc?.duration_minutes ?? 60,
     };
   });
@@ -415,11 +437,13 @@ export async function getWeeklyAvailableSlots(
     const candidateSlots = generateTimeSlots(blocks);
     const occupiedSet = buildOccupiedSetForDay(weekAppointments, fechaStr);
     const libres = candidateSlots.filter((s) => !occupiedSet.has(s));
+    const ocupados = candidateSlots.filter((s) => occupiedSet.has(s));
 
     days.push({
       nombre: DIAS_NOMBRE[date.getDay()] ?? '',
       fecha: fechaStr,
       libres,
+      ocupados,
     });
   }
 
@@ -443,5 +467,10 @@ export async function getWeeklyAvailableSlots(
     semana: mondayStr,
     horarios: { lun_vie: horariosLunVie, sabado: horariosSab },
     dias: days,
+    reservados: weekAppointments.map((a) => ({
+      appointment_at: a.appointment_at,
+      client_name: a.client_name,
+      service_name: a.service_name,
+    })),
   };
 }
