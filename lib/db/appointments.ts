@@ -1,9 +1,14 @@
 import { cache } from 'react';
 import { getDb } from './connection';
 import { flattenRow } from './flatten';
-import { getLocalHourMinute, utcRangeForLocalDate } from '@/lib/utils/datetime';
+import {
+  getLocalDateParts,
+  getMonday,
+  utcRangeForLocalDate,
+} from '@/lib/utils/datetime';
 import {
   SLOT_MINUTES,
+  generateTimeSlots,
   type TimeBlock,
   TIME_BLOCKS_LUN_VIE,
   TIME_BLOCKS_SAB,
@@ -246,7 +251,7 @@ export const getOccupiedSlots = async (date: string): Promise<string[]> => {
     const aptAt = r.appointment_at as string;
     const svc = r.service as { duration_minutes: number } | null;
 
-    const { hour, minute } = getLocalHourMinute(aptAt);
+    const { hour, minute } = getLocalDateParts(aptAt);
     const startMinutes = hour * 60 + minute;
     const duration = svc?.duration_minutes ?? 60;
     const endMinutes = startMinutes + duration;
@@ -297,33 +302,6 @@ export const deleteAppointment = async (id: number): Promise<void> => {
   if (error) throw error;
 };
 
-interface SlotRange {
-  startMinutes: number;
-  endMinutes: number;
-}
-
-function generateSlotsForBlocks(blocks: TimeBlock[]): SlotRange[] {
-  const slots: SlotRange[] = [];
-  for (const block of blocks) {
-    const partsA = block.apertura.split(':');
-    const partsC = block.cierre.split(':');
-    const aH = Number(partsA[0] ?? 0);
-    const aM = Number(partsA[1] ?? 0);
-    const cH = Number(partsC[0] ?? 0);
-    const cM = Number(partsC[1] ?? 0);
-    const openMinutes = aH * 60 + aM;
-    const closeMinutes = cH * 60 + cM;
-    for (
-      let m = openMinutes;
-      m + SLOT_MINUTES <= closeMinutes;
-      m += SLOT_MINUTES
-    ) {
-      slots.push({ startMinutes: m, endMinutes: m + SLOT_MINUTES });
-    }
-  }
-  return slots;
-}
-
 export interface DiaDisponible {
   nombre: string;
   fecha: string;
@@ -337,6 +315,11 @@ export interface DisponibilidadResult {
     sabado: { apertura: string; cierre: string };
   };
   dias: DiaDisponible[];
+  negocio?: {
+    nombre: string;
+    telefono: string;
+    instagram: string;
+  };
 }
 
 const DIAS_NOMBRE = [
@@ -349,6 +332,54 @@ const DIAS_NOMBRE = [
   'sabado',
 ];
 
+async function getOccupiedForRange(
+  fromIso: string,
+  toIso: string,
+): Promise<Array<{ appointment_at: string; duration_minutes: number }>> {
+  const db = getDb();
+  const { data, error } = await db
+    .from('appointments')
+    .select('appointment_at, service:service_id (duration_minutes)')
+    .gte('appointment_at', fromIso)
+    .lt('appointment_at', toIso)
+    .in('status', ['pending', 'confirmed']);
+  if (error) throw error;
+  return (data ?? []).map((r) => {
+    const row = r as Record<string, unknown>;
+    const svc = row.service as { duration_minutes: number } | null;
+    return {
+      appointment_at: row.appointment_at as string,
+      duration_minutes: svc?.duration_minutes ?? 60,
+    };
+  });
+}
+
+function buildOccupiedSetForDay(
+  appointments: Array<{ appointment_at: string; duration_minutes: number }>,
+  dayDate: string,
+): Set<string> {
+  const occupied = new Set<string>();
+  for (const apt of appointments) {
+    const aptDate = apt.appointment_at.slice(0, 10);
+    if (aptDate !== dayDate) continue;
+
+    const { hour: startHour, minute: startMin } = getLocalDateParts(
+      apt.appointment_at,
+    );
+    const startMinutes = startHour * 60 + startMin;
+    const endMinutes = startMinutes + apt.duration_minutes;
+
+    for (let m = startMinutes; m < endMinutes; m += SLOT_MINUTES) {
+      const h = Math.floor(m / 60);
+      const min = m % 60;
+      occupied.add(
+        `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`,
+      );
+    }
+  }
+  return occupied;
+}
+
 export async function getWeeklyAvailableSlots(
   desde: string,
   lunVieBlocks?: TimeBlock[],
@@ -357,38 +388,32 @@ export async function getWeeklyAvailableSlots(
   const blocksLunVie = lunVieBlocks ?? TIME_BLOCKS_LUN_VIE;
   const blocksSab = sabadoBlocks ?? TIME_BLOCKS_SAB;
 
-  const startDate = new Date(desde + 'T00:00:00');
-  const dayOfWeek = startDate.getDay();
+  const mondayStr = getMonday(desde);
+  const mondayDate = new Date(mondayStr + 'T00:00:00');
 
-  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  const monday = new Date(startDate);
-  monday.setDate(startDate.getDate() + mondayOffset);
+  const saturdayDate = new Date(mondayDate);
+  saturdayDate.setDate(mondayDate.getDate() + 5);
+  const saturdayStr = saturdayDate.toISOString().slice(0, 10);
+
+  const weekRange = utcRangeForLocalDate(saturdayStr);
+  const weekAppointments = await getOccupiedForRange(
+    weekRange.fromIso,
+    weekRange.toIso,
+  );
 
   const days: DiaDisponible[] = [];
 
-  for (let i = 1; i <= 6; i++) {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + i);
+  for (let i = 0; i <= 5; i++) {
+    const date = new Date(mondayDate);
+    date.setDate(mondayDate.getDate() + i);
     const fechaStr = date.toISOString().slice(0, 10);
 
-    const isSabado = i === 6;
+    const isSabado = date.getDay() === 6;
     const blocks = isSabado ? blocksSab : blocksLunVie;
 
-    const candidateSlots = generateSlotsForBlocks(blocks);
-
-    const occupied = await getOccupiedSlots(fechaStr);
-
-    const occupiedSet = new Set(occupied);
-
-    const libres: string[] = [];
-    for (const slot of candidateSlots) {
-      const h = Math.floor(slot.startMinutes / 60);
-      const m = slot.startMinutes % 60;
-      const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-      if (!occupiedSet.has(timeStr)) {
-        libres.push(timeStr);
-      }
-    }
+    const candidateSlots = generateTimeSlots(blocks);
+    const occupiedSet = buildOccupiedSetForDay(weekAppointments, fechaStr);
+    const libres = candidateSlots.filter((s) => !occupiedSet.has(s));
 
     days.push({
       nombre: DIAS_NOMBRE[date.getDay()] ?? '',
@@ -414,12 +439,8 @@ export async function getWeeklyAvailableSlots(
       : { apertura: '08:20', cierre: '20:00' };
 
   return {
-    semana: fechaKey(monday),
+    semana: mondayStr,
     horarios: { lun_vie: horariosLunVie, sabado: horariosSab },
     dias: days,
   };
-}
-
-function fechaKey(d: Date): string {
-  return d.toISOString().slice(0, 10);
 }

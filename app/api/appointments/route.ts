@@ -10,8 +10,8 @@ import {
 import { findServiceById } from '@/lib/db/services';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 import { logError } from '@/lib/utils/logger';
-import { getLocalHourMinute } from '@/lib/utils/datetime';
-import { isWithinBusinessHours, SLOT_MINUTES } from '@/lib/config/business';
+import { getLocalDateParts } from '@/lib/utils/datetime';
+import { isWithinBusinessHours, isValidSlot } from '@/lib/config/business';
 
 const listQuerySchema = z.object({
   status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),
@@ -127,11 +127,19 @@ export async function POST(request: Request): Promise<NextResponse> {
         );
       }
 
-      const { hour, minute } = getLocalHourMinute(appointmentAt);
-      if (!isWithinBusinessHours(hour, minute)) {
+      const { hour, minute, dayOfWeek } = getLocalDateParts(appointmentAt);
+      if (!isWithinBusinessHours(hour, minute, dayOfWeek)) {
         return errorResponse(
           'VALIDATION_ERROR',
-          'Horario fuera del horario de atención',
+          dayOfWeek === 0
+            ? 'No atendemos los domingos'
+            : 'Horario fuera del horario de atención',
+        );
+      }
+      if (!isValidSlot(hour, minute, dayOfWeek)) {
+        return errorResponse(
+          'VALIDATION_ERROR',
+          'El turno debe empezar en un horario de slot válido',
         );
       }
 

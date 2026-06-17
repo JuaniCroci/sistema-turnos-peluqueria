@@ -3,36 +3,37 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { getWeeklyAvailableSlots } from '@/lib/db/appointments';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
+import { getMonday } from '@/lib/utils/datetime';
+import {
+  type TimeBlock,
+  BUSINESS_NAME,
+  BUSINESS_PHONE,
+  BUSINESS_INSTAGRAM,
+} from '@/lib/config/business';
+
+const timeBlockSchema = z.object({
+  apertura: z.string().regex(/^\d{2}:\d{2}$/),
+  cierre: z.string().regex(/^\d{2}:\d{2}$/),
+});
 
 const querySchema = z.object({
   desde: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha invalido (YYYY-MM-DD)')
     .optional(),
-  lunVieApertura: z
-    .string()
-    .regex(/^\d{2}:\d{2}$/)
-    .optional(),
-  lunVieCierre: z
-    .string()
-    .regex(/^\d{2}:\d{2}$/)
-    .optional(),
-  sabApertura: z
-    .string()
-    .regex(/^\d{2}:\d{2}$/)
-    .optional(),
-  sabCierre: z
-    .string()
-    .regex(/^\d{2}:\d{2}$/)
-    .optional(),
+  lunVie: z.string().optional(),
+  sab: z.string().optional(),
 });
 
-function getMonday(desde: string): string {
-  const d = new Date(desde + 'T00:00:00');
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().slice(0, 10);
+function parseBlocks(raw: string | undefined): TimeBlock[] | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    const arr = z.array(timeBlockSchema).safeParse(parsed);
+    return arr.success ? arr.data : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export async function GET(request: Request): Promise<NextResponse> {
@@ -62,29 +63,23 @@ export async function GET(request: Request): Promise<NextResponse> {
 
     const desde = parsed.data.desde ?? new Date().toISOString().slice(0, 10);
     const monday = getMonday(desde);
-
-    const blocksLunVie =
-      parsed.data.lunVieApertura && parsed.data.lunVieCierre
-        ? [
-            {
-              apertura: parsed.data.lunVieApertura,
-              cierre: parsed.data.lunVieCierre,
-            },
-          ]
-        : undefined;
-
-    const blocksSab =
-      parsed.data.sabApertura && parsed.data.sabCierre
-        ? [{ apertura: parsed.data.sabApertura, cierre: parsed.data.sabCierre }]
-        : undefined;
+    const lunVieBlocks = parseBlocks(parsed.data.lunVie);
+    const sabBlocks = parseBlocks(parsed.data.sab);
 
     const result = await getWeeklyAvailableSlots(
       monday,
-      blocksLunVie,
-      blocksSab,
+      lunVieBlocks,
+      sabBlocks,
     );
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      ...result,
+      negocio: {
+        nombre: BUSINESS_NAME,
+        telefono: BUSINESS_PHONE,
+        instagram: BUSINESS_INSTAGRAM,
+      },
+    });
   } catch {
     return errorResponse('INTERNAL_ERROR', 'Error al obtener disponibilidad');
   }

@@ -1,20 +1,45 @@
 import { BUSINESS_TZ } from '@/lib/config/business';
 
-export function getLocalHourMinute(isoUtc: string): {
+export function parseTime(t: string): { h: number; m: number } {
+  const parts = t.split(':');
+  return { h: Number(parts[0] ?? 0), m: Number(parts[1] ?? 0) };
+}
+
+export function getMonday(desde: string): string {
+  const d = new Date(desde + 'T00:00:00');
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
+export function getLocalDateParts(isoUtc: string): {
   hour: number;
   minute: number;
+  dayOfWeek: number;
 } {
   const date = new Date(isoUtc);
-  const formatter = new Intl.DateTimeFormat('en-CA', {
+  const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: BUSINESS_TZ,
     hour: 'numeric',
     minute: 'numeric',
+    weekday: 'short',
     hour12: false,
   });
   const parts = formatter.formatToParts(date);
   const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? 0);
   const minute = Number(parts.find((p) => p.type === 'minute')?.value ?? 0);
-  return { hour, minute };
+  const dayName = parts.find((p) => p.type === 'weekday')?.value ?? '';
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+  return { hour, minute, dayOfWeek: dayMap[dayName] ?? 0 };
 }
 
 export function utcRangeForLocalDate(date: string): {

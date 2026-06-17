@@ -1,5 +1,10 @@
+import { parseTime } from '@/lib/utils/datetime';
+
 export const BUSINESS_TZ = 'America/Argentina/Buenos_Aires';
 export const SLOT_MINUTES = 40;
+export const BUSINESS_NAME = 'The Bunker';
+export const BUSINESS_PHONE = '3424 77-2489';
+export const BUSINESS_INSTAGRAM = '@the.bunker1 · @tincholakd_';
 
 export interface TimeBlock {
   apertura: string;
@@ -16,18 +21,25 @@ export const TIME_BLOCKS_SAB: TimeBlock[] = [
   { apertura: '16:00', cierre: '20:00' },
 ];
 
-function parseTime(t: string): { h: number; m: number } {
-  const parts = t.split(':');
-  return { h: Number(parts[0] ?? 0), m: Number(parts[1] ?? 0) };
+export function getBlocksForDay(dayOfWeek: number): TimeBlock[] {
+  if (dayOfWeek === 6) return TIME_BLOCKS_SAB;
+  if (dayOfWeek === 0) return [];
+  return TIME_BLOCKS_LUN_VIE;
 }
 
 export function isWithinBusinessHours(
   hour: number,
   minute: number,
+  dayOfWeek?: number,
   blocks?: TimeBlock[],
 ): boolean {
+  const effectiveBlocks =
+    blocks ??
+    (dayOfWeek !== undefined
+      ? getBlocksForDay(dayOfWeek)
+      : TIME_BLOCKS_LUN_VIE);
   const mins = hour * 60 + minute;
-  for (const block of blocks ?? TIME_BLOCKS_LUN_VIE) {
+  for (const block of effectiveBlocks) {
     const { h: aH, m: aM } = parseTime(block.apertura);
     const { h: cH, m: cM } = parseTime(block.cierre);
     const open = aH * 60 + aM;
@@ -37,6 +49,21 @@ export function isWithinBusinessHours(
     }
   }
   return false;
+}
+
+export function isValidSlot(
+  hour: number,
+  minute: number,
+  dayOfWeek?: number,
+  blocks?: TimeBlock[],
+): boolean {
+  const effectiveBlocks =
+    blocks ??
+    (dayOfWeek !== undefined
+      ? getBlocksForDay(dayOfWeek)
+      : TIME_BLOCKS_LUN_VIE);
+  const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  return generateTimeSlots(effectiveBlocks).includes(timeStr);
 }
 
 export function generateTimeSlots(blocks?: TimeBlock[]): string[] {

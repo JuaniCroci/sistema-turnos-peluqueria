@@ -10,11 +10,15 @@ import {
   Loader2,
 } from 'lucide-react';
 import type { DisponibilidadResult } from '@/lib/db/appointments';
-import { TIME_BLOCKS_LUN_VIE, TIME_BLOCKS_SAB } from '@/lib/config/business';
+import {
+  TIME_BLOCKS_LUN_VIE,
+  TIME_BLOCKS_SAB,
+  type TimeBlock,
+} from '@/lib/config/business';
+import { addWeeks, formatSemana } from '@/lib/utils/datetime.client';
 import styles from './ExportClient.module.css';
 
 type SlotState = 'libre' | 'ocupado' | 'semanal';
-
 type DaySlots = Record<string, SlotState>;
 
 const DIAS_LABEL: Record<string, string> = {
@@ -26,28 +30,55 @@ const DIAS_LABEL: Record<string, string> = {
   sabado: 'SABADO',
 };
 
-function getMondayISO(): string {
+function mondayToday(): string {
   const now = new Date();
   const day = now.getDay();
   const diff = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  return monday.toISOString().slice(0, 10);
+  const m = new Date(now);
+  m.setDate(now.getDate() + diff);
+  return m.toISOString().slice(0, 10);
 }
 
-function addWeeks(dateStr: string, weeks: number): string {
-  const d = new Date(dateStr + 'T00:00:00');
-  d.setDate(d.getDate() + weeks * 7);
-  return d.toISOString().slice(0, 10);
+interface BlockEditorProps {
+  label: string;
+  blocks: TimeBlock[];
+  onChange: (blocks: TimeBlock[]) => void;
 }
 
-function formatSemana(mondayStr: string): string {
-  const d = new Date(mondayStr + 'T00:00:00');
-  const saturday = new Date(d);
-  saturday.setDate(d.getDate() + 5);
-  const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' };
-  const f = new Intl.DateTimeFormat('es-AR', opts);
-  return `${f.format(d)} - ${f.format(saturday)}`;
+function BlockEditor({ label, blocks, onChange }: BlockEditorProps) {
+  const updateBlock = (
+    i: number,
+    field: 'apertura' | 'cierre',
+    val: string,
+  ) => {
+    const next = blocks.map((b, idx) =>
+      idx === i ? { ...b, [field]: val } : b,
+    );
+    onChange(next);
+  };
+
+  return (
+    <div className={styles.controlGroup}>
+      <label className={styles.controlLabel}>{label}</label>
+      {blocks.map((b, i) => (
+        <div key={i} className={styles.blockRow}>
+          <input
+            type="time"
+            value={b.apertura}
+            onChange={(e) => updateBlock(i, 'apertura', e.target.value)}
+            className={styles.timeInput}
+          />
+          <span className={styles.blockSep}>a</span>
+          <input
+            type="time"
+            value={b.cierre}
+            onChange={(e) => updateBlock(i, 'cierre', e.target.value)}
+            className={styles.timeInput}
+          />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export const ExportClient = () => {
@@ -55,41 +86,28 @@ export const ExportClient = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [data, setData] = useState<DisponibilidadResult | null>(null);
-  const [monday, setMonday] = useState(getMondayISO);
+  const [monday, setMonday] = useState(mondayToday);
   const [slotStates, setSlotStates] = useState<Record<string, DaySlots>>({});
   const [bgUrl, setBgUrl] = useState('');
-  const [lunVieApertura, setLunVieApertura] = useState(
-    TIME_BLOCKS_LUN_VIE[0]?.apertura ?? '08:20',
-  );
-  const [lunVieCierre, setLunVieCierre] = useState(
-    TIME_BLOCKS_LUN_VIE[TIME_BLOCKS_LUN_VIE.length - 1]?.cierre ?? '20:00',
-  );
-  const [sabApertura, setSabApertura] = useState(
-    TIME_BLOCKS_SAB[0]?.apertura ?? '08:20',
-  );
-  const [sabCierre, setSabCierre] = useState(
-    TIME_BLOCKS_SAB[TIME_BLOCKS_SAB.length - 1]?.cierre ?? '20:00',
-  );
+  const [lunVieBlocks, setLunVieBlocks] =
+    useState<TimeBlock[]>(TIME_BLOCKS_LUN_VIE);
+  const [sabBlocks, setSabBlocks] = useState<TimeBlock[]>(TIME_BLOCKS_SAB);
 
   useEffect(() => {
     let ignore = false;
-
     const load = async () => {
       setLoading(true);
       setError('');
       try {
         const params = new URLSearchParams({ desde: monday });
-        if (lunVieApertura && lunVieCierre) {
-          params.set('lunVieApertura', lunVieApertura);
-          params.set('lunVieCierre', lunVieCierre);
-        }
-        if (sabApertura && sabCierre) {
-          params.set('sabApertura', sabApertura);
-          params.set('sabCierre', sabCierre);
-        }
+        params.set('lunVie', JSON.stringify(lunVieBlocks));
+        params.set('sab', JSON.stringify(sabBlocks));
+
         const res = await fetch(`/api/export/disponibilidad?${params}`);
         if (!res.ok) throw new Error('Error al cargar disponibilidad');
-        const json: DisponibilidadResult = await res.json();
+        const json: DisponibilidadResult & {
+          negocio: { nombre: string; telefono: string; instagram: string };
+        } = await res.json();
         if (ignore) return;
         setData(json);
 
@@ -114,7 +132,7 @@ export const ExportClient = () => {
     return () => {
       ignore = true;
     };
-  }, [monday, lunVieApertura, lunVieCierre, sabApertura, sabCierre]);
+  }, [monday, lunVieBlocks, sabBlocks]);
 
   const cycleSlot = (fecha: string, slot: string) => {
     setSlotStates((prev) => {
@@ -142,36 +160,37 @@ export const ExportClient = () => {
     }
   };
 
-  const getSlotLabel = (state: SlotState): string => {
-    switch (state) {
-      case 'ocupado':
-        return 'OCUPADO';
-      case 'semanal':
-        return 'SEMANAL';
-      default:
-        return '';
-    }
-  };
-
   const download = async () => {
     if (!previewRef.current) return;
     try {
       const dataUrl = await toPng(previewRef.current, {
         quality: 1,
-        pixelRatio: 2,
+        pixelRatio: 3,
         cacheBust: true,
       });
       const link = document.createElement('a');
       link.download = `turnos-disponibles-${monday}.png`;
       link.href = dataUrl;
       link.click();
-    } catch {
-      setError('Error al generar la imagen');
+    } catch (e) {
+      if (e instanceof DOMException && e.name === 'SecurityError') {
+        setError(
+          'La imagen de fondo no se pudo incluir por restricciones del servidor de origen. Probá con otra imagen o sin fondo personalizado.',
+        );
+      } else {
+        setError('Error al generar la imagen');
+      }
     }
   };
 
   const prevWeek = () => setMonday((p) => addWeeks(p, -1));
   const nextWeek = () => setMonday((p) => addWeeks(p, +1));
+
+  const negocio = data?.negocio ?? {
+    nombre: 'THE BUNKER',
+    telefono: '3424 77-2489',
+    instagram: '@the.bunker1 · @tincholakd_',
+  };
 
   return (
     <div className={styles.page}>
@@ -199,40 +218,16 @@ export const ExportClient = () => {
         </div>
 
         <div className={styles.controlsGrid}>
-          <div className={styles.controlGroup}>
-            <label className={styles.controlLabel}>Lun-Vie apertura</label>
-            <input
-              type="time"
-              value={lunVieApertura}
-              onChange={(e) => setLunVieApertura(e.target.value)}
-              className={styles.timeInput}
-            />
-            <label className={styles.controlLabel}>Lun-Vie cierre</label>
-            <input
-              type="time"
-              value={lunVieCierre}
-              onChange={(e) => setLunVieCierre(e.target.value)}
-              className={styles.timeInput}
-            />
-          </div>
-
-          <div className={styles.controlGroup}>
-            <label className={styles.controlLabel}>Sábado apertura</label>
-            <input
-              type="time"
-              value={sabApertura}
-              onChange={(e) => setSabApertura(e.target.value)}
-              className={styles.timeInput}
-            />
-            <label className={styles.controlLabel}>Sábado cierre</label>
-            <input
-              type="time"
-              value={sabCierre}
-              onChange={(e) => setSabCierre(e.target.value)}
-              className={styles.timeInput}
-            />
-          </div>
-
+          <BlockEditor
+            label="Lun-Vie"
+            blocks={lunVieBlocks}
+            onChange={setLunVieBlocks}
+          />
+          <BlockEditor
+            label="Sábado"
+            blocks={sabBlocks}
+            onChange={setSabBlocks}
+          />
           <div className={styles.controlGroup}>
             <label className={styles.controlLabel}>URL de fondo</label>
             <div className={styles.bgInputWrapper}>
@@ -291,7 +286,7 @@ export const ExportClient = () => {
 
             <div className={styles.previewContent}>
               <div className={styles.previewHeader}>
-                <div className={styles.previewBrand}>THE BUNKER</div>
+                <div className={styles.previewBrand}>{negocio.nombre}</div>
                 <div className={styles.previewSubtitle}>Turnos disponibles</div>
               </div>
 
@@ -310,31 +305,6 @@ export const ExportClient = () => {
                           <span className={styles.noSlots}>Sin atencion</span>
                         </div>
                       </div>
-                    );
-                  }
-
-                  const slotChunks: string[] = [];
-                  let currentLabel = '';
-                  let currentSlots: string[] = [];
-
-                  for (const slot of libreKeys) {
-                    const state = daySlots[slot] ?? 'libre';
-                    const label = getSlotLabel(state);
-                    if (label !== currentLabel) {
-                      if (currentSlots.length > 0) {
-                        slotChunks.push(
-                          `${currentLabel} ${currentSlots.join('-')}`.trim(),
-                        );
-                      }
-                      currentLabel = label;
-                      currentSlots = [slot];
-                    } else {
-                      currentSlots.push(slot);
-                    }
-                  }
-                  if (currentSlots.length > 0) {
-                    slotChunks.push(
-                      `${currentLabel} ${currentSlots.join('-')}`.trim(),
                     );
                   }
 
@@ -377,8 +347,8 @@ export const ExportClient = () => {
               </div>
 
               <div className={styles.previewFooter}>
-                <span>WhatsApp: 3424 77-2489</span>
-                <span>@the.bunker1 · @tincholakd_</span>
+                <span>WhatsApp: {negocio.telefono}</span>
+                <span>{negocio.instagram}</span>
               </div>
             </div>
           </div>
