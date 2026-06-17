@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calendar, CalendarPlus, LayoutDashboard, Share2 } from 'lucide-react';
+import { Calendar, CalendarPlus, Scissors, Share2 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 
 const links = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/servicios', label: 'Modificar servicios', icon: Scissors },
   { href: '/admin/turnos', label: 'Ver turnos', icon: Calendar },
   { href: '/admin/turnos/nuevo', label: 'Agendar turno', icon: CalendarPlus },
   { href: '/admin/exportar', label: 'Exportar', icon: Share2 },
