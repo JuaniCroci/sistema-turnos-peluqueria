@@ -202,7 +202,7 @@ export const ExportClient = () => {
               className={styles.navBtn}
               aria-label="Semana anterior"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={24} />
             </button>
             <span className={styles.weekLabel}>
               {data ? formatSemana(data.semana) : 'Cargando...'}
@@ -212,7 +212,7 @@ export const ExportClient = () => {
               className={styles.navBtn}
               aria-label="Semana siguiente"
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={24} />
             </button>
           </div>
         </div>

@@ -365,7 +365,7 @@ export default function AdminServicesPage() {
                               onClick={() => handleEdit(service)}
                               title="Editar"
                             >
-                              <Edit3 size={14} />
+                              <Edit3 size={18} />
                             </button>
                             {service.active && (
                               <button
@@ -373,7 +373,7 @@ export default function AdminServicesPage() {
                                 onClick={() => handleDelete(service.id)}
                                 title="Eliminar"
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={18} />
                               </button>
                             )}
                           </div>

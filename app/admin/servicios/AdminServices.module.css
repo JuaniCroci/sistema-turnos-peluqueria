@@ -250,3 +250,10 @@
   background: rgba(220, 38, 38, 0.08);
   color: var(--color-danger);
 }
+
+@media (max-width: 768px) {
+  .iconBtn {
+    width: 36px;
+    height: 36px;
+  }
+}

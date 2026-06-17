@@ -237,8 +237,8 @@ export default function AdminAppointmentsPage() {
                   <th>Hora</th>
                   <th>Cliente</th>
                   <th>Servicio</th>
-                  <th>Duración</th>
-                  <th>Precio</th>
+                  <th className={styles.cellDuration}>Duración</th>
+                  <th className={styles.cellPrice}>Precio</th>
                   <th>Estado</th>
                   <th></th>
                 </tr>
@@ -282,7 +282,7 @@ export default function AdminAppointmentsPage() {
                               }
                               title="Confirmar"
                             >
-                              <Check size={12} aria-hidden="true" />
+                              <Check size={16} aria-hidden="true" />
                             </button>
                             <button
                               className={styles.actionBtnDanger}
@@ -292,7 +292,7 @@ export default function AdminAppointmentsPage() {
                               }
                               title="Cancelar"
                             >
-                              <X size={12} aria-hidden="true" />
+                              <X size={16} aria-hidden="true" />
                             </button>
                           </>
                         )}
@@ -306,7 +306,7 @@ export default function AdminAppointmentsPage() {
                               }
                               title="Completar"
                             >
-                              <Check size={12} aria-hidden="true" />
+                              <Check size={16} aria-hidden="true" />
                             </button>
                             <button
                               className={styles.actionBtnDanger}
@@ -316,7 +316,7 @@ export default function AdminAppointmentsPage() {
                               }
                               title="Cancelar"
                             >
-                              <X size={12} aria-hidden="true" />
+                              <X size={16} aria-hidden="true" />
                             </button>
                           </>
                         )}
@@ -330,7 +330,7 @@ export default function AdminAppointmentsPage() {
                               }
                               title="Reabrir"
                             >
-                              <RotateCcw size={12} aria-hidden="true" />
+                              <RotateCcw size={16} aria-hidden="true" />
                             </button>
                             <button
                               className={styles.actionBtnDanger}
@@ -338,7 +338,7 @@ export default function AdminAppointmentsPage() {
                               onClick={() => handleDelete(apt.id)}
                               title="Eliminar"
                             >
-                              <Trash2 size={12} aria-hidden="true" />
+                              <Trash2 size={16} aria-hidden="true" />
                             </button>
                           </>
                         )}

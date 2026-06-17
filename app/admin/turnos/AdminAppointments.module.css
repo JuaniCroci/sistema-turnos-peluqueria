@@ -244,3 +244,26 @@
   color: var(--color-danger);
   background: rgba(220, 38, 38, 0.06);
 }
+
+@media (max-width: 768px) {
+  th.cellDuration,
+  td.cellDuration,
+  th.cellPrice,
+  td.cellPrice {
+    display: none;
+  }
+
+  .table td,
+  .table th {
+    padding: var(--space-2) var(--space-2);
+  }
+
+  .actionBtn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cellActions {
+    gap: var(--space-2);
+  }
+}
