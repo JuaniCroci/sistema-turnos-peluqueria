@@ -366,8 +366,9 @@ export const ExportClient = () => {
               Descargar PNG
             </button>
             <p className={styles.downloadHint}>
-              La imagen se descarga en formato vertical, optimizada para Stories.
-              Los estados (OCUPADO/SEMANAL) los editás vos desde la preview.
+              La imagen se descarga en formato vertical, optimizada para
+              Stories. Los estados (OCUPADO/SEMANAL) los editás vos desde la
+              preview.
             </p>
 
             {data.reservados.length > 0 && (

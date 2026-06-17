@@ -5,10 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Calendar, AlertCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/Button/Button';
 import { formatDuration, formatPrice } from '@/lib/utils/format';
-import {
-  generateTimeSlots,
-  getBlocksForDay,
-} from '@/lib/config/business';
+import { generateTimeSlots, getBlocksForDay } from '@/lib/config/business';
 import type { Service } from '@/lib/types';
 import styles from './NewAdminAppointment.module.css';
 

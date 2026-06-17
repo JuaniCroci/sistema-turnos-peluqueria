@@ -6,11 +6,11 @@ import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
 import { Badge } from '@/components/Badge/Badge';
 import { formatPrice, formatDuration } from '@/lib/utils/format';
-import type { Service, Category } from '@/lib/types';
+import type { Service } from '@/lib/types';
 import styles from './AdminServices.module.css';
 
 interface FormData {
-  category_id: string;
+  category: string;
   name: string;
   description: string;
   duration_minutes: string;
@@ -18,7 +18,7 @@ interface FormData {
 }
 
 const emptyForm: FormData = {
-  category_id: '',
+  category: '',
   name: '',
   description: '',
   duration_minutes: '',
@@ -27,7 +27,6 @@ const emptyForm: FormData = {
 
 export default function AdminServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -50,22 +49,10 @@ export default function AdminServicesPage() {
     }
   }, []);
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      const res = await fetch('/api/categories');
-      if (!res.ok) throw new Error('Error al cargar categorias');
-      const json = await res.json();
-      setCategories(json.data ?? []);
-    } catch {
-      // silencioso, las categorias no son criticas
-    }
-  }, []);
-
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchServices();
-    fetchCategories();
-  }, [fetchServices, fetchCategories]);
+  }, [fetchServices]);
 
   const resetForm = () => {
     setForm(emptyForm);
@@ -76,7 +63,7 @@ export default function AdminServicesPage() {
 
   const handleEdit = (service: Service) => {
     setForm({
-      category_id: String(service.category_id),
+      category: service.category ?? '',
       name: service.name,
       description: service.description ?? '',
       duration_minutes: String(service.duration_minutes),
@@ -91,16 +78,11 @@ export default function AdminServicesPage() {
     e.preventDefault();
     setFormError(null);
 
-    const category_id = Number(form.category_id);
     const duration_minutes = Number(form.duration_minutes);
     const price_cents = Number(form.price_cents) * 100;
 
     if (!form.name.trim()) {
       setFormError('El nombre es requerido');
-      return;
-    }
-    if (!category_id) {
-      setFormError('La categoria es requerida');
       return;
     }
     if (!duration_minutes || duration_minutes < 1) {
@@ -115,7 +97,7 @@ export default function AdminServicesPage() {
     setSaving(true);
     try {
       const body = {
-        category_id,
+        category: form.category.trim() || undefined,
         name: form.name.trim(),
         description: form.description.trim() || undefined,
         duration_minutes,
@@ -215,22 +197,16 @@ export default function AdminServicesPage() {
                 </div>
 
                 <div className={styles.field}>
-                  <label htmlFor="category">Categoria</label>
-                  <select
+                  <label htmlFor="category">Categoria (opcional)</label>
+                  <input
                     id="category"
-                    value={form.category_id}
+                    value={form.category}
                     onChange={(e) =>
-                      setForm({ ...form, category_id: e.target.value })
+                      setForm({ ...form, category: e.target.value })
                     }
-                    className={styles.select}
-                  >
-                    <option value="">Seleccionar...</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
+                    className={styles.input}
+                    placeholder="Ej: Cabello"
+                  />
                 </div>
 
                 <div className={styles.field}>
@@ -318,7 +294,6 @@ export default function AdminServicesPage() {
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  <th>Categoria</th>
                   <th>Duracion</th>
                   <th>Precio</th>
                   <th>Estado</th>
@@ -328,22 +303,18 @@ export default function AdminServicesPage() {
               <tbody>
                 {services.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className={styles.emptyRow}>
+                    <td colSpan={5} className={styles.emptyRow}>
                       No hay servicios. Crea el primero.
                     </td>
                   </tr>
                 ) : (
                   services.map((service) => {
-                    const cat = categories.find(
-                      (c) => c.id === service.category_id,
-                    );
                     return (
                       <tr
                         key={service.id}
                         className={!service.active ? styles.inactive : ''}
                       >
                         <td className={styles.nameCell}>{service.name}</td>
-                        <td className={styles.catCell}>{cat?.name ?? '-'}</td>
                         <td>
                           <span className={styles.metaChip}>
                             <Clock size={12} aria-hidden="true" />

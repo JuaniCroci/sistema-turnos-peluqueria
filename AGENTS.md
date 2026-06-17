@@ -6,7 +6,7 @@ M0 cerrado: el proyecto migro de monorepo pnpm (Vite+React+Express) a **Next.js 
 
 - App Next.js unica en la raiz (no hay monorepo, no hay `pnpm-workspace.yaml`).
 - Componentes dumb migrados de `apps/web` a `components/` (Card, Input, FormField, Spinner, Badge, Button, ServiceCard, Navbar con MobileMenu, StubPage).
-- `app/` con rutas: `/`, `/_not-found`, `/login`, `/register`, `/servicios`, `/servicios/[id]`, `/mis-turnos`, `/mis-turnos/nuevo`, `/admin/servicios`, `/admin/categorias`, `/admin/turnos`.
+- `app/` con rutas: `/`, `/_not-found`, `/login`, `/register`, `/servicios`, `/servicios/[id]`, `/mis-turnos`, `/mis-turnos/nuevo`, `/admin/servicios`, `/admin/turnos`, `/admin/turnos/nuevo`, `/admin/exportar`.
 - `app/layout.tsx` (root) tiene Navbar + footer, importa `app/globals.css` (que trae open-props/normalize, open-props/sizes, `styles/reset.css`, `styles/tokens.css`).
 - `lib/types.ts` con los tipos compartidos (User, Service, Category, Appointment, Role, AppointmentStatus, Page).
 - `lib/utils/format.ts` con formatters es-AR (precio, duracion, fecha, hora).
@@ -16,7 +16,7 @@ M0 cerrado: el proyecto migro de monorepo pnpm (Vite+React+Express) a **Next.js 
 - `.nvmrc` = `24.14.1`.
 - **Verificacion**: `pnpm typecheck` + `pnpm lint` + `pnpm format:check` + `pnpm test` + `pnpm build` pasan verde. CI automatico via GitHub Actions en cada push/PR.
 
-Milestone actual: **Fase 2 (M3 del README original) — Servicios y categorías** (endpoints públicos de services y categories, filtros, paginación, detalle de servicio, admin CRUD con soft delete). Fase 1 cerrada (ver entry de `prompts.md` del 2026-06-06).
+Milestone actual: **Exportación semanal de turnos** (admin export panel, slots dinámicos por día, mobile admin nav, free-text category en servicios).
 
 **Estado de Fase 1 (cerrada 2026-06-06):**
 

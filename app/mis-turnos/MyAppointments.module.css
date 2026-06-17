@@ -122,11 +122,6 @@
   margin: 0;
 }
 
-.categoryName {
-  font-size: var(--font-size-xs);
-  color: var(--color-fg-muted);
-}
-
 .cardMeta {
   display: flex;
   flex-wrap: wrap;

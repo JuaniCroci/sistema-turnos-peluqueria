@@ -12,16 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS categories (
-  id          SERIAL PRIMARY KEY,
-  name        TEXT NOT NULL,
-  slug        TEXT UNIQUE NOT NULL,
-  description TEXT
-);
-
 CREATE TABLE IF NOT EXISTS services (
   id               SERIAL PRIMARY KEY,
-  category_id      INTEGER NOT NULL REFERENCES categories(id),
+  category         TEXT,
   name             TEXT NOT NULL,
   description      TEXT,
   duration_minutes INTEGER NOT NULL CHECK(duration_minutes > 0),
@@ -42,7 +35,6 @@ CREATE TABLE IF NOT EXISTS appointments (
 );
 
 -- indices
-CREATE INDEX IF NOT EXISTS idx_services_category   ON services(category_id);
 CREATE INDEX IF NOT EXISTS idx_services_name       ON services(name);
 CREATE INDEX IF NOT EXISTS idx_services_active     ON services(active);
 CREATE INDEX IF NOT EXISTS idx_appointments_user   ON appointments(user_id);
@@ -59,36 +51,22 @@ WHERE status IN ('pending', 'confirmed');
 -- seed
 -- =============================================================
 
-INSERT INTO categories (name, slug, description)
+INSERT INTO services (category, name, description, duration_minutes, price_cents, active)
 VALUES
-  ('Cabello',       'cabello',       'Cortes y peinados para todos.'),
-  ('Barba',         'barba',         'Perfilado, diseño y cuidado de barba.'),
-  ('Coloración',    'coloracion',    'Tintes, color completo y mechas.'),
-  ('Tratamientos',  'tratamientos',  'Hidratación, keratina y más.')
-ON CONFLICT (slug) DO NOTHING;
-
-INSERT INTO services (category_id, name, description, duration_minutes, price_cents, active)
-SELECT c.id, s.name, s.description, s.duration_minutes, s.price_cents, true
-FROM (VALUES
-  ('cabello',      'Corte caballero',  'Corte clásico de caballero.',               30,  300000),
-  ('cabello',      'Corte dama',       'Corte y lavado para dama.',                 45,  500000),
-  ('cabello',      'Corte niño',       'Corte para niños hasta 12 años.',           20,  200000),
-  ('barba',        'Perfilado de barba','Perfilado y diseño de barba.',               20,  200000),
-  ('barba',        'Barba completa',   'Perfilado, toalla caliente y aceite.',       30,  350000),
-  ('coloracion',   'Tinte de raíces',  'Cobertura de raíces y tono.',                60,  800000),
-  ('coloracion',   'Color completo',   'Color completo en todo el cabello.',         90,  1200000),
-  ('tratamientos', 'Hidratación',      'Hidratación profunda con ampolleta.',        40,  600000),
-  ('tratamientos', 'Keratina',         'Alisado con keratina y sellado.',           120,  1800000)
-) AS s(cat_slug, name, description, duration_minutes, price_cents)
-JOIN categories c ON c.slug = s.cat_slug
-WHERE NOT EXISTS (
-  SELECT 1 FROM services WHERE name = s.name
-);
+  ('Cabello',       'Corte caballero',  'Corte clásico de caballero.',               30,  300000, true),
+  ('Cabello',       'Corte dama',       'Corte y lavado para dama.',                 45,  500000, true),
+  ('Cabello',       'Corte niño',       'Corte para niños hasta 12 años.',           20,  200000, true),
+  ('Barba',         'Perfilado de barba','Perfilado y diseño de barba.',               20,  200000, true),
+  ('Barba',         'Barba completa',   'Perfilado, toalla caliente y aceite.',       30,  350000, true),
+  ('Coloración',    'Tinte de raíces',  'Cobertura de raíces y tono.',                60,  800000, true),
+  ('Coloración',    'Color completo',   'Color completo en todo el cabello.',         90,  1200000, true),
+  ('Tratamientos',  'Hidratación',      'Hidratación profunda con ampolleta.',        40,  600000, true),
+  ('Tratamientos',  'Keratina',         'Alisado con keratina y sellado.',           120,  1800000, true)
+ON CONFLICT DO NOTHING;
 
 -- =============================================================
 -- Row Level Security
 -- =============================================================
 ALTER TABLE users        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE categories   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE services     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;

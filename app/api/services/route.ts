@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { findServices, createService } from '@/lib/db/services';
-import { findCategoryById } from '@/lib/db/categories';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 import { logError } from '@/lib/utils/logger';
 
@@ -14,7 +13,7 @@ const listQuerySchema = z.object({
 });
 
 const createSchema = z.object({
-  category_id: z.number().int().positive('La categoria es requerida'),
+  category: z.string().max(200).optional(),
   name: z.string().min(1, 'El nombre es requerido').max(200),
   description: z.string().max(1000).optional(),
   duration_minutes: z.number().int().positive('La duracion debe ser mayor a 0'),
@@ -79,14 +78,6 @@ export async function POST(request: Request): Promise<NextResponse> {
         'VALIDATION_ERROR',
         'Datos invalidos',
         zodDetails(parsed.error),
-      );
-    }
-
-    const category = await findCategoryById(parsed.data.category_id);
-    if (!category) {
-      return errorResponse(
-        'VALIDATION_ERROR',
-        'La categoria especificada no existe',
       );
     }
 

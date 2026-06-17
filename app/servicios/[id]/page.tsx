@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Clock, Tag, ArrowLeft, Calendar } from 'lucide-react';
 import { findServiceById } from '@/lib/db/services';
-import { findCategoryById } from '@/lib/db/categories';
 import { formatDuration, formatPrice } from '@/lib/utils/format';
 import { auth } from '@/lib/auth';
 import styles from './ServiceDetail.module.css';
@@ -43,10 +42,7 @@ export default async function ServiceDetailPage({
     notFound();
   }
 
-  const [category, session] = await Promise.all([
-    findCategoryById(service.category_id),
-    auth(),
-  ]);
+  const session = await auth();
   const isLoggedIn = Boolean(session?.user);
 
   const reserveHref = isLoggedIn
@@ -64,12 +60,6 @@ export default async function ServiceDetailPage({
         <div className={styles.card}>
           <div className={styles.header}>
             <div>
-              {category && (
-                <span className={styles.categoryBadge}>
-                  <Tag size={12} aria-hidden="true" />
-                  {category.name}
-                </span>
-              )}
               <h1 className={styles.title}>{service.name}</h1>
             </div>
           </div>

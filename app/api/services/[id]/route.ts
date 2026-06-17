@@ -6,12 +6,11 @@ import {
   updateService,
   softDeleteService,
 } from '@/lib/db/services';
-import { findCategoryById } from '@/lib/db/categories';
 import { errorResponse, zodDetails } from '@/lib/utils/api';
 import { logError } from '@/lib/utils/logger';
 
 const updateSchema = z.object({
-  category_id: z.number().int().positive().optional(),
+  category: z.string().max(200).optional(),
   name: z.string().min(1, 'El nombre es requerido').max(200).optional(),
   description: z.string().max(1000).nullable().optional(),
   duration_minutes: z
@@ -87,16 +86,6 @@ export async function PUT(
         'Datos invalidos',
         zodDetails(parsed.error),
       );
-    }
-
-    if (parsed.data.category_id !== undefined) {
-      const category = await findCategoryById(parsed.data.category_id);
-      if (!category) {
-        return errorResponse(
-          'VALIDATION_ERROR',
-          'La categoria especificada no existe',
-        );
-      }
     }
 
     const service = await updateService(id, parsed.data);

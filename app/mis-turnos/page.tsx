@@ -146,11 +146,6 @@ export default function MyAppointmentsPage() {
                         <h3 className={styles.serviceName}>
                           {apt.service_name}
                         </h3>
-                        {apt.category_name && (
-                          <span className={styles.categoryName}>
-                            {apt.category_name}
-                          </span>
-                        )}
                       </div>
                       <Badge tone={cfg.tone}>{cfg.label}</Badge>
                     </div>

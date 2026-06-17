@@ -8,7 +8,7 @@ describe('flattenRow', () => {
       service: {
         name: 'Corte caballero',
         duration_minutes: 30,
-        category: { name: 'Cabello' },
+        details: { sub: 'Premium' },
       },
     };
     const result = flattenRow<Record<string, unknown>>(row);
@@ -16,17 +16,17 @@ describe('flattenRow', () => {
       id: 1,
       service_name: 'Corte caballero',
       service_duration_minutes: 30,
-      service_category_name: 'Cabello',
+      service_details_sub: 'Premium',
     });
   });
 
   it('preserves null nested values', () => {
     const row = {
       id: 2,
-      service: { name: 'Corte dama', category: null },
+      service: { name: 'Corte dama', details: null },
     };
     const result = flattenRow<Record<string, unknown>>(row);
-    expect(result.service_category).toBeNull();
+    expect(result.service_details).toBeNull();
   });
 
   it('does not recurse into arrays', () => {

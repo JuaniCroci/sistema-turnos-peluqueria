@@ -62,7 +62,7 @@ export const findServiceById = cache(
 );
 
 export interface CreateServiceInput {
-  category_id: number;
+  category?: string;
   name: string;
   description?: string;
   duration_minutes: number;
@@ -76,7 +76,7 @@ export const createService = async (
   const { data, error } = await db
     .from('services')
     .insert({
-      category_id: input.category_id,
+      category: input.category ?? null,
       name: input.name,
       description: input.description ?? null,
       duration_minutes: input.duration_minutes,
@@ -91,7 +91,7 @@ export const createService = async (
 };
 
 export interface UpdateServiceInput {
-  category_id?: number;
+  category?: string;
   name?: string;
   description?: string | null;
   duration_minutes?: number;
@@ -104,7 +104,7 @@ export const updateService = async (
 ): Promise<Service> => {
   const db = getDb();
   const updates: Record<string, unknown> = {};
-  if (input.category_id !== undefined) updates.category_id = input.category_id;
+  if (input.category !== undefined) updates.category = input.category;
   if (input.name !== undefined) updates.name = input.name;
   if (input.description !== undefined) updates.description = input.description;
   if (input.duration_minutes !== undefined)

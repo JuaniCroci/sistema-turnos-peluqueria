@@ -8,16 +8,9 @@ export interface User {
   created_at: string;
 }
 
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  description: string | null;
-}
-
 export interface Service {
   id: number;
-  category_id: number;
+  category: string | null;
   name: string;
   description: string | null;
   duration_minutes: number;

@@ -19,7 +19,6 @@ export interface AppointmentRow extends Appointment {
   service_name: string;
   service_duration_minutes: number;
   service_price_cents: number;
-  category_name: string | null;
 }
 
 export interface AppointmentAdminRow extends AppointmentRow {
@@ -48,8 +47,7 @@ export interface AppointmentListResult {
 const APPOINTMENT_SELECT = `
   id, user_id, service_id, appointment_at, status, notes, created_at, client_name,
   service:service_id (
-    name, duration_minutes, price_cents,
-    category:category_id (name)
+    name, duration_minutes, price_cents
   ),
   user:user_id (email, username)
 `;
@@ -57,8 +55,7 @@ const APPOINTMENT_SELECT = `
 const LIST_APPOINTMENT_SELECT = `
   id, user_id, service_id, appointment_at, status, notes, created_at, client_name,
   service:service_id (
-    name, duration_minutes, price_cents,
-    category:category_id (name)
+    name, duration_minutes, price_cents
   )
 `;
 
