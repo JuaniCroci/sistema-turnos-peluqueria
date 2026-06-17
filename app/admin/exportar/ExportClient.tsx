@@ -124,7 +124,11 @@ export const ExportClient = () => {
         }
         setSlotStates(newSlotStates);
       } catch (e) {
-        if (!ignore) setError((e as Error).message);
+        if (!ignore) {
+          setError((e as Error).message);
+          setData(null);
+          setSlotStates({});
+        }
       } finally {
         if (!ignore) setLoading(false);
       }
@@ -362,7 +366,7 @@ export const ExportClient = () => {
               Descargar PNG
             </button>
             <p className={styles.downloadHint}>
-              La imagen se descarga en 1080×1920 px, optimizada para Stories.
+              La imagen se descarga en formato vertical, optimizada para Stories.
               Los estados (OCUPADO/SEMANAL) los editás vos desde la preview.
             </p>
 

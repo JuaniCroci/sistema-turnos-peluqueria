@@ -318,7 +318,7 @@ export interface DiaDisponible {
 export interface DisponibilidadResult {
   semana: string;
   horarios: {
-    lun_vie: { apertura: string; cierre: string };
+    lunVie: { apertura: string; cierre: string };
     sabado: { apertura: string; cierre: string };
   };
   dias: DiaDisponible[];
@@ -465,7 +465,7 @@ export async function getWeeklyAvailableSlots(
 
   return {
     semana: mondayStr,
-    horarios: { lun_vie: horariosLunVie, sabado: horariosSab },
+    horarios: { lunVie: horariosLunVie, sabado: horariosSab },
     dias: days,
     reservados: weekAppointments.map((a) => ({
       appointment_at: a.appointment_at,
