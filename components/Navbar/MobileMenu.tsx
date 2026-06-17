@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
-import { X, LogIn, UserPlus, Calendar, CalendarPlus } from 'lucide-react';
+import { X, LogIn, UserPlus, Calendar, CalendarPlus, Scissors, Share2 } from 'lucide-react';
 import { LogoutButton } from './LogoutButton';
 import type { NavUser } from './Navbar';
 import styles from './MobileMenu.module.css';
@@ -85,32 +85,85 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
           </button>
         </div>
         <nav className={styles.nav}>
-          <Link
-            href="/servicios"
-            className={[
-              styles.link,
-              isActivePath(pathname, '/servicios') ? styles.active : '',
-            ].join(' ')}
-            onClick={onClose}
-          >
-            <ScissorsIcon /> Servicios
-          </Link>
-          {isAuthenticated ? (
+          {isAdmin ? (
             <>
-              {isAdmin ? (
-                <Link
-                  href="/admin/turnos"
-                  className={[
-                    styles.link,
-                    isActivePath(pathname, '/admin/turnos')
-                      ? styles.active
-                      : '',
-                  ].join(' ')}
-                  onClick={onClose}
-                >
-                  <Calendar /> Turnos agendados
-                </Link>
-              ) : (
+              <span className={styles.sectionLabel}>Cliente</span>
+              <Link
+                href="/servicios"
+                className={[
+                  styles.link,
+                  isActivePath(pathname, '/servicios') ? styles.active : '',
+                ].join(' ')}
+                onClick={onClose}
+              >
+                <ScissorsIcon /> Servicios
+              </Link>
+
+              <span className={styles.sectionLabel}>Admin</span>
+              <Link
+                href="/admin/turnos"
+                className={[
+                  styles.link,
+                  isActivePath(pathname, '/admin/turnos')
+                    ? styles.active
+                    : '',
+                ].join(' ')}
+                onClick={onClose}
+              >
+                <Calendar /> Ver turnos
+              </Link>
+              <Link
+                href="/admin/turnos/nuevo"
+                className={[
+                  styles.link,
+                  isActivePath(pathname, '/admin/turnos/nuevo')
+                    ? styles.active
+                    : '',
+                ].join(' ')}
+                onClick={onClose}
+              >
+                <CalendarPlus /> Agregar turno
+              </Link>
+              <Link
+                href="/admin/servicios"
+                className={[
+                  styles.link,
+                  isActivePath(pathname, '/admin/servicios')
+                    ? styles.active
+                    : '',
+                ].join(' ')}
+                onClick={onClose}
+              >
+                <Scissors /> Modificar servicios
+              </Link>
+              <Link
+                href="/admin/exportar"
+                className={[
+                  styles.link,
+                  isActivePath(pathname, '/admin/exportar')
+                    ? styles.active
+                    : '',
+                ].join(' ')}
+                onClick={onClose}
+              >
+                <Share2 /> Exportar turnos semanales
+              </Link>
+
+              <LogoutButton variant="mobile" />
+            </>
+          ) : (
+            <>
+              <Link
+                href="/servicios"
+                className={[
+                  styles.link,
+                  isActivePath(pathname, '/servicios') ? styles.active : '',
+                ].join(' ')}
+                onClick={onClose}
+              >
+                <ScissorsIcon /> Servicios
+              </Link>
+              {isAuthenticated ? (
                 <>
                   <Link
                     href="/mis-turnos"
@@ -137,31 +190,31 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
                     <CalendarPlus /> Reservar
                   </Link>
                 </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className={[
+                      styles.link,
+                      isActivePath(pathname, '/login') ? styles.active : '',
+                    ].join(' ')}
+                    onClick={onClose}
+                  >
+                    <LogIn /> Ingresar
+                  </Link>
+                  <Link
+                    href="/register"
+                    className={[
+                      styles.link,
+                      isActivePath(pathname, '/register') ? styles.active : '',
+                    ].join(' ')}
+                    onClick={onClose}
+                  >
+                    <UserPlus /> Registrarse
+                  </Link>
+                </>
               )}
               <LogoutButton variant="mobile" />
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className={[
-                  styles.link,
-                  isActivePath(pathname, '/login') ? styles.active : '',
-                ].join(' ')}
-                onClick={onClose}
-              >
-                <LogIn /> Ingresar
-              </Link>
-              <Link
-                href="/register"
-                className={[
-                  styles.link,
-                  isActivePath(pathname, '/register') ? styles.active : '',
-                ].join(' ')}
-                onClick={onClose}
-              >
-                <UserPlus /> Registrarse
-              </Link>
             </>
           )}
         </nav>

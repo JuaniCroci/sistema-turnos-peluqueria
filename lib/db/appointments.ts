@@ -395,10 +395,11 @@ export async function getWeeklyAvailableSlots(
   saturdayDate.setDate(mondayDate.getDate() + 5);
   const saturdayStr = saturdayDate.toISOString().slice(0, 10);
 
-  const weekRange = utcRangeForLocalDate(saturdayStr);
+  const monRange = utcRangeForLocalDate(mondayStr);
+  const satRange = utcRangeForLocalDate(saturdayStr);
   const weekAppointments = await getOccupiedForRange(
-    weekRange.fromIso,
-    weekRange.toIso,
+    monRange.fromIso,
+    satRange.toIso,
   );
 
   const days: DiaDisponible[] = [];
