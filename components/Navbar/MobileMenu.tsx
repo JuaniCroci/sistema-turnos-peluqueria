@@ -74,7 +74,7 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
         tabIndex={open ? 0 : -1}
         aria-label="Cerrar menú"
       />
-      <aside
+      <div
         className={styles.panel}
         role="dialog"
         aria-modal="true"
@@ -223,7 +223,7 @@ export const MobileMenu = ({ open, onClose, user }: MobileMenuProps) => {
             </>
           )}
         </nav>
-      </aside>
+      </div>
     </div>,
     document.body,
   );

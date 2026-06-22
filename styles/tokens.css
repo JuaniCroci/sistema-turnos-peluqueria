@@ -1,5 +1,5 @@
 /* Tokens semánticos — Peluquería Clásica (light cálido).
-   Acento principal: bronce (#c17f3b). Acento secundario: carbón peluquero (#2c2220).
+   Acento principal: bronce (#a8651e). Acento secundario: carbón peluquero (#2c2220).
    Jerarquía por tipografía, espaciado y superficies cálidas.
    Sin sombras, bordes hairline 1px con tinte marrón. */
 
@@ -20,8 +20,8 @@
   --color-border-strong: rgba(60, 45, 30, 0.16);
 
   /* ----- Acento principal: bronce / latón ----- */
-  --color-accent: #c17f3b;
-  --color-accent-hover: #a66e2e;
+  --color-accent: #a8651e;
+  --color-accent-hover: #90571a;
   --color-accent-fg: #ffffff;
   --color-accent-soft: #8a7a66; /* links inline y focus */
 
