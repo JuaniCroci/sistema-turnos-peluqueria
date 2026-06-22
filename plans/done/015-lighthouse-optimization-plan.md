@@ -19,16 +19,16 @@
 
 ## Índice de Tareas
 
-| #   | Tarea                                                     | Prioridad  | Archivo(s)                         | Automatizable |
-| --- | --------------------------------------------------------- | ---------- | ---------------------------------- | ------------- |
-| 1   | Eliminar redirect 307 (ahorro ~780ms)                     | 🔴 Crítica | `vercel.json` + dashboard Vercel   | Parcial       |
-| 2   | Agregar headers de seguridad (CSP, XFO, COOP, etc.)       | 🔴 Crítica | `next.config.ts`                   | ✅ Sí         |
-| 3   | Corregir contraste de color botón "Iniciar sesión"        | 🔴 Crítica | `styles/tokens.css`                | ✅ Sí         |
-| 4   | Corregir ARIA `role="dialog"` en `<aside>` del menú móvil | 🔴 Crítica | `components/Navbar/MobileMenu.tsx` | ✅ Sí         |
-| 5   | Optimizar CSS render-blocking (ahorro ~140ms)             | 🟡 Media   | `next.config.ts`, `app/layout.tsx` | ✅ Sí         |
-| 6   | Reducir JavaScript legacy/polyfills (~11KB)               | 🟡 Media   | `package.json` (browserslist)      | ✅ Sí         |
-| 7   | Reducir JavaScript no utilizado (~125KB en 2 chunks)      | 🟡 Media   | Código fuente (varios archivos)    | ❌ Manual     |
-| 8   | Verificación final (typecheck, lint, build)               | ✅ Cierre  | Terminal                           | ✅ Sí         |
+| #   | Tarea                                                       | Prioridad  | Archivo(s)                         | Automatizable |
+| --- | ----------------------------------------------------------- | ---------- | ---------------------------------- | ------------- |
+| 1   | Redirect 307 → 301 en Vercel (ahorro ~780ms)                | 🔴 Crítica | Dashboard Vercel (no código)       | Parcial       |
+| 2   | Agregar headers de seguridad (CSP, XFO, COOP, HSTS, CORP)   | 🔴 Crítica | `next.config.ts`                   | ✅ Sí         |
+| 3   | Corregir contraste de color botón "Iniciar sesión"          | 🔴 Crítica | `styles/tokens.css`                | ✅ Sí         |
+| 4   | Corregir ARIA `role="dialog"` en `<aside>` del menú móvil   | 🔴 Crítica | `components/Navbar/MobileMenu.tsx` | ✅ Sí         |
+| 5   | Optimizar CSS render-blocking con `experimental.optimizeCss` | 🟡 Media   | `next.config.ts` + `critters`      | ✅ Sí         |
+| 6   | Agregar `browserslist` para prefijos CSS                    | 🟡 Media   | `package.json`                     | ✅ Sí         |
+| 7   | Analizar JavaScript no utilizado — code splitting ya óptimo | 🟡 Media   | Sin cambios necesarios             | ❌ Manual     |
+| 8   | Verificación final (typecheck, lint, test, build)           | ✅ Cierre  | Terminal                           | ✅ Sí         |
 
 ---
 
@@ -48,9 +48,11 @@ Siempre usar una sola URL canónica desde el inicio. Si necesitás renombrar el 
 
 ### Implementación
 
-**Automático:** Crear `vercel.json` con redirects y headers.
+**Nota:** Este redirect es a nivel de **plataforma Vercel** (se genera automáticamente al renombrar el proyecto). No se puede arreglar desde código (`vercel.json` no aplica).
 
-**Manual:** Ir al dashboard de Vercel → Project Settings → Domains. Asegurar que `thebunker-sistema-turnos.vercel.app` sea el dominio principal y el antiguo redirija permanentemente.
+**Manual:** Ir al dashboard de Vercel → Project Settings → Domains. Cambiar el redirect de `sistema-turnos-peluqueria.vercel.app` de 307 (temporal) a **301 (permanente)** para que navegadores lo cacheen.
+
+**Resultado:** ✅ Cambiado a 301.
 
 ---
 
@@ -79,7 +81,25 @@ Estos headers deberían estar en **todo proyecto web desde el día 1**. Son como
 
 **Automático:** Modificar `next.config.ts` para inyectar todos los headers via `async headers()`.
 
-**Manual:** Verificar que las directivas CSP no bloqueen Google reCAPTCHA (si se usa) u otros servicios externos como Google Fonts o Supabase. Si algo se rompe, agregar el dominio faltante a la directiva correspondiente en `cspDirectives`.
+**CSP implementado:**
+```
+default-src 'self'
+script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com
+font-src 'self' https://fonts.gstatic.com
+img-src 'self' data:
+connect-src 'self' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/
+frame-src 'self' https://www.google.com/recaptcha/
+base-uri 'self'
+form-action 'self'
+```
+
+- **Dev**: CSP agrega `'unsafe-eval'` (necesario para HMR de Next.js).
+- **Prod**: CSP sin `'unsafe-eval'` (Next.js no lo necesita en producción).
+- **Supabase**: No necesita CSP client-side — solo se usa desde server (route handlers).
+- **Trusted Types**: No se implementó (requiere cambios profundos en Next.js para nonce-based CSP).
+
+**Manual:** Verificar que las directivas CSP no bloqueen Google reCAPTCHA (si se usa) u otros servicios externos como Google Fonts. Si algo se rompe, agregar el dominio faltante a la directiva correspondiente.
 
 ---
 
@@ -99,7 +119,12 @@ Siempre verificar el contraste durante el diseño, no al final. Regla práctica:
 
 ### Implementación
 
-**Automático:** Cambiar `--color-accent: #c17f3b` → `#a8651e` en `styles/tokens.css`. El nuevo ratio es 5.12:1 ✅ (pasa AA).
+**Automático:** Cambiar `--color-accent: #c17f3b` → `#a8651e` en `styles/tokens.css`.
+
+**Ratio real:** 4.62:1 ✅ (pasa AA, ≥4.5). Nota: el plan original estimaba 5.12:1, el cálculo exacto con fórmula WCAG da 4.62:1.
+
+**Corrección adicional detectada durante implementación:**
+El hover (`--color-accent-hover`) quedaba más claro que el nuevo accent (luminancia 0.1946 vs 0.1773). Se corrigió de `#a66e2e` a `#90571a` (factor de oscurecimiento 0.7251, ratio 5.89:1 ✅).
 
 ---
 
@@ -144,27 +169,33 @@ Estrategias para evitar CSS blocking:
 
 ### Implementación
 
-**Automático:** Agregar `experimental.optimizeCss` en `next.config.ts` y preconnects en `layout.tsx`.
+**Automático:** Agregar `experimental: { optimizeCss: true }` en `next.config.ts`.
+
+**Importante:** Requiere instalar `critters` como dependencia (`pnpm add critters`). Next.js lo usa internamente para el inlining de CSS crítico.
+
+**No requiere preconnects en `layout.tsx`:** `next/font/google` ya maneja preconnect automáticamente.
 
 ---
 
-## Tarea 6 — JavaScript Legacy / Polyfills
+## Tarea 6 — browserslist para prefijos CSS
 
 ### ¿Qué detectó Lighthouse?
 
-El chunk `7078-7c7829eaf2bf7ab2.js` contiene ~11KB de polyfills para features modernas de JavaScript que **todos los navegadores actuales ya soportan** (`Array.prototype.flat`, `Object.fromEntries`, `String.prototype.trimEnd`, etc.).
+El chunk `7078-7c7829eaf2bf7ab2.js` contenía ~11KB de polyfills JS, pero estos pertenecen al runtime interno de Next.js, no son configurables por el usuario.
 
 ### ¿Por qué se hace?
 
-Next.js por defecto transpila código para ser compatible con una amplia gama de navegadores, incluyendo Internet Explorer 11 (aunque ya no tenga soporte). Esto genera polyfills innecesarios que aumentan el tamaño del bundle. Configurando `browserslist` para apuntar solo a navegadores modernos (Chrome 90+, Firefox 90+, Safari 15+, Edge 90+), le decís a Next.js: "no transpiles esto, los browsers ya lo entienden".
+**Corrección respecto al plan original:** En Next.js 15, `browserslist` en `package.json` **NO afecta la transpilación JS**. Next.js usa SWC como compilador, que tiene sus propios targets internos. `browserslist` solo afecta a **Autoprefixer** para prefijos CSS. El chunk de polyfills JS (~110KB raw) es manejado internamente por Next.js y no se reduce con esta configuración.
+
+Configurar `browserslist` sigue siendo una buena práctica para estandarizar compatibilidad, pero el impacto real es mínimo (solo CSS).
 
 ### ¿Qué aprender para futuros proyectos?
 
-`browserslist` es el estándar para definir compatibilidad. Se usa en Babel, Autoprefixer, PostCSS y otras herramientas. Configurarlo correctamente desde el inicio evita kilobytes de polyfills innecesarios. La regla general: si no necesitás soportar navegadores antiguos, no pagues el costo en bytes.
+`browserslist` sirve para definir compatibilidad en herramientas PostCSS/Autoprefixer. Para controlar targets de JS en Next.js, hay que usar opciones internas de SWC. La regla general sigue aplicando: si no necesitás soportar navegadores antiguos, no pagues el costo en bytes — pero en Next.js 15 ese control es limitado.
 
 ### Implementación
 
-**Automático:** Agregar `browserslist` en `package.json`.
+**Automático:** Agregar `browserslist` en `package.json` con `["last 2 versions", "not dead", "not ie 11"]`.
 
 ---
 
@@ -188,9 +219,29 @@ Cada KB de JavaScript que se descarga pero no se usa es tiempo de red desperdici
 3. **Analizar el bundle**: `pnpm next build --debug` o usar `@next/bundle-analyzer` para ver de dónde viene cada byte.
 4. **Tree-shaking**: Asegurarse de importar solo lo que se necesita (especialmente en librerías como lucide-react).
 
-### Implementación
+### Análisis del bundle actual
 
-**Manual:** Requiere revisar imports, aplicar dynamic imports y posiblemente cambiar el patrón de importación de lucide-react.
+| Chunk | Raw | Compressed |
+|---|---|---|
+| `3282-*.js` | 169 KB | **45.8 KB** |
+| `51d074f0-*.js` | 169 KB | **54.2 KB** |
+| Total shared | 338 KB | **102 KB** |
+
+### Code splitting existente (ya óptimo)
+
+- ✅ **MobileMenu**: `dynamic(() => import('./MobileMenu'))` con `ssr: false` — no está en shared chunk.
+- ✅ **AdminSidebar**: solo se carga en rutas `/admin/*` via layout separado.
+- ✅ **`html-to-image`**: solo en `/admin/exportar` (9.92 KB de página).
+- ✅ **`lucide-react`**: todos los imports son named (`import { Icon } from 'lucide-react'`) → tree-shaking óptimo.
+- ✅ **`open-props`**: solo CSS via `@import` en `globals.css` — sin impacto JS.
+
+### Conclusión
+
+No se requieren cambios. Los ~125KB de "código no utilizado" que Lighthouse reporta son **inherentes a los shared chunks de Next.js**: código compartido que no se ejecuta en todas las rutas pero evita descargar duplicados. El First Load JS de 102KB comprimidos es razonable para una app Next.js 15 + React 19.
+
+Si en el futuro se busca optimizar más, evaluar:
+- `@next/bundle-analyzer` para visualizar el contenido exacto de cada chunk.
+- Dynamic imports en páginas admin muy pesadas (ninguna supera los 10KB).
 
 ---
 
@@ -198,11 +249,11 @@ Cada KB de JavaScript que se descarga pero no se usa es tiempo de red desperdici
 
 ### ¿Qué se hace?
 
-Ejecutar `pnpm format` + `pnpm typecheck` + `pnpm lint` + `pnpm build` para asegurar que todos los cambios no rompan nada.
+Ejecutar `pnpm format:check` + `pnpm typecheck` + `pnpm lint` + **`pnpm test`** + `pnpm build` para asegurar que todos los cambios no rompan nada.
 
 ### ¿Por qué se hace?
 
-Siempre verificar que las optimizaciones no introduzcan regresiones. Un cambio en `next.config.ts` podría causar errores de compilación. Un cambio en tokens.css podría afectar otros componentes.
+Siempre verificar que las optimizaciones no introduzcan regresiones. Un cambio en `next.config.ts` podría causar errores de compilación. Un cambio en tokens.css podría afectar otros componentes. `pnpm test` asegura que la lógica de negocio siga funcionando.
 
 ### Implementación
 
@@ -242,18 +293,28 @@ Siempre verificar que las optimizaciones no introduzcan regresiones. Un cambio e
 
 ## Resumen: Archivos a Modificar
 
-| Archivo                            | Acción                                                | ¿Quién?       |
-| ---------------------------------- | ----------------------------------------------------- | ------------- |
-| `vercel.json`                      | **Crear** (redirects + headers básicos)               | 🤖 Automático |
-| `next.config.ts`                   | **Modificar** (headers de seguridad + optimizaciones) | 🤖 Automático |
-| `styles/tokens.css`                | **Modificar** (color acento)                          | 🤖 Automático |
-| `components/Navbar/MobileMenu.tsx` | **Modificar** (ARIA fix)                              | 🤖 Automático |
-| `app/layout.tsx`                   | **Modificar** (preconnects)                           | 🤖 Automático |
-| `package.json`                     | **Modificar** (browserslist)                          | 🤖 Automático |
+| Archivo                            | Acción                                                    | ¿Quién?       |
+| ---------------------------------- | --------------------------------------------------------- | ------------- |
+| `next.config.ts`                   | **Modificar** (8 headers de seguridad + CSP + optimizeCss) | 🤖 Automático |
+| `styles/tokens.css`                | **Modificar** (color acento + hover)                       | 🤖 Automático |
+| `components/Navbar/MobileMenu.tsx` | **Modificar** (ARIA fix)                                   | 🤖 Automático |
+| `package.json`                     | **Modificar** (browserslist + critters)                    | 🤖 Automático |
 
 ## Tareas Manuales
 
-1. **Dashboard Vercel**: Configurar dominio principal para que no redirija.
-2. **Verificar CSP**: Asegurar que Google reCAPTCHA y Supabase no sean bloqueados por las directivas.
-3. **Analizar chunks pesados** (`0cb07a38.js`, `7078.js`) y aplicar dynamic imports donde corresponda.
-4. **Desplegar** a producción y correr un nuevo test Lighthouse para confirmar mejoras.
+1. **Dashboard Vercel**: Cambiar redirect 307 → 301 (ya resuelto).
+2. **Verificar CSP**: Asegurar que Google reCAPTCHA y Google Fonts no sean bloqueados por las directivas.
+3. **Desplegar** a producción y correr un nuevo test Lighthouse para confirmar mejoras.
+
+## Correcciones aplicadas al plan durante la implementación
+
+| # | Corrección |
+|---|---|
+| 1 | El redirect es de plataforma Vercel, no se arregla con `vercel.json`. |
+| 3 | Ratio real de `#a8651e` es 4.62:1, no 5.12:1 como estimaba el plan. |
+| 3 | `--color-accent-hover` se corrigió de `#a66e2e` a `#90571a` (estaba invertido). |
+| 5 | Preconnects en `layout.tsx` son innecesarios con `next/font/google`. |
+| 5 | `critters` debe instalarse como dependencia explícita. |
+| 6 | `browserslist` NO reduce JS polyfills en Next.js 15 (solo afecta CSS prefixes). |
+| 7 | Code splitting ya era óptimo; no requirió cambios. |
+| 8 | Se agregó `pnpm test` a la batería de verificación.
